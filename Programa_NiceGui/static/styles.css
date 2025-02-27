@@ -1,0 +1,7 @@
+body {
+    background-image: url("background_app.png");
+    background-size: cover;
+    background-position: center center;
+    height: 100vh;
+    margin: 0;
+}
