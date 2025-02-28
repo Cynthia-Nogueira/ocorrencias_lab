@@ -1,9 +1,9 @@
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import mysql.connector
 from nicegui import app, ui
 import secrets
 import smtplib
+import mysql.connector
 from token_helper import gerar_token, verificar_token, hash_senha
 
 
@@ -19,8 +19,33 @@ def get_db_connection():
         database="ocorrencias_lab"
     )
 
-#---------------------------------------------- Gerador de tokens -----------------------------------------------
+#-------------------------------------------- redefinindo a senha -----------------------------------
 
+# redefine a senha clicar no link
+def redefinir_senha_no_banco(email: str, nova_senha: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    senha_hash = hash_senha(nova_senha)  # codifica a nova senha
+
+    try:
+        # verifica se o e-mail existe no banco antes de atualizar
+        cursor.execute("SELECT username FROM utilizador WHERE email = %s", (email,))
+        result = cursor.fetchone()
+
+        if not result:
+            raise ValueError("E-mail não encontrado!")
+
+        # atualiza a senha no banco
+        cursor.execute("UPDATE utilizador SET password = %s WHERE email = %s", (senha_hash, email))
+        conn.commit()
+
+        print("Senha redefinida com sucesso!")
+    finally:
+        cursor.close()
+        conn.close()
+
+#---------------------------------------------- Gerador de tokens -----------------------------------------------
+"""
 def gerar_token():
     return secrets.token_urlsafe(32)
 
@@ -33,9 +58,9 @@ def verificar_token(token):
     conn.close()
     return result is not None
 
-
+"""
 # ------------------------------- Limpa os tokens expirados do banco de dados -------------------------------
-
+"""
 def limpar_tokens_expirados():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -45,38 +70,10 @@ def limpar_tokens_expirados():
     conn.close()
 
 
-# ---------------------------- E-mail com Token ---------------------------
-"""
-# mensagem do email do token
-def enviar_email(destinatario, token, assunto, corpo):
-    remetente = "cynthia_nnogueira@hotmail.co"
-
-    assunto = "Token para redefinição de senha"
-    corpo = (f"Olá,\n\nAqui está o seu token para redefinir a senha: {token}\n\n"
-             f"Esse token expira em 5 minutos."
-             f"\n\nAtenciosamente,\nEquipe de Suporte")
-
-    mensagem = MIMEMultipart()
-    mensagem['From'] = remetente
-    mensagem['To'] = destinatario
-    mensagem['Subject'] = assunto
-
-    try:
-        # conexao com o servidor SMTP local (sem autenticação)
-        with smtplib.SMTP('webmail.iep.pt', 25) as servidor:
-            servidor.sendmail(remetente, destinatario, mensagem.as_string())
-            print("E-mail enviado com sucesso!")
-    except Exception as erro:
-        print(f"Erro ao enviar o e-mail: {erro}")
-        raise Exception("Erro ao tentar enviar o e-mail.")
-
-"""
-
 # ------------------------------- Pagina para inserir token ----------------------------
 
 # Página para verificação de token (interface gráfica)
 
-@ui.page('/verificar_token')
 def verificar_token_page():
     app.add_static_files('/static', '../static')
     ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/styles.css">')
@@ -103,29 +100,6 @@ def verificar_token_page():
             "w-full").style(
             "color: white; font-weight: bold")
 
-
+"""
 #---------------------------------- Redefinir a nova senha ----------------------------------
 
-
-# Redefine a senha apos a validacao do token
-def redefinir_senha_no_banco(token: str, nova_senha: str):
-    if not verificar_token(token):
-        raise ValueError("Token inválido ou expirado!")
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    senha_hash = hash_senha(nova_senha)
-
-    try:
-        # atualiza a senha no sql
-        cursor.execute(
-            "UPDATE utilizador SET password = %s WHERE username = (SELECT username FROM tokens WHERE token = %s)",
-            (senha_hash, token)
-        )
-
-        # invalida o token da tabela
-        cursor.execute("DELETE FROM tokens WHERE token = %s", (token,))
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
