@@ -39,7 +39,7 @@ def redefinir_senha_no_banco(email: str, nova_senha: str):
         cursor.execute("UPDATE utilizador SET password = %s WHERE email = %s", (senha_hash, email))
         conn.commit()
 
-        print("Senha redefinida com sucesso!")
+        print("Nova senha definida com sucesso!")
     finally:
         cursor.close()
         conn.close()
@@ -69,11 +69,11 @@ def limpar_tokens_expirados():
     cursor.close()
     conn.close()
 
-
+"""
 # ------------------------------- Pagina para inserir token ----------------------------
 
+"""
 # Página para verificação de token (interface gráfica)
-
 def verificar_token_page():
     app.add_static_files('/static', '../static')
     ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/styles.css">')

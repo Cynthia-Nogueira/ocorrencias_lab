@@ -24,10 +24,12 @@ def get_db_connection():
 
 #----------------------------------- encripta a senha -------------------------------------
 
+
 def hash_senha(senha: str) -> str:
     # gera o hash da senha usando bcrypt
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(senha.encode(), salt).decode()
+
 
 #------------------------------------------- Recuperar senha page -----------------------------------------------------
 
@@ -132,5 +134,6 @@ def redefinir_senha_page():
             "color: white; font-weight: bold")
         ui.button("Voltar", on_click=lambda: ui.navigate.to("/"), color="#008B8B").classes("w-full").style(
             "color: white; font-weight: bold")
+
 
 

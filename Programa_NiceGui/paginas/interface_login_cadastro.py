@@ -3,13 +3,10 @@ import bcrypt
 import mysql.connector
 from nicegui import app, ui
 
-from Programa_NiceGui.paginas import interface_token
-from token_helper import gerar_token, verificar_token
-
 from Programa_NiceGui.paginas.token_helper import hash_senha
 from Programa_NiceGui.paginas import interface_recuperar_senha
 
-from Programa_NiceGui.paginas.interface_formulario import formulario_page
+from Programa_NiceGui.paginas.interface_formulario import novo_formulario
 from interface_principal import main_page
 
 # ------------------------------------------ Funcoes para login ----------------------------------------------
@@ -130,7 +127,7 @@ def login_page():
 
 # ---------------------------------------- Configuracao das rotas -------------------------------------------
 
-# Configuração das Rotas
+
 @ui.page("/")
 def index():
     login_page()
@@ -141,32 +138,19 @@ def registro():
 
 @ui.page("/formulario")
 def formulario():
-    formulario_page()
+    novo_formulario()
 
 @ui.page("/main")
 def main():
     main_page()
 
+@ui.page("/redefinir_senha_page")
+def redefinir_senha():
+    interface_recuperar_senha.redefinir_senha_page()
+
 @ui.page("/recuperacao_senha")
 def recuperacao_senha():
     interface_recuperar_senha.recuperar_senha_page()
-
-
-@ui.page("/recuperar_senha/{token}")
-def verificar_token_page():
-    interface_token.verificar_token_page()   #pag de verificar o token
-
-
-@ui.page("/redefinir_senha/{token}")
-def redefinir_senha(token: str):
-    if not verificar_token(token):
-        ui.label("Token inválido ou expirado!").classes("text-center text-h5 text-negative")
-        return
-    interface_token.redefinir_senha_page(token)
-
-@ui.page("/verificar_token")
-def verificar_token():
-    interface_token.verificar_token_page()
 
 # Executa o aplicativo
 ui.run()

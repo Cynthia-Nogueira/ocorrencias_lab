@@ -1,38 +1,41 @@
 import smtplib
-from email.message import EmailMessage
-from email.utils import formataddr
-
-from nicegui import ui
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
-def sendmail(dest: str, token: str) -> None:
-    if '@' not in dest or '.' not in dest:
-        raise ValueError("Endereço de e-mail do destinatário inválido.")
+# Função para enviar o e-mail
+def sendmail(email):
+    remetente = "it_bots@iep.pt"
+    destinatario = email
 
-    sender = "it_bots@iep.pt"
-    subject = "Token para redefinição de senha"
-    body = f"""Olá,
+    # Corpo do e-mail
+    assunto = "Link: redefinir senha"
+    corpo = """
+    Olá,
 
-Aqui está o seu token para redefinir a senha: {token}
+    Clique no link abaixo para redefinir sua senha:
+    http://127.0.0.1:8080/redefinir_senha_page
 
-Esse token expira em 5 minutos.
+    Atenciosamente,
+    Equipe Suporte
+    """
 
-Atenciosamente,
-Equipe de Suporte
-"""
+    # Criação da mensagem
+    mensagem = MIMEMultipart()
+    mensagem['From'] = remetente
+    mensagem['To'] = destinatario
+    mensagem['Subject'] = assunto
 
-
-    msg = EmailMessage()
-    msg['From'] = formataddr(("Equipe de Suporte", sender))
-    msg['To'] = dest
-    msg['Subject'] = subject
-    msg.set_content(body)
+    # Corpo do e-mail como texto
+    mensagem.attach(MIMEText(corpo, 'plain'))
 
     try:
-        with smtplib.SMTP('webmail.iep.pt', 25) as smtp:
-            smtp.send_message(msg)
-            print("E-mail enviado com sucesso!")
+        # servidor SMTP local
+        servidor = smtplib.SMTP('webmail.iep.pt', 25)
+        servidor.sendmail(remetente, destinatario, mensagem.as_string())  # envia o e-mail
+        servidor.quit()
+
+        print("E-mail enviado com sucesso!")
     except Exception as e:
         print(f"Erro ao enviar e-mail: {e}")
-        raise
 

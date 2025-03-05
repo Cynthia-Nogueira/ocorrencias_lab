@@ -5,3 +5,25 @@ body {
     height: 100vh;
     margin: 0;
 }
+
+
+/*cor dos botoes*/
+
+.btn-custom {
+    background-color: #008B8B;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease-in-out;
+}
+
+.btn-custom:hover {
+    background-color: #006B6B; /* Um tom mais escuro no hover */
+}
+
+.btn-custom:active {
+    background-color: #004D4D; /* Ainda mais escuro quando pressionado */
+}
