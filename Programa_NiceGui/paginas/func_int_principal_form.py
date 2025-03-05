@@ -82,9 +82,17 @@ def excluir_ocorrencia(id):
         cursor.execute(query, (id,))
         conn.commit()
 
+        return "Ocorrência excluida com sucesso!", True
+
+    except Exception as e:
+        return f"Erro ao excluir ocorrência: {e}", False
+
     finally:
         cursor.close()
         conn.close()
+
+
+
 
 
 # ------------------------------------- Editar ocorrência -----------------------------------------
@@ -114,22 +122,27 @@ def formulario_edicao(id):
                 "w-full")
 
             def btn_salvar():
-                # salva a ocorrência no banco
-                update_ocorrencia(id_, cliente_input.value,
-                                  num_processo_input.value, responsavel_input.value,
-                                  data_picker.value, conteudo_input.value,
-                                  status_input.value)
+                try:
+                    # salva a ocorrencia no banco
+                    update_ocorrencia(id_, cliente_input.value,
+                                      num_processo_input.value, responsavel_input.value,
+                                      data_picker.value, conteudo_input.value,
+                                      status_input.value)
 
-                ui.notify("Salvo com sucesso!", type="success")
+                    # ntificacao de sucesso
+                    ui.notify("Salvo com sucesso!", type="success")
 
-                #limpa os campos
-                cliente_input.value = ""
-                num_processo_input.value = ""
-                responsavel_input.value = None
-                data_picker.value = None
-                conteudo_input.value = ""
-                status_input.value = None
+                    # limpa os campos do form
+                    cliente_input.set_value("")
+                    num_processo_input.set_value("")
+                    responsavel_input.set_value(None)
+                    data_picker.set_value(None)
+                    conteudo_input.set_value("")
+                    status_input.set_value(None)
 
+                except Exception as e:
+                    # notificação se houver erro
+                    ui.notify(f"Erro ao salvar: {str(e)}", type="negative")
 
             with ui.row().classes("justify-end mt-4"):
                 ui.button("Salvar", on_click=btn_salvar).classes("btn-primary")
@@ -141,16 +154,26 @@ def formulario_edicao(id):
 # ------------------------------------- SALVA FORMULÁRIO ----------------------------------------
 
 def salvar_ocorrencia(cliente, num_processo, responsavel, data, status, conteudo):
+
+    if len(conteudo) > 400:
+        return "Erro: o campo não pode exceder 400 caracteres."
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        cursor.execute("INSERT INTO ocorrencias"
+        insert_stmt=("INSERT INTO ocorrencias "
                        "(cliente, num_processo, responsavel, data, status, conteudo)"
-                       "VALUES (%S, %S, %S, %S, %S, %S)",
-                       (cliente, num_processo, responsavel, data, status, conteudo)
+                       "VALUES (%s, %s, %s, %s, %s, %s)"
         )
+        #valores que vao entrar na tabela
+        cont = (cliente, num_processo, responsavel, data, status, conteudo)
+        cursor.execute(insert_stmt, cont)
         conn.commit()
+        return "Ocorrência salva com sucesso!", True
+
+    except Exception as e:
+        return f"Erro ao salvar ocorrência: {e}", False
 
     finally:
         cursor.close()

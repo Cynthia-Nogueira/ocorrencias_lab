@@ -21,7 +21,9 @@ def get_db_connection():
         database="ocorrencias_lab"
     )
 
-# Função para verificar login2
+#--------------------------------------------- FUNCAO QUE VERIFICA LOGIN ---------------------------------------------
+
+# Função para verificar login
 def check_login(username, password):
     conn = get_db_connection()
     cursor = conn.cursor()
