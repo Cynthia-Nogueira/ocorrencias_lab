@@ -1,0 +1,37 @@
+from nicegui import ui
+from Programa_NiceGui.paginas.interface_formulario import novo_formulario
+from interface_principal import main_page
+from Programa_NiceGui.paginas import interface_recuperar_senha
+from interface_login_cadastro import login_page, registro_page
+
+# ---------------------------------------------- Configuração das Rotas --------------------------------------------
+
+@ui.page("/")
+def index():
+    login_page()
+
+@ui.page("/registro")
+def registro():
+    registro_page()
+
+@ui.page("/formulario")
+def formulario():
+    novo_formulario()
+
+@ui.page("/main")
+def main():
+    main_page()
+
+@ui.page("/redefinir_senha_page")
+def redefinir_senha():
+    interface_recuperar_senha.redefinir_senha_page()
+
+@ui.page("/recuperacao_senha")
+def recuperacao_senha():
+    interface_recuperar_senha.recuperar_senha_page()
+
+
+# ------------------------------------------------ Inicializa o NiceGUI ---------------------------------------------
+
+if __name__ in {"__main__", "__mp_main__"}:
+    ui.run()

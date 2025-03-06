@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from nicegui import app, ui
-from Programa_NiceGui.paginas.func_int_principal_form import salvar_ocorrencia, get_db_connection
-
+from Programa_NiceGui.paginas.func_int_principal_form import salvar_ocorrencia
+from db_conection import get_db_connection
 
 # ------------------------------------- SELECT RESPONSAVEL ----------------------------------------
 
@@ -14,7 +14,6 @@ def get_responsavel():
     cursor.close()
     conn.close()
     return responsaveis
-
 
 # ------------------------------------------- ESTRUTURA FORMULARIO -------------------------------------------
 
@@ -36,17 +35,17 @@ def novo_formulario():
             with ui.grid(columns=2).classes("w-full"):
                 with ui.input('Date') as date:
                     with ui.menu().props('no-parent-event') as menu:
-                        with ui.date().bind_value(date).style("--q-primary:#008B8B; --q-color-calendar-header:#008B8B;"):
+                        with ui.date().bind_value(date).style(
+                                "--q-primary:#008B8B; --q-color-calendar-header:#008B8B;"):
                             with ui.row().classes('justify-end'):
                                 ui.button('Close', on_click=menu.close).props('flat').style("color:#008B8B;")
                     with date.add_slot('prepend'):
-                        ui.icon('edit_calendar', color="#008B8B").on('click', menu.open).classes('cursor-pointer w-full')
+                        ui.icon('edit_calendar', color="#008B8B").on('click', menu.open).classes(
+                            'cursor-pointer w-full')
                 status = ui.input("Status", value="Em espera").props("readonly").classes("w-full")
-
 
         conteudo = ui.textarea("Conteúdo da ocorrência").props("maxlength=400").classes("w-full mr-2 mr-2")
         contador = ui.label("0/400 caracteres").classes("text-sm text-gray-500 mb-4")
-
 
         def atualizar_contador():
             carac_digitado = len(conteudo.value)
@@ -59,7 +58,7 @@ def novo_formulario():
 
         # chama a atualizacao
 
-        #conteudo.on("input", lambda: atualizar_contador())
+        # conteudo.on("input", lambda: atualizar_contador())
 
         conteudo.on("keydown", lambda: atualizar_contador())
         conteudo.on("keyup", lambda: ())
@@ -67,7 +66,8 @@ def novo_formulario():
         atualizar_contador()
 
         def btn_salvar():
-            msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, responsavel.value, date.value, status.value, conteudo.value)
+            msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, responsavel.value, date.value,
+                                             status.value, conteudo.value)
             if sucesso:
                 ui.notify(msg, type="positive")
 
@@ -84,11 +84,15 @@ def novo_formulario():
                 ui.notify(msg, type="negative")
 
         with ui.row().classes("mx-auto gap-x-8"):
-            ui.button("Salvar", on_click=btn_salvar, color="#008B8B").classes("btn-primary w-32").style("color: white; font-weight: bold")
+            ui.button("Salvar", on_click=btn_salvar, color="#008B8B").classes("btn-primary w-32").style(
+                "color: white; font-weight: bold")
 
-            ui.button("Cancelar", on_click=dialog.close, color="#008B8B").classes("btn-secondary w-32").style("color: white; font-weight: bold")
+            ui.button("Cancelar", on_click=dialog.close, color="#008B8B").classes("btn-secondary w-32").style(
+                "color: white; font-weight: bold")
 
     dialog.open()
+
+
 
 
 

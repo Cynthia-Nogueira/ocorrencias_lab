@@ -4,20 +4,9 @@ from nicegui import app, ui
 import secrets
 import smtplib
 import mysql.connector
-from token_helper import gerar_token, verificar_token, hash_senha
+from token_helper import  hash_senha
+from db_conection import get_db_connection
 
-
-
-#-----------------------------------conecxao ao banco de dados -------------------------------------
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="127.0.0.1",
-        port=3305,
-        user="admin",
-        password="root",
-        database="ocorrencias_lab"
-    )
 
 #-------------------------------------------- redefinindo a senha -----------------------------------
 
@@ -45,7 +34,7 @@ def redefinir_senha_no_banco(email: str, nova_senha: str):
         conn.close()
 
 #---------------------------------------------- Gerador de tokens -----------------------------------------------
-"""
+
 def gerar_token():
     return secrets.token_urlsafe(32)
 
@@ -58,7 +47,7 @@ def verificar_token(token):
     conn.close()
     return result is not None
 
-"""
+
 # ------------------------------- Limpa os tokens expirados do banco de dados -------------------------------
 """
 def limpar_tokens_expirados():

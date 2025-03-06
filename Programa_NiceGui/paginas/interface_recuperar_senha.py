@@ -1,31 +1,20 @@
 import re
 import bcrypt
-
+"""
 from Programa_NiceGui.paginas.send_email import sendmail
 import interface_login_cadastro
 from interface_token import gerar_token, redefinir_senha_no_banco
 from nicegui import app, ui
-
+"""
 from send_email import sendmail
-import mysql.connector
 from nicegui import app, ui
+from db_conection import get_db_connection
 
-
-#-----------------------------------conecxao ao banco de dados -------------------------------------
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="127.0.0.1",
-        port=3305,
-        user="admin",
-        password="root",
-        database="ocorrencias_lab"
-    )
-
-#----------------------------------- encripta a senha -------------------------------------
+#----------------------------------------------- encripta a senha ---------------------------------------------------
 
 
 def hash_senha(senha: str) -> str:
+
     # gera o hash da senha usando bcrypt
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(senha.encode(), salt).decode()
@@ -37,8 +26,8 @@ def recuperar_senha_page():
     app.add_static_files('/static', '../static')
     ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/styles.css">')
 
-    with ui.card().classes("absolute-center items-center").style("background-color: #d2e9dd ;"):
-        ui.label("Digite seu e-mail").classes("text-h4 text-center")
+    with ui.card().classes("absolute-center items-center").style("background-color: #d2e9dd; width: 400px; height: 250px; border-radius: 12px;"):
+        ui.label("Digite seu e-mail").classes("text-h4 text- mx-auto")
 
         email = ui.input("E-mail").classes("w-full")
 
@@ -76,15 +65,17 @@ def recuperar_senha_page():
 
         ui.button("Enviar Link", on_click=enviar_link, color="#008B8B").classes("w-full").style(
             "color: white; font-weight: bold")
+        ui.button("Voltar", on_click=lambda: ui.navigate.to("/"), color="#008B8B").classes("w-full").classes("w-full").style("color: white; font-weight: bold")
 
 
 
-# Redefinição de senha
+# ------------------------------------------------ Redefinição de senha ------------------------------------------------
+
 def redefinir_senha_page():
     app.add_static_files('/static', '../static')
     ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/styles.css">')
 
-    with ui.card().classes("absolute-center items-center").style("background-color: #d2e9dd ;"):
+    with ui.card().classes("absolute-center items-center").style("background-color: #d2e9dd; width: 380px; height: 400px;"):
         ui.label("Redefinir Senha").classes("text-h4 text-center")
 
         email = ui.input("E-mail").classes("w-full")

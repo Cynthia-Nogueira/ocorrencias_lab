@@ -1,42 +1,16 @@
+from flask import session
 from nicegui import app, ui
-import mysql.connector
-from nicegui.html import dialog
 
-from Programa_NiceGui.paginas.func_int_principal_form import get_ocorrencias, excluir_ocorrencia, formulario_edicao, \
-    update_ocorrencia
+from nicegui.html import dialog
+from func_int_principal_form import get_ocorrencias, excluir_ocorrencia
 from Programa_NiceGui.paginas.interface_formulario import novo_formulario
 from datetime import date, datetime
+from nicegui import ui
+from flask import session
+from db_conection import get_db_connection
 
-
-# ------------------------------------- Conexão com Banco de Dados -------------------------------------
-
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="127.0.0.1",
-        port=3306,
-        user="root",
-        password="senha",
-        database="seu_banco"
-    )
-
-# --------------------------------------------------- EXCLUI A OCORRENCIA DA TABELA ---------------------------------------
-
-
-def confirmar_exclusao(id, num_processo):
-    dialog = ui.dialog()
-    with dialog:
-        with ui.card():
-            ui.label(f"Tem certeza que deseja excluir a ocorrência do processo: {num_processo}?")
-            with ui.row().classes("mt4"):
-                ui.button("Cancelar", on_click=dialog.close, color="#B22222").classes("btn-secondary")
-                ui.button("Confirmar", on_click=lambda: [excluir_ocorrencia(dialog, id), carregar_tabela()],
-                          color="#008B8B").classes("btn-primary")
-
-    dialog.open()
 
 # --------------------------------------------------- CARREGA A TABELA ---------------------------------------
-
 
 # carrega os dados na tabela
 def carregar_tabela():
@@ -72,9 +46,7 @@ def carregar_tabela():
         # Exibe o erro caso ocorra algo inesperado
         ui.notify(f"Erro ao carregar a tabela: {e}", color="red")
 
-
 # ----------------------------------------------- TABELA OCORRENCIA --------------------------------------------
-
 
 def main_page():
     app.add_static_files('/static', '../static')
@@ -108,6 +80,9 @@ def main_page():
 
 
     carregar_tabela()
+
+
+
 
 
 

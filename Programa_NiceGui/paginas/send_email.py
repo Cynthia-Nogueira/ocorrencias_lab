@@ -2,6 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+#--------------------------------------------- ENVIA EMAIL PARA RECUPERAR SENHA ----------------------------------------
 
 # Função para enviar o e-mail
 def sendmail(email):

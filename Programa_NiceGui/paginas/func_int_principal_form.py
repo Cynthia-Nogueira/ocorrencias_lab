@@ -1,35 +1,7 @@
 import mysql
 from nicegui import ui
 from datetime import datetime
-
-
-# ---------------------------------- Conecta com o Banco de Dados -------------------------------------------
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="127.0.0.1",
-        port=3305,
-        user="admin",
-        password="root",
-        database="ocorrencias_lab"
-    )
-
-
-# ---------------------------------- BD lista ocorrencias ---------------------------------------------------
-
-def get_ocorrencias():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        query = "SELECT * FROM ocorrencias"
-        cursor.execute(query)
-        ocorrencias = cursor.fetchall()
-
-    finally:
-        cursor.close()
-        conn.close()
-        return ocorrencias
+from db_conection import get_db_connection
 
 
 # ------------------------------- Atualiza a ocorrência no banco --------------------------------
@@ -51,6 +23,71 @@ def update_ocorrencia(id, cliente, num_processo, responsavel, data, status, cont
         cursor.close()
         conn.close()
 
+
+# ---------------------------------- BD lista ocorrencias ---------------------------------------------------
+
+def get_ocorrencias():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        query = "SELECT * FROM ocorrencias"
+        cursor.execute(query)
+        ocorrencias = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+        return ocorrencias
+
+
+# ------------------------------------- Exclui ocorrência -----------------------------------------
+
+def excluir_ocorrencia(id):
+
+    # msg para confirmar exclusao
+    confirmacao = ui.confirm(f"Tem certeza que deseja excluir esta ocorrência? Esta ação não pode ser desfeita.")
+
+    if not confirmacao:
+        ui.notify("Exclusão cancelada.", type="negative")
+        return False
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        query = "DELETE FROM ocorrencias WHERE id = %s"
+        cursor.execute(query, (id,))
+        conn.commit()
+        ui.notify("Ocorrência excluida com sucesso!", type="positive")
+        return True
+
+    except Exception as e:
+        ui.notify(f"Erro ao excluir ocorrência: {e}", color="red")  # Notificação de erro
+        return False
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ---------------------------------------- UPDATE STATUS ---------------------------------------
+"""def update_status(id_, novo_status):
+    # Implementa a atualização no banco de dados
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            #UPDATE ocorrencias
+            #SET status = %s
+            #WHERE id = %s
+""", (novo_status, id_))
+        conn.commit()
+    except Exception as e:
+        ui.notify(f"Erro ao atualizar status: {e}", color="red")
+    finally:
+        cursor.close()
+        conn.close()"""
 
 # ----------------------------- Cria uma nova ocorrência no banco -------------------------
 
@@ -74,6 +111,14 @@ def nova_ocorrencia(cliente, num_processo, responsavel, data, status, conteudo):
 # ------------------------------------- Exclui ocorrência -----------------------------------------
 
 def excluir_ocorrencia(id):
+
+    # msg para confirmar exclusao
+    confirmacao = ui.confirm(f"Tem certeza que deseja excluir esta ocorrência? Esta ação não pode ser desfeita.")
+
+    if not confirmacao:
+        ui.notify("Exclusão cancelada.", type="negative")
+        return False
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -81,21 +126,20 @@ def excluir_ocorrencia(id):
         query = "DELETE FROM ocorrencias WHERE id = %s"
         cursor.execute(query, (id,))
         conn.commit()
-
-        return "Ocorrência excluida com sucesso!", True
+        ui.notify("Ocorrência excluida com sucesso!", type="positive")
+        return True
 
     except Exception as e:
-        return f"Erro ao excluir ocorrência: {e}", False
+        ui.notify(f"Erro ao excluir ocorrência: {e}", color="red")  # Notificação de erro
+        return False
 
     finally:
         cursor.close()
         conn.close()
 
 
-
-
-
 # ------------------------------------- Editar ocorrência -----------------------------------------
+
 
 def formulario_edicao(id):
     #abre a ocorrência selecionada para edição
@@ -180,7 +224,6 @@ def salvar_ocorrencia(cliente, num_processo, responsavel, data, status, conteudo
         conn.close()
 
 
-# -------------------------------------- DATA -------------------------------------------------
 
 
 
