@@ -19,12 +19,15 @@ from interface_principal import main_page
 def check_login(username, password):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT password FROM utilizador WHERE username = %s", (username,))
+    cursor.execute("SELECT nome, password FROM utilizador WHERE username = %s", (username,))
     result = cursor.fetchone()
     cursor.close()
     conn.close()
 
-    if result and bcrypt.checkpw(password.encode(), result[0].encode()):
+    #print(result[0])
+
+    if result and bcrypt.checkpw(password.encode(), result[1].encode()):
+        app.storage.user["username"] = result[0]
         return True
     return False
 

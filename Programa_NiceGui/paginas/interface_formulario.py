@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from nicegui import app, ui
 from Programa_NiceGui.paginas.func_int_principal_form import salvar_ocorrencia
+#from Programa_NiceGui.paginas.interface_principal import carregar_tabela
 from db_conection import get_db_connection
 
 # ------------------------------------- SELECT RESPONSAVEL ----------------------------------------
@@ -8,7 +9,7 @@ from db_conection import get_db_connection
 def get_responsavel():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT nome FROM responsaveis")
+    cursor.execute("SELECT DISTINCT nome FROM utilizador")
 
     responsaveis = [row[0] for row in cursor.fetchall()]  # transforma os resultados em uma lista de nomes
     cursor.close()
@@ -19,6 +20,7 @@ def get_responsavel():
 
 def novo_formulario():
     app.add_static_files('/static', '../static')
+    ui.add_head_html('<script src="/static/js/scripts.js"></script>')
 
     with ui.dialog() as dialog, ui.card().classes("w-4/5 h-[600px] mx-auto"):
         ui.label("Nova Ocorrência").classes("text-2xl mx-auto font-bold mb-4")
@@ -80,6 +82,8 @@ def novo_formulario():
                 status.set_value("Em espera")
 
                 atualizar_contador()
+                #carregar_tabela()
+
             else:
                 ui.notify(msg, type="negative")
 
@@ -89,6 +93,7 @@ def novo_formulario():
 
             ui.button("Cancelar", on_click=dialog.close, color="#008B8B").classes("btn-secondary w-32").style(
                 "color: white; font-weight: bold")
+
 
     dialog.open()
 
