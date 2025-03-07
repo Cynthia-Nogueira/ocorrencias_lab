@@ -6,8 +6,7 @@ from interface_login_cadastro import login_page, registro_page
 
 from flask import Flask, request, jsonify
 from db_conection import get_db_connection
-
-
+from
 
 # ---------------------------------------------- Configuração das Rotas --------------------------------------------
 

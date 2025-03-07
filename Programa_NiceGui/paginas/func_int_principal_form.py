@@ -43,7 +43,7 @@ def get_ocorrencias():
 
 # ------------------------------------- Exclui ocorrência -----------------------------------------
 
-def excluir_ocorrencia(id):
+def excluir_ocorrencia(id_):
 
     # msg para confirmar exclusao
     confirmacao = ui.confirm(f"Tem certeza que deseja excluir esta ocorrência? Esta ação não pode ser desfeita.")
@@ -57,7 +57,7 @@ def excluir_ocorrencia(id):
 
     try:
         query = "DELETE FROM ocorrencias WHERE id = %s"
-        cursor.execute(query, (id,))
+        cursor.execute(query, (id_,))
         conn.commit()
         ui.notify("Ocorrência excluida com sucesso!", type="positive")
         return True
@@ -141,7 +141,7 @@ def excluir_ocorrencia(id):
 # ------------------------------------- Editar ocorrência -----------------------------------------
 
 
-def formulario_edicao(id):
+def formulario_edicao(id_):
     #abre a ocorrência selecionada para edição
     conn = get_db_connection()
     cursor = conn.cursor()

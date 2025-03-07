@@ -1,11 +1,11 @@
 function statusRenderer(params) {
-    const id = params.data.id;
-    const currentStatus = params.value;
+    const_id = params.data.id;
+    const_currentStatus = params.value;
 
-    const select = document.createElement("select");
+    const_select = document.createElement("select");
     select.classList.add("status-select");
 
-    const statuses = ["Em espera", "Em execução", "Concluído"];
+    const_statuses = ["Em espera", "Em execução", "Concluído"];
     statuses.forEach(status => {
         const option = document.createElement("option");
         option.value = status;
@@ -35,3 +35,4 @@ function statusRenderer(params) {
 
     return select;
 }
+

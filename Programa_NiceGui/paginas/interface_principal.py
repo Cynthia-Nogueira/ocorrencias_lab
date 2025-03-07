@@ -1,6 +1,8 @@
 from nicegui import app, ui
 
 from nicegui.html import dialog
+
+from Programa_NiceGui.paginas.func_int_principal_form import formulario_edicao
 from func_int_principal_form import get_ocorrencias, excluir_ocorrencia
 from Programa_NiceGui.paginas.interface_formulario import novo_formulario
 from datetime import date, datetime
