@@ -1,10 +1,10 @@
-body {
+/*body {
     background-image: url("background_app.png");
     background-size: cover;
     background-position: center center;
     height: 100vh;
     margin: 0;
-}
+}*/
 
 
 /*cor dos botoes*/
@@ -26,4 +26,9 @@ body {
 
 .btn-custom:active {
     background-color: #004D4D; /* Ainda mais escuro quando pressionado */
+}
+
+#myGrid {
+    flex: 1 1 0px;
+    width: 100%;
 }
