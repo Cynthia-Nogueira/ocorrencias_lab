@@ -12,30 +12,6 @@ const gridOptions = {
   // Columns to be displayed (Should match rowData properties)
   columnDefs: [
     {
-      field: "company",
-      flex: 6,
-    },
-    {
-      field: "website",
-      cellRenderer: CompanyRenderer,
-    },
-    {
-      headerName: "Logo",
-      field: "company",
-      cellRenderer: CompanyLogoRenderer,
-      cellClass: "logoCell",
-      minWidth: 100,
-    },
-    {
-      field: "revenue",
-      cellRenderer: PriceRenderer,
-    },
-    {
-      field: "hardware",
-      headerName: "Hardware",
-      cellRenderer: MissionResultRenderer,
-    },
-    {
       field: "actions",
       headerName: "Actions",
       cellRenderer: CustomButtonComponent,

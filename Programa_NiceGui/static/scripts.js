@@ -1,38 +1,29 @@
-function statusRenderer(params) {
-    const_id = params.data.id;
-    const_currentStatus = params.value;
+class CustomButtonComponent {
+    eGui;
+    eButton;
+    eventListener;
 
-    const_select = document.createElement("select");
-    select.classList.add("status-select");
+    init() {
+        this.eGui = document.createElement('div');
+        const eButton = document.createElement('button');
+        eButton.className = 'btn-simple';
+        eButton.textContent = 'Launch!';
+        this.eventListener = () => alert('Software Launched');
+        eButton.addEventListener('click', this.eventListener);
+        this.eGui.appendChild(eButton);
+    }
 
-    const_statuses = ["Em espera", "Em execução", "Concluído"];
-    statuses.forEach(status => {
-        const option = document.createElement("option");
-        option.value = status;
-        option.textContent = status;
-        if (status === currentStatus) {
-            option.selected = true;
+    getGui() {
+        return this.eGui;
+    }
+
+    refresh() {
+        return true;
+    }
+
+    destroy() {
+        if (this.eButton) {
+            this.eButton.removeEventListener('click', this.eventListener);
         }
-        select.appendChild(option);
-    });
-
-    select.addEventListener("change", function () {
-        fetch('/atualizar_status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: id, status: this.value })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log("Status atualizado com sucesso!");
-            } else {
-                console.error("Erro ao atualizar status:", data.error);
-            }
-        })
-        .catch(error => console.error("Erro na requisição:", error));
-    });
-
-    return select;
+    }
 }
-
