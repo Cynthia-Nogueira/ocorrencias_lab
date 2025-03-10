@@ -3,10 +3,9 @@ from Programa_NiceGui.paginas.interface_formulario import novo_formulario
 from interface_principal import main_page
 from Programa_NiceGui.paginas import interface_recuperar_senha
 from interface_login_cadastro import login_page, registro_page
-
 from flask import Flask, request, jsonify
 from db_conection import get_db_connection
-from
+from header import pag_layout
 
 # ---------------------------------------------- Configuração das Rotas --------------------------------------------
 
@@ -43,6 +42,7 @@ def formulario():
 
 @ui.page("/main")
 def main():
+    pag_layout()
     main_page()
 
 @ui.page("/redefinir_senha_page")
@@ -58,3 +58,4 @@ def recuperacao_senha():
 
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(storage_secret="minha_chave_secreta_aleatoria")
+

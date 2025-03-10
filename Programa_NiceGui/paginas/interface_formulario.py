@@ -9,7 +9,7 @@ from db_conection import get_db_connection
 def get_responsavel():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT nome FROM utilizador")
+    cursor.execute("SELECT DISTINCT CONCAT(nome, ' ', sobrenome) AS nome_completo FROM utilizador;")
 
     responsaveis = [row[0] for row in cursor.fetchall()]  # transforma os resultados em uma lista de nomes
     cursor.close()

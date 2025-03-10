@@ -1,7 +1,5 @@
 from nicegui import app, ui
-
 from nicegui.html import dialog
-
 from Programa_NiceGui.paginas.func_int_principal_form import formulario_edicao
 from func_int_principal_form import get_ocorrencias, excluir_ocorrencia
 from Programa_NiceGui.paginas.interface_formulario import novo_formulario
@@ -10,6 +8,7 @@ from nicegui import ui
 from flask import session
 from db_conection import get_db_connection
 from nicegui.elements.aggrid import AgGrid
+
 
 
 # --------------------------------------------------- CARREGA A TABELA ---------------------------------------
@@ -23,7 +22,7 @@ def atualizar_tabela(dados_tabela):
 # ------------------------ carrega os dados na tabela---------------------
 
 def carregar_tabela(usuario_logado):
-    """Carrega os dados das ocorrências na tabela, considerando o usuário logado."""
+    #Carrega os dados das ocorrências na tabela, considerando o usuário logado.
     dados_tabela = []
 
     try:
@@ -42,6 +41,7 @@ def carregar_tabela(usuario_logado):
             else:
                 # Se não for o responsável, mostra apenas o status como texto
                 status_select = f"<span>{status}</span>"
+
 
             # Botões de ação
             botoes = f"""
@@ -71,7 +71,7 @@ def carregar_tabela(usuario_logado):
 # ----------------------------------------------- TABELA OCORRENCIA --------------------------------------------
 
 def status_renderer(params):
-    """Renderiza um select editável dentro da célula do AG Grid"""
+    #Renderiza um select editável dentro da célula do AG Grid
     status_options = ["Em espera", "Em execução", "Concluído"]
 
     # Criar um dropdown UI dentro da célula
@@ -83,7 +83,8 @@ def status_renderer(params):
 def main_page():
     app.add_static_files('/static', '../static')
     ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/styles.css">')
-    ui.add_head_html('<script src="/static/scripts.js"></script>')
+    ui.add_head_html('<script src="/static/customButtonComponent.js"></script>')
+    ui.add_head_html('<script src="/static/main.js"></script>')
 
     ui.label("Lista de Ocorrências").classes("text-4xl font-bold mb-4 mx-auto text-center")
 
@@ -96,7 +97,7 @@ def main_page():
             {"headerName": "Nº Processo", "field": "num_processo"},
             {"headerName": "Responsável", "field": "responsavel"},
             {"headerName": "Data", "field": "data"},
-                {"headerName": "Status", "field": "status", "cellRenderer": "statusRenderer"},
+            {"headerName": "Status", "field": "status", "cellRenderer": "CustomButtonComponent"},
             {"headerName": "Conteúdo", "field": "conteudo"},
             {"headerName": "Ações", "field": "acoes", "cellRenderer": "htmlRenderer"},
         ],
@@ -111,9 +112,11 @@ def main_page():
     with ui.row().classes("mx-auto gap-x-10"):
         ui.button("Nova Ocorrência", on_click=novo_formulario, color="#008B8B") \
             .classes("btn-primary w-48").style("color: white; font-weight: bold")
-        ui.button("Atualizar", on_click=carregar_tabela, color="#008B8B") \
+        ui.button("Atualizar", on_click=carregar_tabela(usuario_logado), color="#008B8B") \
             .classes("btn-secondary w-48").style("color: white; font-weight: bold")
 
+    div = ui.element('div').style("height: 100%")
+    div._props['id'] = 'myGrid'  # Adicionando ID manualmente
 
     carregar_tabela(usuario_logado)
 

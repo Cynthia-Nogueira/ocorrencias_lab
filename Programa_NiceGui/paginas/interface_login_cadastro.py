@@ -1,4 +1,3 @@
-import re
 import bcrypt
 import mysql.connector
 from nicegui import app, ui
@@ -7,6 +6,7 @@ from Programa_NiceGui.paginas.token_helper import hash_senha
 from db_conection import get_db_connection
 
 from flask import session
+import re
 
 #from Programa_NiceGui.paginas import interface_recuperar_senha
 #from interface_token import redefinir_senha_no_banco
@@ -19,7 +19,7 @@ from interface_principal import main_page
 def check_login(username, password):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT nome, password FROM utilizador WHERE username = %s", (username,))
+    cursor.execute("SELECT  CONCAT(nome, ' ', sobrenome), password FROM utilizador WHERE username = %s", (username,))
     result = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -31,6 +31,7 @@ def check_login(username, password):
         return True
     return False
 
+ui.run(storage_secret="umsegredoqualquer")
 
 #---------------------------------------- UNICIANDO SESSAO --------------------------------------------------
 
@@ -66,17 +67,32 @@ def registro_page():
     ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/styles.css">')
 
     with ui.card().classes("absolute-center mx-auto").style(
-            "background-color: #d2e9dd; width: 400px; height: 480px; border-radius: 12px;"):
+            "background-color: #d2e9dd; width: 500px; height: 615px; border-radius: 12px;"):
         ui.label("Criar Conta").classes("text-h4 text-center mx-auto")
 
-        username = ui.input("Nome de usuário").classes("w-full")
-        email = ui.input("E-mail").classes("w-full")
+        username = ui.input("Username", placeholder='Não deve conter acentos e espaços!').classes("w-full")
+        nome = ui.input("Nome", placeholder='Ex: Maria').classes("w-full")
+        sobrenome = ui.input("Apelido", placeholder='Ex: Almeida').classes("w-full")
+        email = ui.input("E-mail", placeholder='Ex: joao.gomes@iep.pt').classes("w-full")
         password = ui.input("Senha", password=True, password_toggle_button=True).classes("w-full")
         confirm_password = ui.input("Confirmar Senha", password=True, password_toggle_button=True).classes("w-full")
 
         def try_registro():
             if not username.value or not email.value or not password.value or not confirm_password.value:
                 ui.notify("Preencha todos os campos!", type="negative")
+                return
+
+            # impedi acentos no username
+            if not re.match(r'^[a-zA-Z0-9_]+$', username.value):
+                ui.notify("O username não deve conter acentos ou espaços!", type="negative")
+                return
+
+            nome_completo = f"{nome.value.strip()} {sobrenome.value.strip()}"
+
+            # impedir acentos e força iniciais maiúsculas no nome e sobrenome
+            nome_completo = f"{nome.value.strip()} {sobrenome.value.strip()}"
+            if not re.match(r'^[A-Z][a-za-z]+ [A-Z][a-za-z]+$', nome_completo):
+                ui.notify("O nome e apelido devem começar com letra maiúscula e não conter acentos!", type="negative")
                 return
 
             if len(password.value) < 8 or not re.search(r'[A-Z]', password.value) or not re.search(r'\d',
@@ -100,12 +116,22 @@ def registro_page():
             senha_hash = hash_senha(password.value)
 
             try:
-                query = "INSERT INTO utilizador (username, email, password) VALUES (%s, %s, %s)"
-                cursor.execute(query, (username.value, email.value, senha_hash))
+                query = "INSERT INTO utilizador (username, nome, sobrenome, email, password) VALUES (%s, %s, %s, %s, %s)"
+                cursor.execute(query, (username.value, nome.value, sobrenome.value, email.value, senha_hash))
                 conn.commit()
                 ui.notify("✅ Cadastro realizado com sucesso!", type="positive")
-                ui.navigate.to("/")
+
+                # limpar os campos
+                username.value = ''
+                nome.value = ''
+                sobrenome.value = ''
+                email.value = ''
+                password.value = ''
+                confirm_password.value = ''
+
             except mysql.connector.Error as e:
+                print(f"Erro ao cadastrar: {e}")  # Adicionando print para debug
+
                 ui.notify(f"❌ Erro ao cadastrar: {e}", type="negative")
             finally:
                 cursor.close()
@@ -126,7 +152,7 @@ def login_page():
         "background-color: #d2e9dd; width: 300px; height: 350px; border-radius: 12px;"):
         ui.label("Login").classes("text-h4 text-center")
 
-        username = ui.input("Utilizador").classes("w-full")
+        username = ui.input("Username", placeholder='Ex: Maria ou maria').classes("w-full")
         password = ui.input("Senha", password=True, password_toggle_button=True).classes("w-full")
 
 
