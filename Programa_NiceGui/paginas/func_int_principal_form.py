@@ -1,6 +1,8 @@
 import mysql
 from nicegui import ui
 from datetime import datetime
+
+from Programa_NiceGui.paginas.funcoes_menu import enviar_notificacao
 from db_conection import get_db_connection
 
 
@@ -98,10 +100,23 @@ def nova_ocorrencia(cliente, num_processo, responsavel, data, status, conteudo):
     try:
         query = """
                 INSERT INTO ocorrencias (cliente, num_processo, responsavel, data, status, conteudo)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
         """
         cursor.execute(query, (cliente, num_processo, responsavel, data, status, conteudo))
+        ocorrencia_id = cursor.fetchone()[0]  #pega o id da ocorrencia inserida
         conn.commit()
+
+        #busca todos que estao registados em utilizador
+        query_usuarios = """SELECTE id, nome, apelido FROM utilizador"""
+
+        cursor.execute(query_usuarios)
+        usuarios = cursor.fetchall()  #cria uma lista de tuplas com o id, nome e apelido
+
+        mensagem = f"Nova ocorrencia registada: {cliente} - processo {num_processo}."
+
+        for usuario in usuarios:
+            nome_completo = f"{usuario[1]} {usuario[2]}"
+            enviar_notificacao(usuario[0], mensagem)
 
     finally:
         cursor.close()

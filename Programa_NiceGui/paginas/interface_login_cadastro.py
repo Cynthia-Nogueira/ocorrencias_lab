@@ -19,7 +19,7 @@ from interface_principal import main_page
 def check_login(username, password):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT  CONCAT(nome, ' ', sobrenome), password FROM utilizador WHERE username = %s", (username,))
+    cursor.execute("SELECT  CONCAT(nome, ' ', apelido), password FROM utilizador WHERE username = %s", (username,))
     result = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -72,7 +72,7 @@ def registro_page():
 
         username = ui.input("Username", placeholder='Não deve conter acentos e espaços!').classes("w-full")
         nome = ui.input("Nome", placeholder='Ex: Maria').classes("w-full")
-        sobrenome = ui.input("Apelido", placeholder='Ex: Almeida').classes("w-full")
+        apelido = ui.input("Apelido", placeholder='Ex: Almeida').classes("w-full")
         email = ui.input("E-mail", placeholder='Ex: joao.gomes@iep.pt').classes("w-full")
         password = ui.input("Senha", password=True, password_toggle_button=True).classes("w-full")
         confirm_password = ui.input("Confirmar Senha", password=True, password_toggle_button=True).classes("w-full")
@@ -87,10 +87,10 @@ def registro_page():
                 ui.notify("O username não deve conter acentos ou espaços!", type="negative")
                 return
 
-            nome_completo = f"{nome.value.strip()} {sobrenome.value.strip()}"
+            nome_completo = f"{nome.value.strip()} {apelido.value.strip()}"
 
-            # impedir acentos e força iniciais maiúsculas no nome e sobrenome
-            nome_completo = f"{nome.value.strip()} {sobrenome.value.strip()}"
+            # impedir acentos e força iniciais maiúsculas no nome e apelido
+            nome_completo = f"{nome.value.strip()} {apelido.value.strip()}"
             if not re.match(r'^[A-Z][a-za-z]+ [A-Z][a-za-z]+$', nome_completo):
                 ui.notify("O nome e apelido devem começar com letra maiúscula e não conter acentos!", type="negative")
                 return
@@ -116,15 +116,15 @@ def registro_page():
             senha_hash = hash_senha(password.value)
 
             try:
-                query = "INSERT INTO utilizador (username, nome, sobrenome, email, password) VALUES (%s, %s, %s, %s, %s)"
-                cursor.execute(query, (username.value, nome.value, sobrenome.value, email.value, senha_hash))
+                query = "INSERT INTO utilizador (username, nome, apelido, email, password) VALUES (%s, %s, %s, %s, %s)"
+                cursor.execute(query, (username.value, nome.value, apelido.value, email.value, senha_hash))
                 conn.commit()
                 ui.notify("✅ Cadastro realizado com sucesso!", type="positive")
 
                 # limpar os campos
                 username.value = ''
                 nome.value = ''
-                sobrenome.value = ''
+                apelido.value = ''
                 email.value = ''
                 password.value = ''
                 confirm_password.value = ''
@@ -166,6 +166,9 @@ def login_page():
                 ui.navigate.to("/main")
             else:
                 ui.notify("Utilizador ou senha incorretos", type="negative")
+
+        # faz com que a tecla enter logue na conta
+        password.on("keydown.enter", try_login)
 
         ui.button("Entrar", on_click=try_login, color="#008B8B").classes("w-full").style(
             "color: white; font-weight: bold")

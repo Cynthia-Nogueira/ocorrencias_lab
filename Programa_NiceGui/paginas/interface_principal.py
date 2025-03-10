@@ -40,7 +40,7 @@ def carregar_tabela(usuario_logado):
                 """
             else:
                 # Se não for o responsável, mostra apenas o status como texto
-                status_select = f"<span>{status}</span>"
+                status_select = f"{status}"
 
 
             # Botões de ação
@@ -112,7 +112,7 @@ def main_page():
     with ui.row().classes("mx-auto gap-x-10"):
         ui.button("Nova Ocorrência", on_click=novo_formulario, color="#008B8B") \
             .classes("btn-primary w-48").style("color: white; font-weight: bold")
-        ui.button("Atualizar", on_click=carregar_tabela(usuario_logado), color="#008B8B") \
+        ui.button("Atualizar", on_click=lambda: carregar_tabela(usuario_logado), color="#008B8B") \
             .classes("btn-secondary w-48").style("color: white; font-weight: bold")
 
     div = ui.element('div').style("height: 100%")

@@ -9,7 +9,7 @@ from db_conection import get_db_connection
 def get_responsavel():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT CONCAT(nome, ' ', sobrenome) AS nome_completo FROM utilizador;")
+    cursor.execute("SELECT DISTINCT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador;")
 
     responsaveis = [row[0] for row in cursor.fetchall()]  # transforma os resultados em uma lista de nomes
     cursor.close()
@@ -68,6 +68,10 @@ def novo_formulario():
         atualizar_contador()
 
         def btn_salvar():
+            if not conteudo.value.strip():  # Verifica se o campo conteúdo está vazio
+                ui.notify("O campo 'Conteúdo da ocorrência' é obrigatório.", type="negative")
+                return
+
             msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, responsavel.value, date.value,
                                              status.value, conteudo.value)
             if sucesso:
