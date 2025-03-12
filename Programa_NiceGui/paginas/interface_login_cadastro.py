@@ -8,18 +8,13 @@ from db_conection import get_db_connection
 from flask import session
 import re
 
-#from Programa_NiceGui.paginas import interface_recuperar_senha
-#from interface_token import redefinir_senha_no_banco
-
-from interface_principal import main_page
-
 #--------------------------------------------- VERIFICA LOGIN ---------------------------------------------
 
 # Função para verificar login
 def check_login(username, password):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT  CONCAT(nome, ' ', apelido), password FROM utilizador WHERE username = %s", (username,))
+    cursor.execute("SELECT  CONCAT(nome, ' ', apelido), password, id FROM utilizador WHERE username = %s", (username,))
     result = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -28,6 +23,7 @@ def check_login(username, password):
 
     if result and bcrypt.checkpw(password.encode(), result[1].encode()):
         app.storage.user["username"] = result[0]
+        app.storage.user["userid"] = result[2]
         return True
     return False
 
@@ -44,20 +40,6 @@ def realizar_login(username, password):
         return True
     return False
 
-"""
-# Função para verificar login
-def check_login(username, password):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT password FROM utilizador WHERE username = %s", (username,))
-    result = cursor.fetchone()   
-    cursor.close()
-    conn.close()
-
-    if result and bcrypt.checkpw(password.encode(), result[0].encode()):
-        return True
-    return False
-"""
 
 #---------------------------------------- Cadastro Utilizador Page --------------------------------------------------
 
@@ -87,10 +69,11 @@ def registro_page():
                 ui.notify("O username não deve conter acentos ou espaços!", type="negative")
                 return
 
-            nome_completo = f"{nome.value.strip()} {apelido.value.strip()}"
 
             # impedir acentos e força iniciais maiúsculas no nome e apelido
             nome_completo = f"{nome.value.strip()} {apelido.value.strip()}"
+
+
             if not re.match(r'^[A-Z][a-za-z]+ [A-Z][a-za-z]+$', nome_completo):
                 ui.notify("O nome e apelido devem começar com letra maiúscula e não conter acentos!", type="negative")
                 return
@@ -154,8 +137,6 @@ def login_page():
 
         username = ui.input("Username", placeholder='Ex: Maria ou maria').classes("w-full")
         password = ui.input("Senha", password=True, password_toggle_button=True).classes("w-full")
-
-
 
         def try_login():
             if not username.value or not password.value:

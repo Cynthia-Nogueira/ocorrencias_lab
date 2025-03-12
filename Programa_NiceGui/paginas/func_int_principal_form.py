@@ -158,12 +158,18 @@ def excluir_ocorrencia(id):
 
 def formulario_edicao(id_):
     #abre a ocorrência selecionada para edição
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM ocorrencias WHERE id = %s", (id,))
-    ocorrencia = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM ocorrencias WHERE id = %s", (id_,))
+        ocorrencia = cursor.fetchone()
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+           conn.close()
 
     if ocorrencia:
         id_, cliente, num_processo, responsavel, data, conteudo, status = ocorrencia

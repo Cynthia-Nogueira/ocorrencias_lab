@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 from nicegui import app, ui
+from funcoes_menu import enviar_notificacao
 from Programa_NiceGui.paginas.func_int_principal_form import salvar_ocorrencia
 #from Programa_NiceGui.paginas.interface_principal import carregar_tabela
 from db_conection import get_db_connection
@@ -7,18 +8,20 @@ from db_conection import get_db_connection
 # ------------------------------------- SELECT RESPONSAVEL ----------------------------------------
 
 def get_responsavel():
+    """ Obtém a lista de responsáveis do banco de dados """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT DISTINCT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador;")
-
-    responsaveis = [row[0] for row in cursor.fetchall()]  # transforma os resultados em uma lista de nomes
+    responsaveis = [row[0] for row in cursor.fetchall()]
     cursor.close()
     conn.close()
     return responsaveis
 
-# ------------------------------------------- ESTRUTURA FORMULARIO -------------------------------------------
 
+
+# ------------------------------------------- ESTRUTURA FORMULARIO -------------------------------------------
 def novo_formulario():
+
     app.add_static_files('/static', '../static')
     ui.add_head_html('<script src="/static/js/scripts.js"></script>')
 
@@ -30,8 +33,8 @@ def novo_formulario():
                 cliente = ui.input("Cliente").classes("w-full")
                 num_processo = ui.input("Nº Processo").classes("w-full")
 
-        with ui.row().classes("w-full"):
-            responsavel = ui.select(get_responsavel(), label="Responsável").classes("w-full")
+        responsavel = ui.select(get_responsavel(), label="Responsável").classes("w-full")
+
 
         with ui.row().classes(" w-full justify-between"):
             with ui.grid(columns=2).classes("w-full"):
@@ -68,7 +71,9 @@ def novo_formulario():
         atualizar_contador()
 
         def btn_salvar():
-            if not conteudo.value.strip():  # Verifica se o campo conteúdo está vazio
+            current_user_id = app.storage.user.get("userid", None)
+
+            if not conteudo.value.strip(): #verifica se o campo esta vazio
                 ui.notify("O campo 'Conteúdo da ocorrência' é obrigatório.", type="negative")
                 return
 
@@ -76,6 +81,16 @@ def novo_formulario():
                                              status.value, conteudo.value)
             if sucesso:
                 ui.notify(msg, type="positive")
+
+                # Obtem todos os usuários (exceto o usuário logado) para enviar a notificação
+                lista_user = obter_user()
+
+                # Enviar a notificação para os usuários, excluindo o usuário logado
+                for user in lista_user:
+                    if user['id'] != current_user_id:
+                        nome_user = 'Utilizador Logado'
+                        mensagem_notificacao = f"Nova ocorrência registada por {nome_user}:\n Nome do cliente: {cliente.value} - Processo: {num_processo.value}"
+                        enviar_notificacao(user['id'], mensagem_notificacao)
 
                 # Limpa os campos
                 cliente.set_value("")
@@ -85,8 +100,9 @@ def novo_formulario():
                 conteudo.set_value("")
                 status.set_value("Em espera")
 
+                # carregar_tabela()
                 atualizar_contador()
-                #carregar_tabela()
+
 
             else:
                 ui.notify(msg, type="negative")
@@ -103,8 +119,18 @@ def novo_formulario():
 
 
 
+# ------------------------------------------- OBTEM O NOME DOS USERS -------------------------------------------
 
 
+def obter_user():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    query = """SELECT DISTINCT CONCAT (nome, ' ', apelido) as nome_completo, id FROM utilizador"""
+    cursor.execute(query)
+    users = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return users
 
 
 
