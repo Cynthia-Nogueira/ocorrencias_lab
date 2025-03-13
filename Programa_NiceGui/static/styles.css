@@ -20,15 +20,8 @@ body {
     transition: background 0.3s ease-in-out;
 }
 
-.btn-custom:hover {
-    background-color: #006B6B; /* Um tom mais escuro no hover */
-}
 
-.btn-custom:active {
-    background-color: #004D4D; /* Ainda mais escuro quando pressionado */
-}
 
-#myGrid {
-    flex: 1 1 0px;
-    width: 100%;
+button {
+    background-color: unset !important;
 }

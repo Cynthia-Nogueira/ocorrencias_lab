@@ -20,8 +20,8 @@ def get_responsavel():
 
 
 # ------------------------------------------- ESTRUTURA FORMULARIO -------------------------------------------
-def novo_formulario():
 
+def novo_formulario():
     app.add_static_files('/static', '../static')
     ui.add_head_html('<script src="/static/js/scripts.js"></script>')
 
@@ -84,12 +84,17 @@ def novo_formulario():
 
                 # Obtem todos os usuários (exceto o usuário logado) para enviar a notificação
                 lista_user = obter_user()
+                # chama a função: obter o nome do utilizador logado
+                nome_user = obter_user_logado(current_user_id)
+
+                if not nome_user:
+                    ui.notify("Utilizador logado não encontrado.", type="negative")
+                    return
 
                 # Enviar a notificação para os usuários, excluindo o usuário logado
                 for user in lista_user:
                     if user['id'] != current_user_id:
-                        nome_user = 'Utilizador Logado'
-                        mensagem_notificacao = f"Nova ocorrência registada por {nome_user}:\n Nome do cliente: {cliente.value} - Processo: {num_processo.value}"
+                        mensagem_notificacao = f"Nova ocorrência registada por {nome_user}\n\n - Nome do cliente: {cliente.value} / Nº Processo: {num_processo.value}"
                         enviar_notificacao(user['id'], mensagem_notificacao)
 
                 # Limpa os campos
@@ -132,6 +137,25 @@ def obter_user():
     conn.close()
     return users
 
+
+
+# ------------------------------------------- OBTEM USER LOGADO -------------------------------------------
+
+#busca o user logado para printar o nome na mensagem
+
+def obter_user_logado(current_user_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """SELECT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador WHERE id = %s;"""
+        cursor.execute(query, (current_user_id,))
+        user = cursor.fetchone()
+        if user:
+            return user[0]  # Retorna o nome completo do utilizador
+        return None  # Caso o utilizador não seja encontrado
+    finally:
+        cursor.close()
+        conn.close()
 
 
 

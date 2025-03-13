@@ -1,45 +1,97 @@
-
 from Programa_NiceGui.paginas.db_conection import get_db_connection
 from nicegui import ui, app
 
 
-#CRIAR ROTA NO MAIN
-
-
 # --------------------------------- EXIBE AS NOTIFICACOES ---------------------------
 
-notificacoes = []
+notificacoes = []   #nao funciona
 
 def exibir_notificacoes():
     global notificacoes
     current_user_id = app.storage.user.get("userid", None)
-    notificacoes, _ = carregar_notificacoes(current_user_id)
+    #notificacoes, _ = carregar_notificacoes(current_user_id)
+    notificacoes, notificacoes_nao_lidas = carregar_notificacoes(current_user_id)
 
     with ui.dialog() as dialog:
-        ui.label("Notificações:").classes("text-h6")
+        with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
+            ui.label("Notificações:").classes("text-2xl mx-auto font-bold mb-4").style("color: black; font-weight: bold;")
 
-        for notificacao in notificacoes:
-            if not notificacao["lida"]:
-                ui.button(notificacao['mensagem'], on_click=lambda id=notificacao['id']: visualizar_notificacao(id)).classes("q-pa-sm")
-            else:
-                ui.label(notificacao['mensagem']).classes("q-pa-sm")
+            # Aplica estilo no cartão para adicionar scroll e limitar altura
+            card_notificacoes.classes("q-pa-md")
+            card_notificacoes.style("background-color: #B8B8B8; border-radius: 10px; overflow-y: auto;"
+                                    "width: 600px; height: 500px;")
+
+            # Lista de notificações com rolagem
+            with ui.column().classes("w-full"):
+                for notificacao in notificacoes:
+                    if not notificacao["lida"]:
+                        ui.button(
+                            notificacao["mensagem"],
+                            on_click=lambda id=notificacao["id"]: visualizar_notificacao(id)
+                        ).classes("q-pa-sm text-left full-width").style(
+                            "background-color: #d0d0d0 !important; color: black !important; border: 2px solid #ffffff; border-radius: 8px;"
+                        )
+
+                    else:
+                        ui.label(f"✅ {notificacao['mensagem']}").classes("q-pa-sm text-gray-500").style(
+                            "background-color: #E8E8E8 !importante; border-radius: 8px; padding: 8px;"  # tom mais claro
+                        )
+
+            ui.button("Fechar", on_click=dialog.close, color="#878787").classes("btn-primary w-32 mx-auto").style(
+                "color: white; font-weight: bold"
+            )
+
+    dialog.open()
+
+
+# -------------------------------- MARCA COMO LIDAS E ATUALIZA NO BD AS NOTIFICACOES --------------------------
+
+
+#Marca uma notificação como lida, exibe seus detalhes e (opcionalmente) recarrega a lista.
+
+def visualizar_notificacao(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Atualiza no banco de dados para marcar como lida
+        query = "UPDATE notificacoes SET lida = TRUE WHERE id = %s"
+        cursor.execute(query, (id,))
+        conn.commit()
+
+        # Obtém a mensagem da notificação
+        query = "SELECT mensagem FROM notificacoes WHERE id = %s"
+        cursor.execute(query, (id,))
+        mensagem = cursor.fetchone()
+
+        # Exibe o conteúdo completo da notificação em um novo diálogo
+        with ui.dialog() as detalhe_dialog:
+            with ui.card().classes("w-96"):
+                ui.label(mensagem[0]).classes("text-h6 q-pa-md")
+                ui.button("Fechar", on_click=lambda: fechar_notificacao(detalhe_dialog)).classes("text-primary").props("flat")
+
+        detalhe_dialog.open()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+def fechar_notificacao(detalhe_dialog):
+    detalhe_dialog.close()
 
 
 
-        ui.button("Fechar", on_click=dialog.close).classes("text-h6 text-primary").props("flat")
-
-
-# ---------------------------------- ADICIONA UMA NOCA NOTA AO DICIONARIO ------------------------------------
+# ---------------------------------- ADICIONA UMA NOCA NOTIFICACAO AO DICIONARIO -------------------------------
 
 def add_notificacao(mensagem):
-    notificacoes.append(mensagem)
+    notificacoes.append(mensagem)   #rever se funciona tudo
 
 # ------------------------------------------- ENVIA AS NOTIFICACOES --------------------------------------
 
 def enviar_notificacao(usuario_id, mensagem):
     conn = get_db_connection()
-    if conn is None:                                                    #teste apagar
-        raise ValueError("Conexão com o banco de dados falhou.")        #teste apagar
+    if conn is None:
+        raise ValueError("Conexão com o banco de dados falhou.")        #ja funciona
     cursor = conn.cursor()
 
     try:
@@ -50,7 +102,7 @@ def enviar_notificacao(usuario_id, mensagem):
         cursor.close()
         conn.close()
 
-# ------------------------------------------- CARREGA AS NOTIFICACOES --------------------------------------
+# ------------------------------------------- LISTA COMPLETA DE NOTIFICACOES --------------------------------------
 
 
 def carregar_notificacoes(usuario_id):
@@ -82,29 +134,3 @@ def carregar_notificacoes(usuario_id):
         conn.close()
 
 
-# -------------------------------- MARCA COMO LIDAS E ATUALIZA NO BD AS NOTIFICACOES --------------------------
-
-def visualizar_notificacao(id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        query = "UPDATE notificacoes SET lida = TRUE WHERE id = %s"
-        cursor.execute(query, (id,))
-        conn.commit()
-
-        # Exibir conteúdo completo da notificação
-        query = "SELECT mensagem FROM notificacoes WHERE id = %s"
-        cursor.execute(query, (id,))
-        mensagem = cursor.fetchone()
-
-        with ui.dialog() as dialog:
-            ui.label(mensagem[0]).classes("text-h6 q-pa-md")
-
-            ui.button("Fechar", on_click=dialog.close)
-
-        dialog.open()
-
-    finally:
-        cursor.close()
-        conn.close()
