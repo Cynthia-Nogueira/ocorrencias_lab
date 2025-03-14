@@ -63,9 +63,10 @@ def recuperar_senha_page():
                 cursor.close()
                 conn.close()
 
-        ui.button("Enviar Link", on_click=enviar_link, color="#008B8B").classes("w-full").style(
-            "color: white; font-weight: bold")
-        ui.button("Voltar", on_click=lambda: ui.navigate.to("/"), color="#008B8B").classes("w-full").classes("w-full").style("color: white; font-weight: bold")
+        ui.button("Enviar Link", on_click=enviar_link, color="#008B8B").style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("w-full")
+        ui.button("Voltar", on_click=lambda: ui.navigate.to("/"), color="#008B8B").style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("w-full")
 
 
 
@@ -121,10 +122,10 @@ def redefinir_senha_page():
                 cursor.close()
                 conn.close()
 
-        ui.button("Redefinir Senha", on_click=redefinir_senha, color="#008B8B").classes("w-full").style(
-            "color: white; font-weight: bold")
-        ui.button("Voltar", on_click=lambda: ui.navigate.to("/"), color="#008B8B").classes("w-full").style(
-            "color: white; font-weight: bold")
+        ui.button("Redefinir Senha", on_click=redefinir_senha).style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("w-full")
+        ui.button("Voltar", on_click=lambda: ui.navigate.to("/")).style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("w-full")
 
 
 

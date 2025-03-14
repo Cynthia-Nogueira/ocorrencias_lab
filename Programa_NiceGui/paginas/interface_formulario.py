@@ -94,7 +94,12 @@ def novo_formulario():
                 # Enviar a notificação para os usuários, excluindo o usuário logado
                 for user in lista_user:
                     if user['id'] != current_user_id:
-                        mensagem_notificacao = f"Nova ocorrência registada por {nome_user}\n\n - Nome do cliente: {cliente.value} / Nº Processo: {num_processo.value}"
+                        mensagem_notificacao = (
+                            f"• <b>Nova ocorrência registrada por:</b><br>"
+                            f"<span style='display: block; text-align: center;'>{nome_user}</span><br>"
+                            f"• <b>Nome do cliente:</b> {cliente.value}<br>"
+                            f"• <b>Nº Processo:</b> {num_processo.value}"
+                        )
                         enviar_notificacao(user['id'], mensagem_notificacao)
 
                 # Limpa os campos
@@ -113,16 +118,13 @@ def novo_formulario():
                 ui.notify(msg, type="negative")
 
         with ui.row().classes("mx-auto gap-x-8"):
-            ui.button("Salvar", on_click=btn_salvar, color="#008B8B").classes("btn-primary w-32").style(
-                "color: white; font-weight: bold")
+            ui.button("Salvar", on_click=btn_salvar).style("color: white; font-weight: bold; "
+                                    "background-color: #008B8B !important;").classes("btn-primary w-32")
 
-            ui.button("Cancelar", on_click=dialog.close, color="#008B8B").classes("btn-secondary w-32").style(
-                "color: white; font-weight: bold")
-
+            ui.button("Cancelar", on_click=dialog.close).style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("btn-secondary w-32")
 
     dialog.open()
-
-
 
 # ------------------------------------------- OBTEM O NOME DOS USERS -------------------------------------------
 
@@ -152,7 +154,7 @@ def obter_user_logado(current_user_id):
         user = cursor.fetchone()
         if user:
             return user[0]  # Retorna o nome completo do utilizador
-        return None  # Caso o utilizador não seja encontrado
+        return None
     finally:
         cursor.close()
         conn.close()

@@ -83,11 +83,10 @@ def verificar_token_page():
             else:
                 ui.notify("Token inválido ou expirado!", type="negative")
 
-        ui.button("Verificar Token", on_click=validar_token, color="#008B8B").classes("w-full").style(
-            "color: white; font-weight: bold")
-        ui.button("Voltar", on_click=lambda: ui.navigate.to("/recuperacao_senha"), color="#008B8B").classes(
-            "w-full").style(
-            "color: white; font-weight: bold")
+        ui.button("Verificar Token", on_click=validar_token).style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("w-full")
+        ui.button("Voltar", on_click=lambda: ui.navigate.to("/recuperacao_senha")).style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("w-full")
 
 """
 #---------------------------------- Redefinir a nova senha ----------------------------------

@@ -120,8 +120,10 @@ def registro_page():
                 cursor.close()
                 conn.close()
 
-        ui.button("Confirmar", on_click=try_registro, color="#008B8B").classes("w-full").classes("w-full").style("color: white; font-weight: bold")
-        ui.button("Voltar", on_click=lambda: ui.navigate.to("/"), color="#008B8B").classes("w-full").classes("w-full").style("color: white; font-weight: bold")
+        ui.button("Confirmar", on_click=try_registro, color="#008B8B").style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("w-full")
+        ui.button("Voltar", on_click=lambda: ui.navigate.to("/"), color="#008B8B").style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("w-full")
 
 
 #------------------------------------------------ Login Page -----------------------------------------------------
@@ -151,8 +153,9 @@ def login_page():
         # faz com que a tecla enter logue na conta
         password.on("keydown.enter", try_login)
 
-        ui.button("Entrar", on_click=try_login, color="#008B8B").classes("w-full").style(
-            "color: white; font-weight: bold")
+        ui.button("Entrar", on_click=try_login).style("color: white; font-weight: bold;"
+                        " background-color: #008B8B !important;").classes("w-full").style(
+                        "color: white; font-weight: bold")
 
         # Texto que direciona a pagina de cadastro
         ui.label("Não tem uma conta?").classes("text-center").on("click", lambda: ui.navigate.to("/registro")).style(

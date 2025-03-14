@@ -210,8 +210,10 @@ def formulario_edicao(id_):
                     ui.notify(f"Erro ao salvar: {str(e)}", type="negative")
 
             with ui.row().classes("justify-end mt-4"):
-                ui.button("Salvar", on_click=btn_salvar).classes("btn-primary")
-                ui.button("Cancelar", on_click=lambda: dialog.close()).classes("btn-secondary")
+                ui.button("Salvar", on_click=btn_salvar).style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("btn-primary")
+                ui.button("Cancelar", on_click=lambda: dialog.close()).style("color: white; font-weight: bold;"
+                                    " background-color: #008B8B !important;").classes("btn-secondary")
 
         dialog.open()
 

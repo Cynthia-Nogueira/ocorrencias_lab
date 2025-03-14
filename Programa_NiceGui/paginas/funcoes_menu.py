@@ -9,37 +9,36 @@ notificacoes = []   #nao funciona
 def exibir_notificacoes():
     global notificacoes
     current_user_id = app.storage.user.get("userid", None)
-    #notificacoes, _ = carregar_notificacoes(current_user_id)
-    notificacoes, notificacoes_nao_lidas = carregar_notificacoes(current_user_id)
+    notificacoes, _ = carregar_notificacoes(current_user_id)
 
     with ui.dialog() as dialog:
         with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
-            ui.label("Notificações:").classes("text-2xl mx-auto font-bold mb-4").style("color: black; font-weight: bold;")
+            ui.label("Notificações:").style("color: #40403e; font-weight: bold;").classes(
+                "text-2xl mx-auto font-bold mb-4")
 
             # Aplica estilo no cartão para adicionar scroll e limitar altura
             card_notificacoes.classes("q-pa-md")
-            card_notificacoes.style("background-color: #B8B8B8; border-radius: 10px; overflow-y: auto;"
-                                    "width: 600px; height: 500px;")
+            card_notificacoes.style(
+                "background-color: #d2e9dd; border-radius: 10px; overflow-y: auto;"
+                "width: 600px; height: 500px;")
 
             # Lista de notificações com rolagem
             with ui.column().classes("w-full"):
                 for notificacao in notificacoes:
                     if not notificacao["lida"]:
+                        # Notificação NÃO lida (cor diferente)
                         ui.button(
                             notificacao["mensagem"],
-                            on_click=lambda id=notificacao["id"]: visualizar_notificacao(id)
-                        ).classes("q-pa-sm text-left full-width").style(
-                            "background-color: #d0d0d0 !important; color: black !important; border: 2px solid #ffffff; border-radius: 8px;"
-                        )
-
+                            on_click=lambda id=notificacao["id"]: visualizar_notificacao(id),
+                        ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
+                         .classes("q-pa-sm text-left full-width")
                     else:
-                        ui.label(f"✅ {notificacao['mensagem']}").classes("q-pa-sm text-gray-500").style(
-                            "background-color: #E8E8E8 !importante; border-radius: 8px; padding: 8px;"  # tom mais claro
-                        )
+                        # Notificação LIDA (cor mais clara)
+                        ui.label(f"{notificacao['mensagem']}").classes("q-pa-sm text-gray-500") \
+                         .style("background-color: #d2e9dd !important; border-radius: 8px; padding: 8px;")
 
-            ui.button("Fechar", on_click=dialog.close, color="#878787").classes("btn-primary w-32 mx-auto").style(
-                "color: white; font-weight: bold"
-            )
+            ui.button("Fechar", on_click=dialog.close).style("color: white; font-weight: bold;"
+                                    " background-color: #5a7c71 !important;").classes("btn-primary w-32 mx-auto")
 
     dialog.open()
 
@@ -49,12 +48,13 @@ def exibir_notificacoes():
 
 #Marca uma notificação como lida, exibe seus detalhes e (opcionalmente) recarrega a lista.
 
+
 def visualizar_notificacao(id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        # Atualiza no banco de dados para marcar como lida
+        # Atualiza o banco de dados para marcar como lida
         query = "UPDATE notificacoes SET lida = TRUE WHERE id = %s"
         cursor.execute(query, (id,))
         conn.commit()
@@ -64,11 +64,29 @@ def visualizar_notificacao(id):
         cursor.execute(query, (id,))
         mensagem = cursor.fetchone()
 
+        # Atualiza a lista global de notificações SEM remover, apenas marcando como lida
+        global notificacoes
+        for notificacao in notificacoes:
+            if notificacao["id"] == id:
+                notificacao["lida"] = True  # <<< AQUI MARCA COMO LIDA
+
+        # Atualiza o contador de notificações não lidas
+        global notificacoes_nao_lidas
+        notificacoes_nao_lidas = sum(1 for n in notificacoes if not n["lida"])
+
+
+        mensagem_formatada = mensagem[0].replace("**", " ").replace("\n","<br>")  # Remove negrito e adiciona quebras HTML
+
         # Exibe o conteúdo completo da notificação em um novo diálogo
         with ui.dialog() as detalhe_dialog:
             with ui.card().classes("w-96"):
-                ui.label(mensagem[0]).classes("text-h6 q-pa-md")
-                ui.button("Fechar", on_click=lambda: fechar_notificacao(detalhe_dialog)).classes("text-primary").props("flat")
+                ui.label("Detalhes da Notificação").style("color: #40403e;").classes("text-lg font-bold mx-auto q-mb-md")
+                ui.markdown(f"{mensagem_formatada}").style("color: #40403e;").classes("text-lg q-pa-md")
+                ui.button("Fechar", on_click=lambda: fechar_notificacao(detalhe_dialog)).style(
+                    "color: white !important; font-weight: bold; background-color: #5a7c71 !important;"
+                ).classes("text-primary mx-auto").props("flat")
+
+#.style("background-color: #40403e;") para mudar a cor da letra
 
         detalhe_dialog.open()
 
@@ -76,10 +94,26 @@ def visualizar_notificacao(id):
         cursor.close()
         conn.close()
 
+
 def fechar_notificacao(detalhe_dialog):
     detalhe_dialog.close()
+"""
+# -------------------------------- ATUALIZA INTERFACE NOTIFICACOES --------------------------
 
 
+def atualiza_int_notficacoes():
+    global notificacoes
+    with ui.column().classes("w-full"):
+        for notificacao in notificacoes:
+            if not notificacao["lida"]:
+                ui.button(
+                    notificacao["mensagem"],
+                    on_click=lambda id=notificacao["id"]: visualizar_notificacao(id)).style("color: gray; font-weight: "
+                                    "bold; background-color: #D7EDE1 !important;").classes("q-pa-sm text-left full-width")
+            else:
+                ui.label(f"{notificacao['mensagem']}").classes("q-pa-sm text-gray-500").style("background-color: #d2e9dd "
+                                                                   "!important; border-radius: 8px; padding: 8px;")
+"""
 
 # ---------------------------------- ADICIONA UMA NOCA NOTIFICACAO AO DICIONARIO -------------------------------
 
@@ -91,7 +125,7 @@ def add_notificacao(mensagem):
 def enviar_notificacao(usuario_id, mensagem):
     conn = get_db_connection()
     if conn is None:
-        raise ValueError("Conexão com o banco de dados falhou.")        #ja funciona
+        raise ValueError("Conexão com o banco de dados falhou.")
     cursor = conn.cursor()
 
     try:

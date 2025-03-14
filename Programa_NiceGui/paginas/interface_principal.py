@@ -110,10 +110,10 @@ def main_page():
 
     # botoes auxiliares
     with ui.row().classes("mx-auto gap-x-10"):
-        ui.button("Nova Ocorrência", on_click=novo_formulario, color="#008B8B") \
-            .classes("btn-primary w-48").style("color: white; font-weight: bold")
-        ui.button("Atualizar", on_click=lambda: carregar_tabela(usuario_logado), color="#008B8B") \
-            .classes("btn-secondary w-48").style("color: white; font-weight: bold")
+        ui.button("Nova Ocorrência", on_click=novo_formulario).style("color: white; font-weight: bold;"
+                        " background-color: #008B8B !important;").classes("btn-primary w-48")
+        ui.button("Atualizar", on_click=lambda: carregar_tabela(usuario_logado)).style("color: white; font-weight: bold;"
+                        " background-color: #008B8B !important;").classes("btn-secondary w-48")
 
     div = ui.element('div').style("height: 100%")
     div._props['id'] = 'myGrid'  # Adicionando ID manualmente
