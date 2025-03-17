@@ -35,7 +35,6 @@ def novo_formulario():
 
         responsavel = ui.select(get_responsavel(), label="Responsável").classes("w-full")
 
-
         with ui.row().classes(" w-full justify-between"):
             with ui.grid(columns=2).classes("w-full"):
                 with ui.input('Date') as date:
@@ -70,10 +69,56 @@ def novo_formulario():
 
         atualizar_contador()
 
+
+
+
+
+
+
+
+
+
+        def mostrar_detalhes_notificacao(mensagem, nome_user):
+            # Exibe a notificação detalhada em um diálogo
+            with ui.dialog() as detalhe_dialog:
+                with ui.card().classes("w-96 mx-auto"):
+                    ui.label("Detalhes da Notificação").classes("text-lg font-bold mx-auto q-mb-sm")
+
+                    # Estrutura do texto
+                    with ui.column():
+                        partes_mensagem = mensagem.split("\n")
+                        for linha in partes_mensagem:
+                            if ":" in linha:
+                                titulo, conteudo = linha.split(":", 1)  # Separa o texto antes e depois dos dois pontos
+                                with ui.row():  #.classes("items-center")
+                                    ui.label(titulo + ":").classes("font-bold")
+                                    ui.label(conteudo.strip())
+                            #elif linha.strip() == nome_user:
+                             #   ui.label(linha).classes("mx-auto")
+                            else:
+                                ui.label(linha)
+
+                    ui.button("Fechar", on_click=detalhe_dialog.close).style(
+                        "color: white; font-weight: bold; background-color: #5a7c71 !important;"
+                    ).classes("mx-auto q-mt-md")
+
+            detalhe_dialog.open()    #tirar
+
+
+
+
+
+
+
+
+
+
+
         def btn_salvar():
+            """ Salva a ocorrência e envia notificações para outros usuários """
             current_user_id = app.storage.user.get("userid", None)
 
-            if not conteudo.value.strip(): #verifica se o campo esta vazio
+            if not conteudo.value.strip():  # Verifica se o campo está vazio
                 ui.notify("O campo 'Conteúdo da ocorrência' é obrigatório.", type="negative")
                 return
 
@@ -82,27 +127,32 @@ def novo_formulario():
             if sucesso:
                 ui.notify(msg, type="positive")
 
-                # Obtem todos os usuários (exceto o usuário logado) para enviar a notificação
+                # Obtém todos os usuários (exceto o usuário logado) para enviar a notificação
                 lista_user = obter_user()
-                # chama a função: obter o nome do utilizador logado
                 nome_user = obter_user_logado(current_user_id)
 
                 if not nome_user:
                     ui.notify("Utilizador logado não encontrado.", type="negative")
                     return
 
+                # Criando a notificação formatada corretamente sem HTML
+                mensagem_notificacao = (
+                    f"• Nova ocorrência registrada por:\n"
+                    f"{nome_user}\n"
+                    f"• Nome do cliente: {cliente.value}\n"
+                    f"• Nº Processo: {num_processo.value}\n"
+                    f"• Status: {status.value}"
+                )
+
                 # Enviar a notificação para os usuários, excluindo o usuário logado
                 for user in lista_user:
                     if user['id'] != current_user_id:
-                        mensagem_notificacao = (
-                            f"• <b>Nova ocorrência registrada por:</b><br>"
-                            f"<span style='display: block; text-align: center;'>{nome_user}</span><br>"
-                            f"• <b>Nome do cliente:</b> {cliente.value}<br>"
-                            f"• <b>Nº Processo:</b> {num_processo.value}"
-                        )
                         enviar_notificacao(user['id'], mensagem_notificacao)
 
-                # Limpa os campos
+                # Exibir a notificação detalhada ao usuário que registrou a ocorrência
+                mostrar_detalhes_notificacao(mensagem_notificacao, nome_user)
+
+                # Limpa os campos do formulário
                 cliente.set_value("")
                 num_processo.set_value("")
                 responsavel.set_value(None)
@@ -110,12 +160,11 @@ def novo_formulario():
                 conteudo.set_value("")
                 status.set_value("Em espera")
 
-                # carregar_tabela()
                 atualizar_contador()
-
 
             else:
                 ui.notify(msg, type="negative")
+
 
         with ui.row().classes("mx-auto gap-x-8"):
             ui.button("Salvar", on_click=btn_salvar).style("color: white; font-weight: bold; "

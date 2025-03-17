@@ -29,7 +29,7 @@ def exibir_notificacoes():
                         # Notificação NÃO lida (cor diferente)
                         ui.button(
                             notificacao["mensagem"],
-                            on_click=lambda id=notificacao["id"]: visualizar_notificacao(id),
+                            on_click=lambda id=notificacao["id"]: visualizar_notificacao(id, mensagem),
                         ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
                          .classes("q-pa-sm text-left full-width")
                     else:
@@ -49,7 +49,7 @@ def exibir_notificacoes():
 #Marca uma notificação como lida, exibe seus detalhes e (opcionalmente) recarrega a lista.
 
 
-def visualizar_notificacao(id):
+def visualizar_notificacao(id, mensagem):
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -75,21 +75,6 @@ def visualizar_notificacao(id):
         notificacoes_nao_lidas = sum(1 for n in notificacoes if not n["lida"])
 
 
-        mensagem_formatada = mensagem[0].replace("**", " ").replace("\n","<br>")  # Remove negrito e adiciona quebras HTML
-
-        # Exibe o conteúdo completo da notificação em um novo diálogo
-        with ui.dialog() as detalhe_dialog:
-            with ui.card().classes("w-96"):
-                ui.label("Detalhes da Notificação").style("color: #40403e;").classes("text-lg font-bold mx-auto q-mb-md")
-                ui.markdown(f"{mensagem_formatada}").style("color: #40403e;").classes("text-lg q-pa-md")
-                ui.button("Fechar", on_click=lambda: fechar_notificacao(detalhe_dialog)).style(
-                    "color: white !important; font-weight: bold; background-color: #5a7c71 !important;"
-                ).classes("text-primary mx-auto").props("flat")
-
-#.style("background-color: #40403e;") para mudar a cor da letra
-
-        detalhe_dialog.open()
-
     finally:
         cursor.close()
         conn.close()
@@ -97,7 +82,7 @@ def visualizar_notificacao(id):
 
 def fechar_notificacao(detalhe_dialog):
     detalhe_dialog.close()
-"""
+
 # -------------------------------- ATUALIZA INTERFACE NOTIFICACOES --------------------------
 
 
