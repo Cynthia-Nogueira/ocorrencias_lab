@@ -1,9 +1,9 @@
-from datetime import date, timedelta
+#from datetime import date, timedelta
 from nicegui import app, ui
 from funcoes_menu import enviar_notificacao
 from Programa_NiceGui.paginas.func_int_principal_form import salvar_ocorrencia
 #from Programa_NiceGui.paginas.interface_principal import carregar_tabela
-from db_conection import get_db_connection
+from db_conection import get_db_connection, obter_user_logado
 
 # ------------------------------------- SELECT RESPONSAVEL ----------------------------------------
 
@@ -16,7 +16,6 @@ def get_responsavel():
     cursor.close()
     conn.close()
     return responsaveis
-
 
 
 # ------------------------------------------- ESTRUTURA FORMULARIO -------------------------------------------
@@ -69,54 +68,11 @@ def novo_formulario():
 
         atualizar_contador()
 
-
-
-
-
-
-
-
-
-
-        def mostrar_detalhes_notificacao(mensagem, nome_user):
-            # Exibe a notificação detalhada em um diálogo
-            with ui.dialog() as detalhe_dialog:
-                with ui.card().classes("w-96 mx-auto"):
-                    ui.label("Detalhes da Notificação").classes("text-lg font-bold mx-auto q-mb-sm")
-
-                    # Estrutura do texto
-                    with ui.column():
-                        partes_mensagem = mensagem.split("\n")
-                        for linha in partes_mensagem:
-                            if ":" in linha:
-                                titulo, conteudo = linha.split(":", 1)  # Separa o texto antes e depois dos dois pontos
-                                with ui.row():  #.classes("items-center")
-                                    ui.label(titulo + ":").classes("font-bold")
-                                    ui.label(conteudo.strip())
-                            #elif linha.strip() == nome_user:
-                             #   ui.label(linha).classes("mx-auto")
-                            else:
-                                ui.label(linha)
-
-                    ui.button("Fechar", on_click=detalhe_dialog.close).style(
-                        "color: white; font-weight: bold; background-color: #5a7c71 !important;"
-                    ).classes("mx-auto q-mt-md")
-
-            detalhe_dialog.open()    #tirar
-
-
-
-
-
-
-
-
-
-
+        current_user_id = app.storage.user.get("userid", None)
+        nome_user = obter_user_logado(current_user_id)
 
         def btn_salvar():
             """ Salva a ocorrência e envia notificações para outros usuários """
-            current_user_id = app.storage.user.get("userid", None)
 
             if not conteudo.value.strip():  # Verifica se o campo está vazio
                 ui.notify("O campo 'Conteúdo da ocorrência' é obrigatório.", type="negative")
@@ -128,8 +84,7 @@ def novo_formulario():
                 ui.notify(msg, type="positive")
 
                 # Obtém todos os usuários (exceto o usuário logado) para enviar a notificação
-                lista_user = obter_user()
-                nome_user = obter_user_logado(current_user_id)
+                lista_user = obter_lista_user()
 
                 if not nome_user:
                     ui.notify("Utilizador logado não encontrado.", type="negative")
@@ -150,7 +105,7 @@ def novo_formulario():
                         enviar_notificacao(user['id'], mensagem_notificacao)
 
                 # Exibir a notificação detalhada ao usuário que registrou a ocorrência
-                mostrar_detalhes_notificacao(mensagem_notificacao, nome_user)
+                #mostrar_detalhes_notificacao(mensagem_notificacao, nome_user)
 
                 # Limpa os campos do formulário
                 cliente.set_value("")
@@ -178,7 +133,7 @@ def novo_formulario():
 # ------------------------------------------- OBTEM O NOME DOS USERS -------------------------------------------
 
 
-def obter_user():
+def obter_lista_user():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     query = """SELECT DISTINCT CONCAT (nome, ' ', apelido) as nome_completo, id FROM utilizador"""
@@ -187,27 +142,6 @@ def obter_user():
     cursor.close()
     conn.close()
     return users
-
-
-
-# ------------------------------------------- OBTEM USER LOGADO -------------------------------------------
-
-#busca o user logado para printar o nome na mensagem
-
-def obter_user_logado(current_user_id):
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        query = """SELECT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador WHERE id = %s;"""
-        cursor.execute(query, (current_user_id,))
-        user = cursor.fetchone()
-        if user:
-            return user[0]  # Retorna o nome completo do utilizador
-        return None
-    finally:
-        cursor.close()
-        conn.close()
-
 
 
 

@@ -1,7 +1,34 @@
-from Programa_NiceGui.paginas.db_conection import get_db_connection
+from Programa_NiceGui.paginas.db_conection import get_db_connection, obter_user_logado
 from nicegui import ui, app
 
+# ----------------------------------- ABRE UMA CAIXA COM DETALHES DA MENSAGEM ------------------------------------
 
+
+def mostrar_detalhes_notificacao(mensagem, nome_user):
+    # Exibe a notificação detalhada em um diálogo
+    with ui.dialog() as detalhe_dialog:
+        with ui.card().classes("w-96 mx-auto"):
+            ui.label("Detalhes da Notificação").classes("text-lg font-bold mx-auto q-mb-sm")
+
+            # Estrutura do texto
+            with ui.column():
+                partes_mensagem = mensagem[0].split("\n")
+                for linha in partes_mensagem:
+                    if ":" in linha:
+                        titulo, conteudo = linha.split(":", 1)  # Separa o texto antes e depois dos dois pontos
+                        with ui.row():
+                            ui.label(titulo + ":").classes("font-bold")
+                            ui.label(conteudo.strip())
+                    # elif linha.strip() == nome_user:
+                    #   ui.label(linha).classes("mx-auto")
+                    else:
+                        ui.label(linha)
+
+            ui.button("Fechar", on_click=detalhe_dialog.close).style(
+                "color: white; font-weight: bold; background-color: #5a7c71 !important;"
+            ).classes("mx-auto q-mt-md")
+
+    detalhe_dialog.open()  # tirar
 # --------------------------------- EXIBE AS NOTIFICACOES ---------------------------
 
 notificacoes = []   #nao funciona
@@ -29,7 +56,7 @@ def exibir_notificacoes():
                         # Notificação NÃO lida (cor diferente)
                         ui.button(
                             notificacao["mensagem"],
-                            on_click=lambda id=notificacao["id"]: visualizar_notificacao(id, mensagem),
+                            on_click = lambda id=notificacao["id"], mensagem=notificacao["mensagem"]: visualizar_notificacao(id, mensagem)
                         ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
                          .classes("q-pa-sm text-left full-width")
                     else:
@@ -68,11 +95,16 @@ def visualizar_notificacao(id, mensagem):
         global notificacoes
         for notificacao in notificacoes:
             if notificacao["id"] == id:
-                notificacao["lida"] = True  # <<< AQUI MARCA COMO LIDA
+                notificacao["lida"] = True  # marca como lida
 
         # Atualiza o contador de notificações não lidas
         global notificacoes_nao_lidas
         notificacoes_nao_lidas = sum(1 for n in notificacoes if not n["lida"])
+
+        # Exibir os detalhes da notificação utilizando a função global
+        current_user_id = app.storage.user.get("userid", None)
+        nome_user = obter_user_logado(current_user_id)  # Obtém o nome do usuário logado
+        mostrar_detalhes_notificacao(mensagem, nome_user)
 
 
     finally:
@@ -98,7 +130,7 @@ def atualiza_int_notficacoes():
             else:
                 ui.label(f"{notificacao['mensagem']}").classes("q-pa-sm text-gray-500").style("background-color: #d2e9dd "
                                                                    "!important; border-radius: 8px; padding: 8px;")
-"""
+
 
 # ---------------------------------- ADICIONA UMA NOCA NOTIFICACAO AO DICIONARIO -------------------------------
 
