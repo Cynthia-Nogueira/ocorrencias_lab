@@ -1,5 +1,5 @@
 from nicegui import ui, app
-from Programa_NiceGui.paginas.funcoes_menu import notificacoes, exibir_notificacoes, carregar_notificacoes
+from Programa_NiceGui.paginas.funcoes_menu import notificacoes, exibir_notificacoes_menu, carregar_notificacoes
 
 
 #---------------------------------------------- INTERFACE DO MENU -----------------------------
@@ -17,9 +17,9 @@ def pag_layout():
 
         # icone de notificacoes no menu
         if notificacoes_nao_lidas > 0:
-            ui.button(f"Notificações ({notificacoes_nao_lidas})", icon="notifications", on_click=exibir_notificacoes).style('color: red;').props('flat')
+            ui.button(f"Notificações ({notificacoes_nao_lidas})", icon="notifications", on_click=exibir_notificacoes_menu).style('color: red;').props('flat')
         else:
-            ui.button('Notificações', icon='notifications', on_click=exibir_notificacoes).props('flat')
+            ui.button('Notificações', icon='notifications', on_click=exibir_notificacoes_menu).props('flat')
 
         #vem campo com as ocorrencias em aberto
         #vem campo com as ocorrencias em em execucao
@@ -31,7 +31,7 @@ def pag_layout():
         ui.button(on_click=lambda: right_drawer.toggle(), icon='menu').props('flat color=white')
 
 
-        #PRECISA????
+        #PRECISA ????
 
         # Botão para adicionar notificações (simula a criação de uma nova notificação)
         #ui.button('Adicionar Notificação', on_click=lambda: adicionar_notificacao('Nova notificação de teste!')).props(

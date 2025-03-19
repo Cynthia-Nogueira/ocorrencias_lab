@@ -90,22 +90,16 @@ def novo_formulario():
                     ui.notify("Utilizador logado não encontrado.", type="negative")
                     return
 
-                # Criando a notificação formatada corretamente sem HTML
+                # Criando a notificação formatada
                 mensagem_notificacao = (
-                    f"• Nova ocorrência registrada por:\n"
-                    f"{nome_user}\n"
-                    f"• Nome do cliente: {cliente.value}\n"
-                    f"• Nº Processo: {num_processo.value}\n"
-                    f"• Status: {status.value}"
+                    f"• Nova ocorrência registada por:\n"
+                    f"  {nome_user}\n"
                 )
 
                 # Enviar a notificação para os usuários, excluindo o usuário logado
                 for user in lista_user:
                     if user['id'] != current_user_id:
                         enviar_notificacao(user['id'], mensagem_notificacao)
-
-                # Exibir a notificação detalhada ao usuário que registrou a ocorrência
-                #mostrar_detalhes_notificacao(mensagem_notificacao, nome_user)
 
                 # Limpa os campos do formulário
                 cliente.set_value("")
@@ -130,7 +124,7 @@ def novo_formulario():
 
     dialog.open()
 
-# ------------------------------------------- OBTEM O NOME DOS USERS -------------------------------------------
+# ------------------------------------------- OBTEM TODOSO OS USERS -------------------------------------------
 
 
 def obter_lista_user():
