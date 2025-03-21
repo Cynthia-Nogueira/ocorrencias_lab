@@ -27,3 +27,13 @@ class CustomButtonComponent {
         }
     }
 }
+
+class CustomButtonComponent {
+    init(params) {
+        this.eGui = document.createElement("div");
+        this.eGui.innerHTML = `<button onclick="aceitarOcorrencia(${params.data.id})">Aceitar</button>`;
+    }
+    getGui() {
+        return this.eGui;
+    }
+}

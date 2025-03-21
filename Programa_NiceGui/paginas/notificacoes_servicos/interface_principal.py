@@ -1,13 +1,13 @@
 from attr import dataclass
-import mysql.connector
-#import (cursor)
+from mysql.connector import cursor
 from nicegui import app
 from nicegui import ui
 import Programa_NiceGui.paginas.interface_layout.global_state as global_state
-#from Programa_NiceGui.paginas.banco_dados.db_conection import obter_dados
+from Programa_NiceGui.paginas.banco_dados.db_conection import obter_dados
 from Programa_NiceGui.paginas.interface_layout.formulario import novo_formulario
 from Programa_NiceGui.paginas.notificacoes_servicos.tabela import carregar_tabela
 from nicegui.elements.aggrid import AgGrid
+
 
 # ----------------------------------------------- TABELA OCORRENCIA --------------------------------------------
 
@@ -57,17 +57,17 @@ def main_page():
             {"headerName": "Conteúdo", "field": "conteudo"},
             {"headerName": "Ações", "field": "acoes", "cellRenderer": "htmlRenderer"},
         ],
-        "rowData":[],         #"rowData":dados_convertidos (alteracoes feitas)
+        "rowData": [],    #dados_convertidos,
     }).classes("w-full max-w-[1200px] h-[500px] mx-auto") \
         .style("background: transparent; border: 5px solid rgba(255, 255, 255, 0.5);")
 
-    print("tipo de agrid", type(grid))
-    print("conteudo", grid)
+    #carregar_tabela(grid, usuario_logado)
 
-    configurar_grid(grid)
+    #configurar_grid(grid)
 
     usuario_logado = app.storage.user.get("username", None) # Obtém o usuário da sessão
     carregar_tabela(grid, usuario_logado)  # Passa para a função de carregamento
+
 
     # botoes auxiliares
     with ui.row().classes("mx-auto gap-x-10"):
@@ -77,7 +77,7 @@ def main_page():
                         " background-color: #008B8B !important;").classes("btn-secondary w-48")
 
     div = ui.element('div').style("height: 100%")
-    div._props['id'] = 'myGrid'  # Adicionando ID manualmente
+    div._props['id'] = 'myGrid'  # Adicionando ID manualmente   (apagar???)
 
     carregar_tabela(grid, usuario_logado)
 

@@ -2,6 +2,8 @@ from nicegui import app, ui
 from datetime import date
 from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado
 from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
+from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import salvar_ocorrencia
 
 # ------------------------------------------- ESTRUTURA FORMULARIO -------------------------------------------
 
@@ -9,7 +11,7 @@ def novo_formulario():
     app.add_static_files('/static', '../static')
     ui.add_head_html('<script src="/static/js/scripts.js"></script>')
 
-    with ui.dialog() as dialog, ui.card().classes("w-4/5 h-[600px] mx-auto"):
+    with ui.dialog() as dialog, ui.card().classes("w-4/5 h-[530px] mx-auto"):    #h600
         ui.label("Nova Ocorrência").classes("text-2xl mx-auto font-bold mb-4")
 
         with ui.row().classes("w-full justify-between"):
@@ -58,10 +60,6 @@ def novo_formulario():
         nome_user = obter_user_logado(current_user_id)
 
         def btn_salvar():
-
-            from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import enviar_notificacao
-            from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import salvar_ocorrencia
-
             """ Salva a ocorrência e envia notificações para outros usuários """
 
             if not conteudo.value.strip():  # Verifica se o campo está vazio

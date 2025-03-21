@@ -1,7 +1,7 @@
 from nicegui import ui
 from nicegui.elements import grid
 import Programa_NiceGui.paginas.interface_layout.global_state as global_state
-from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
+from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection, obter_dados
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao, carregar_notificacoes
 from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import obter_ocorrencias
 
@@ -14,19 +14,7 @@ def carregar_tabela(grid, usuario_logado):
         for ocorrencia in obter_ocorrencias():
             id_, cliente, num_processo, data, status, conteudo, responsavel = ocorrencia
 
-            # Criação do botão "Aceitar" apenas se o status for "Em espera" (caso contrário, não será exibido)
-            botoes = ui.row()
-            """
-            if status == "Em espera":  # Só exibe o botão se o status for "Em espera"
-                botoes.add(
-                    ui.button("Aceitar", on_click=lambda id=id_: aceitar_ocorrencia(id_, usuario_logado, None),
-                              color="primary")
-                )
-            else:
-                botoes.add(ui.label("Já está em execução ou concluído"))
-            """
-
-            # Adiciona os dados à lista da tabela
+            # Convertendo a ocorrência para dicionário (evita erro JSON serializable)
             dados_tabela.append({
                 "id": id_,
                 "cliente": cliente,
@@ -34,15 +22,17 @@ def carregar_tabela(grid, usuario_logado):
                 "data": data,
                 "status": status,
                 "conteudo": conteudo,
-                "responsavel": responsavel or "Nenhum responsável",
-                "acoes": botoes,
+                "responsavel": responsavel or "Responsável vazio",
+                "acoes": "Botão aqui"  # PlaceHolder (pois UI não pode ser passado para AgGrid)
             })
 
-        # Atualiza a tabela com os dados carregados
+        # Atualiza a tabela com os dados convertidos corretamente
         atualizar_tabela(grid, dados_tabela)
 
     except Exception as e:
         ui.notify(f"Erro ao carregar a tabela: {e}", color="red")
+
+    global_state.grid = grid
 
 
 # ------------------------------------------- ATUALIZA A TABELA -------------------------------------------

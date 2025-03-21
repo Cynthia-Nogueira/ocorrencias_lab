@@ -1,8 +1,6 @@
 from nicegui import ui, app
 from Programa_NiceGui.paginas.interface_layout.menu import carregar_notificacoes, exibir_notificacoes_menu
 
-
-
 #---------------------------------------------- INTERFACE DO MENU -----------------------------
 
 def pag_layout():

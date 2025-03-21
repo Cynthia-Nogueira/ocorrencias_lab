@@ -9,7 +9,8 @@ def get_db_connection():
         password="root",
         database="ocorrencias_lab"
     )
-"""
+
+
 def obter_dados():
     #Busca dados no banco e retorna como lista.
     conn = get_db_connection()  # Abre a conexão com o BD
@@ -23,11 +24,7 @@ def obter_dados():
 
     return dados  # Retorna os dados do banco
 
-# Teste para ver se está funcionando
-dados_banco = obter_dados()
-print(dados_banco)
 
-"""
 
 def obter_user_logado(current_user_id):
     if not current_user_id:
