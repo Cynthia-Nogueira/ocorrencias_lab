@@ -6,9 +6,9 @@ import interface_login_cadastro
 from interface_token import gerar_token, redefinir_senha_no_banco
 from nicegui import app, ui
 """
-from send_email import sendmail
+from Programa_NiceGui.paginas.notificacoes_servicos.send_email import sendmail
 from nicegui import app, ui
-from db_conection import get_db_connection
+from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
 #----------------------------------------------- encripta a senha ---------------------------------------------------
 

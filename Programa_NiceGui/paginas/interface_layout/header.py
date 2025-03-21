@@ -1,5 +1,6 @@
 from nicegui import ui, app
-from Programa_NiceGui.paginas.funcoes_menu import notificacoes, exibir_notificacoes_menu, carregar_notificacoes
+from Programa_NiceGui.paginas.interface_layout.menu import carregar_notificacoes, exibir_notificacoes_menu
+
 
 
 #---------------------------------------------- INTERFACE DO MENU -----------------------------
@@ -38,4 +39,9 @@ def pag_layout():
          #   'flat color=blue')
 
 # Chama a função para rodar o app
-ui.run()
+ui.run(storage_secret="minha_chave_secreta_aleatoria")
+
+
+
+
+

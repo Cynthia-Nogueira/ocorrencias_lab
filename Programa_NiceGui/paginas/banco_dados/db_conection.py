@@ -9,6 +9,25 @@ def get_db_connection():
         password="root",
         database="ocorrencias_lab"
     )
+"""
+def obter_dados():
+    #Busca dados no banco e retorna como lista.
+    conn = get_db_connection()  # Abre a conexão com o BD
+    cursor = conn.cursor(dictionary=True)  # Criar cursor corretamente
+
+    cursor.execute("SELECT * FROM ocorrencias")  # Ajuste para sua tabela real
+    dados = cursor.fetchall()  # Obtém os resultados
+
+    cursor.close()  # Fecha o cursor
+    conn.close()  # Fecha a conexão
+
+    return dados  # Retorna os dados do banco
+
+# Teste para ver se está funcionando
+dados_banco = obter_dados()
+print(dados_banco)
+
+"""
 
 def obter_user_logado(current_user_id):
     if not current_user_id:
@@ -24,3 +43,4 @@ def obter_user_logado(current_user_id):
     finally:
         cursor.close()
         conn.close()
+

@@ -1,46 +1,24 @@
-import mysql
 from nicegui import ui
-from datetime import datetime
-
-from Programa_NiceGui.paginas.funcoes_menu import enviar_notificacao
-from db_conection import get_db_connection
-
+from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
 # ------------------------------- Atualiza a ocorrência no banco --------------------------------
 
-def update_ocorrencia(id, cliente, num_processo, responsavel, data, status, conteudo):
+def update_ocorrencia(id, cliente, num_processo, data, status, conteudo):
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         query = """
             UPDATE ocorrencias 
-            SET cliente = %s, num_processo = %s, responsavel = %s, data = %s, status = %s, conteudo = %s
+            SET cliente = %s, num_processo = %s, data = %s, status = %s, conteudo = %s
             WHERE id = %s
         """
-        cursor.execute(query, (id, cliente, num_processo, responsavel, data, status, conteudo))
+        cursor.execute(query, (id, cliente, num_processo, data, status, conteudo))
         conn.commit()
 
     finally:
         cursor.close()
         conn.close()
-
-
-# ---------------------------------- BD lista ocorrencias ---------------------------------------------------
-
-def get_ocorrencias():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        query = "SELECT * FROM ocorrencias"
-        cursor.execute(query)
-        ocorrencias = cursor.fetchall()
-
-    finally:
-        cursor.close()
-        conn.close()
-        return ocorrencias
 
 
 # ------------------------------------- Exclui ocorrência -----------------------------------------
@@ -72,85 +50,83 @@ def excluir_ocorrencia(id_):
         cursor.close()
         conn.close()
 
-
-# ---------------------------------------- UPDATE STATUS ---------------------------------------
-"""def update_status(id_, novo_status):
-    # Implementa a atualização no banco de dados
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("""
-            #UPDATE ocorrencias
-            #SET status = %s
-            #WHERE id = %s
-""", (novo_status, id_))
-        conn.commit()
-    except Exception as e:
-        ui.notify(f"Erro ao atualizar status: {e}", color="red")
-    finally:
-        cursor.close()
-        conn.close()"""
-
 # ----------------------------- Cria uma nova ocorrência no banco -------------------------
 
-def nova_ocorrencia(cliente, num_processo, responsavel, data, status, conteudo):
+def nova_ocorrencia(cliente, num_processo, data, status, conteudo, usuario_criador):
+
+    from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         query = """
-                INSERT INTO ocorrencias (cliente, num_processo, responsavel, data, status, conteudo)
-                VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
+            INSERT INTO ocorrencias (cliente, num_processo, data, status, conteudo, criador_id)
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
         """
-        cursor.execute(query, (cliente, num_processo, responsavel, data, status, conteudo))
-        ocorrencia_id = cursor.fetchone()[0]  #pega o id da ocorrencia inserida
+        cursor.execute(query, (cliente, num_processo, data, status, conteudo, usuario_criador))
+        ocorrencia_id = cursor.fetchone()[0]
         conn.commit()
 
-        #busca todos que estao registados em utilizador
-        query_usuarios = """SELECTE id, nome, apelido FROM utilizador"""
+        # Buscar todos os usuários, exceto o criador da ocorrência
+        query_usuarios = "SELECT id FROM utilizador WHERE id != %s"
+        cursor.execute(query_usuarios, (usuario_criador,))
+        usuarios = cursor.fetchall()
 
-        cursor.execute(query_usuarios)
-        usuarios = cursor.fetchall()  #cria uma lista de tuplas com o id, nome e apelido
-
-        mensagem = f"Nova ocorrencia registada: {cliente} - processo {num_processo}."
+        mensagem = f"Nova ocorrência registrada: {cliente} - processo {num_processo}."
 
         for usuario in usuarios:
-            nome_completo = f"{usuario[1]} {usuario[2]}"
-            enviar_notificacao(usuario[0], mensagem)
+            enviar_notificacao(usuario[0], mensagem, ocorrencia_id)
 
     finally:
         cursor.close()
         conn.close()
 
 
-# ------------------------------------- Exclui ocorrência -----------------------------------------
+# ------------------------------------- SALVA FORMULÁRIO ----------------------------------------
 
-def excluir_ocorrencia(id):
+def salvar_ocorrencia(cliente, num_processo, data, status, conteudo):
 
-    # msg para confirmar exclusao
-    confirmacao = ui.confirm(f"Tem certeza que deseja excluir esta ocorrência? Esta ação não pode ser desfeita.")
-
-    if not confirmacao:
-        ui.notify("Exclusão cancelada.", type="negative")
-        return False
+    if len(conteudo) > 400:
+        return "Erro: o campo não pode exceder 400 caracteres."
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        query = "DELETE FROM ocorrencias WHERE id = %s"
-        cursor.execute(query, (id,))
+        insert_stmt=("INSERT INTO ocorrencias "
+                       "(cliente, num_processo, data, status, conteudo)"
+                       "VALUES (%s, %s, %s, %s, %s, %s)"
+        )
+        #valores que vao entrar na tabela
+        cont = (cliente, num_processo, data, status, conteudo)
+        cursor.execute(insert_stmt, cont)
         conn.commit()
-        ui.notify("Ocorrência excluida com sucesso!", type="positive")
-        return True
+        return "Ocorrência salva com sucesso!", True
 
     except Exception as e:
-        ui.notify(f"Erro ao excluir ocorrência: {e}", color="red")  # Notificação de erro
-        return False
+        return f"Erro ao salvar ocorrência: {e}", False
 
     finally:
         cursor.close()
         conn.close()
+
+
+# ---------------------------------- BD lista ocorrencias ---------------------------------------------------
+
+def obter_ocorrencias():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        query = "SELECT * FROM ocorrencias"
+        cursor.execute(query)
+        ocorrencias = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+        return ocorrencias
 
 
 # ------------------------------------- Editar ocorrência -----------------------------------------
@@ -172,15 +148,13 @@ def formulario_edicao(id_):
            conn.close()
 
     if ocorrencia:
-        id_, cliente, num_processo, responsavel, data, conteudo, status = ocorrencia
+        id_, cliente, num_processo, data, conteudo, status = ocorrencia
 
         with ui.dialog() as dialog, ui.card():
             ui.label(f"Editar Ocorrência #{id_}").classes("text-2xl font-bold mb-4")
 
             cliente_input = ui.input("Cliente", value=cliente).classes("w-full")
             num_processo_input = ui.input("Nº Processo", value=num_processo).classes("w-full")
-            responsavel_input = ui.select(["Ana", "Carlos", "João", "Maria"], label="Responsável",
-                                          value=responsavel).classes("w-full")
             data_picker = ui.date(label="Data", value=data).classes("w-full")
             conteudo_input = ui.textarea("Conteúdo", value=conteudo).classes("w-full")
             status_input = ui.select(["Em espera", "Em execução", "Concluído"], label="Status", value=status).classes(
@@ -190,7 +164,6 @@ def formulario_edicao(id_):
                 try:
                     # salva a ocorrencia no banco
                     update_ocorrencia(id_, cliente_input.value,
-                                      num_processo_input.value, responsavel_input.value,
                                       data_picker.value, conteudo_input.value,
                                       status_input.value)
 
@@ -200,7 +173,6 @@ def formulario_edicao(id_):
                     # limpa os campos do form
                     cliente_input.set_value("")
                     num_processo_input.set_value("")
-                    responsavel_input.set_value(None)
                     data_picker.set_value(None)
                     conteudo_input.set_value("")
                     status_input.set_value(None)
@@ -218,35 +190,20 @@ def formulario_edicao(id_):
         dialog.open()
 
 
-# ------------------------------------- SALVA FORMULÁRIO ----------------------------------------
-
-def salvar_ocorrencia(cliente, num_processo, responsavel, data, status, conteudo):
-
-    if len(conteudo) > 400:
-        return "Erro: o campo não pode exceder 400 caracteres."
-
+# ---------------------------------------- UPDATE STATUS ---------------------------------------
+"""def update_status(id_, novo_status):
+    # Implementa a atualização no banco de dados
     conn = get_db_connection()
     cursor = conn.cursor()
-
     try:
-        insert_stmt=("INSERT INTO ocorrencias "
-                       "(cliente, num_processo, responsavel, data, status, conteudo)"
-                       "VALUES (%s, %s, %s, %s, %s, %s)"
-        )
-        #valores que vao entrar na tabela
-        cont = (cliente, num_processo, responsavel, data, status, conteudo)
-        cursor.execute(insert_stmt, cont)
+        cursor.execute("""
+            #UPDATE ocorrencias
+            #SET status = %s
+            #WHERE id = %s
+""", (novo_status, id_))
         conn.commit()
-        return "Ocorrência salva com sucesso!", True
-
     except Exception as e:
-        return f"Erro ao salvar ocorrência: {e}", False
-
+        ui.notify(f"Erro ao atualizar status: {e}", color="red")
     finally:
         cursor.close()
-        conn.close()
-
-
-
-
-
+        conn.close()"""

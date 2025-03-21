@@ -1,22 +1,7 @@
-#from datetime import date, timedelta
 from nicegui import app, ui
-from funcoes_menu import enviar_notificacao
-from Programa_NiceGui.paginas.func_int_principal_form import salvar_ocorrencia
-#from Programa_NiceGui.paginas.interface_principal import carregar_tabela
-from db_conection import get_db_connection, obter_user_logado
-
-# ------------------------------------- SELECT RESPONSAVEL ----------------------------------------
-
-def get_responsavel():
-    """ Obtém a lista de responsáveis do banco de dados """
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador;")
-    responsaveis = [row[0] for row in cursor.fetchall()]
-    cursor.close()
-    conn.close()
-    return responsaveis
-
+from datetime import date
+from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado
+from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user
 
 # ------------------------------------------- ESTRUTURA FORMULARIO -------------------------------------------
 
@@ -32,19 +17,20 @@ def novo_formulario():
                 cliente = ui.input("Cliente").classes("w-full")
                 num_processo = ui.input("Nº Processo").classes("w-full")
 
-        responsavel = ui.select(get_responsavel(), label="Responsável").classes("w-full")
+        hoje = date.today().strftime("%d/%m/%Y")
 
-        with ui.row().classes(" w-full justify-between"):
+        with ui.row().classes("w-full justify-between"):
             with ui.grid(columns=2).classes("w-full"):
-                with ui.input('Date') as date:
+                with ui.input('Data', value=hoje).props("readonly") as date_input:  # Data preenchida e somente leitura
                     with ui.menu().props('no-parent-event') as menu:
-                        with ui.date().bind_value(date).style(
+                        with ui.date().bind_value(date_input).style(
                                 "--q-primary:#008B8B; --q-color-calendar-header:#008B8B;"):
                             with ui.row().classes('justify-end'):
-                                ui.button('Close', on_click=menu.close).props('flat').style("color:#008B8B;")
-                    with date.add_slot('prepend'):
+                                ui.button('Fechar', on_click=menu.close).props('flat').style("color:#008B8B;")
+                    with date_input.add_slot('prepend'):
                         ui.icon('edit_calendar', color="#008B8B").on('click', menu.open).classes(
                             'cursor-pointer w-full')
+
                 status = ui.input("Status", value="Em espera").props("readonly").classes("w-full")
 
         conteudo = ui.textarea("Conteúdo da ocorrência").props("maxlength=400").classes("w-full mr-2 mr-2")
@@ -72,13 +58,17 @@ def novo_formulario():
         nome_user = obter_user_logado(current_user_id)
 
         def btn_salvar():
+
+            from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import enviar_notificacao
+            from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import salvar_ocorrencia
+
             """ Salva a ocorrência e envia notificações para outros usuários """
 
             if not conteudo.value.strip():  # Verifica se o campo está vazio
                 ui.notify("O campo 'Conteúdo da ocorrência' é obrigatório.", type="negative")
                 return
 
-            msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, responsavel.value, date.value,
+            msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, date.value,
                                              status.value, conteudo.value)
             if sucesso:
                 ui.notify(msg, type="positive")
@@ -104,7 +94,6 @@ def novo_formulario():
                 # Limpa os campos do formulário
                 cliente.set_value("")
                 num_processo.set_value("")
-                responsavel.set_value(None)
                 date.set_value(None)
                 conteudo.set_value("")
                 status.set_value("Em espera")
@@ -123,25 +112,4 @@ def novo_formulario():
                                     " background-color: #008B8B !important;").classes("btn-secondary w-32")
 
     dialog.open()
-
-# ------------------------------------------- OBTEM TODOSO OS USERS -------------------------------------------
-
-
-def obter_lista_user():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    query = """SELECT DISTINCT CONCAT (nome, ' ', apelido) as nome_completo, id FROM utilizador"""
-    cursor.execute(query)
-    users = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return users
-
-
-
-
-
-
-
-
 

@@ -1,11 +1,6 @@
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from nicegui import app, ui
 import secrets
-import smtplib
-import mysql.connector
 from token_helper import  hash_senha
-from db_conection import get_db_connection
+from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
 
 #-------------------------------------------- redefinindo a senha -----------------------------------

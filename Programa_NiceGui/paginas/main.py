@@ -1,11 +1,11 @@
 from nicegui import ui
-from Programa_NiceGui.paginas.interface_formulario import novo_formulario
-from interface_principal import main_page
-from Programa_NiceGui.paginas import interface_recuperar_senha
-from interface_login_cadastro import login_page, registro_page
+from Programa_NiceGui.paginas.interface_layout.formulario import novo_formulario
+from Programa_NiceGui.paginas.notificacoes_servicos.interface_principal import main_page
+from Programa_NiceGui.paginas.notificacoes_servicos import recuperar_senha
+from Programa_NiceGui.paginas.interface_layout.auth import login_page, registro_page
 from flask import Flask, request, jsonify
-from db_conection import get_db_connection
-from header import pag_layout
+from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
+from Programa_NiceGui.paginas.interface_layout.header import pag_layout
 
 # ---------------------------------------------- Configuração das Rotas --------------------------------------------
 
@@ -47,11 +47,11 @@ def main():
 
 @ui.page("/redefinir_senha_page")
 def redefinir_senha():
-    interface_recuperar_senha.redefinir_senha_page()
+    recuperar_senha.redefinir_senha_page()
 
 @ui.page("/recuperacao_senha")
 def recuperacao_senha():
-    interface_recuperar_senha.recuperar_senha_page()
+    recuperar_senha.recuperar_senha_page()
 
 
 # ------------------------------------------------ Inicializa o NiceGUI ---------------------------------------------
