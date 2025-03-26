@@ -1,5 +1,8 @@
 import mysql.connector
 
+
+# ------------------------------- CONECTA AO BANCO DE DADOS -------------------------------
+
 def get_db_connection():
     """Estabelece e retorna uma conexão com o banco de dados."""
     return mysql.connector.connect(
@@ -10,6 +13,7 @@ def get_db_connection():
         database="ocorrencias_lab"
     )
 
+# --------------------------------------- OBTEM OS DADOS DA TABELA OCORRENCIAS --------------------------------
 
 def obter_dados():
     #Busca dados no banco e retorna como lista.
@@ -24,7 +28,7 @@ def obter_dados():
 
     return dados  # Retorna os dados do banco
 
-
+# --------------------------------- OBTEM OS DADOS DE QUEM ESTA LOGADO -------------------------------------
 
 def obter_user_logado(current_user_id):
     if not current_user_id:
@@ -33,6 +37,7 @@ def obter_user_logado(current_user_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+
         query = """SELECT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador WHERE id = %s;"""
         cursor.execute(query, (current_user_id,))
         user = cursor.fetchone()

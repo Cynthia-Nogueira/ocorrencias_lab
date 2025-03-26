@@ -25,3 +25,19 @@ body {
 button {
     background-color: unset !important;
 }
+
+/*flex telas*/
+
+/* Responsividade para a tabela */
+@media (min-width: 768px) {
+    .ag-theme-alpine {
+        height: 60vh;  /* Ajuste conforme o seu layout */
+    }
+}
+
+@media (max-width: 767px) {
+    .ag-theme-alpine {
+        height: auto;  /* Para dispositivos móveis, a altura se ajusta ao conteúdo */
+    }
+}
+

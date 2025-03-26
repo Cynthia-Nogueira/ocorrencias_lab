@@ -85,7 +85,7 @@ def nova_ocorrencia(cliente, num_processo, data, status, conteudo, usuario_criad
 
 # ------------------------------------- SALVA FORMULÁRIO ----------------------------------------
 
-def salvar_ocorrencia(cliente, num_processo, data, status, conteudo):
+def salvar_ocorrencia(cliente, num_processo, data_formatada, status, conteudo):
 
     if len(conteudo) > 400:
         return "Erro: o campo não pode exceder 400 caracteres."
@@ -95,11 +95,11 @@ def salvar_ocorrencia(cliente, num_processo, data, status, conteudo):
 
     try:
         insert_stmt=("INSERT INTO ocorrencias "
-                       "(cliente, num_processo, data, status, conteudo)"
-                       "VALUES (%s, %s, %s, %s, %s, %s)"
+                       "(cliente, num_processo, data, responsavel, status, conteudo)"
+                       "VALUES (%s, %s, %s, NULL, %s, %s)"
         )
         #valores que vao entrar na tabela
-        cont = (cliente, num_processo, data, status, conteudo)
+        cont = (cliente, num_processo, data_formatada, status, conteudo)
         cursor.execute(insert_stmt, cont)
         conn.commit()
         return "Ocorrência salva com sucesso!", True
@@ -207,3 +207,26 @@ def formulario_edicao(id_):
     finally:
         cursor.close()
         conn.close()"""
+
+
+# ------------------------------  DEF PARA OEGAR A ULTIMA ID CRIADA ---------------------------------
+
+def ultima_ocorrencia_id():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Busca o último ID da tabela 'ocorrencias'
+        query = "SELECT MAX(id) FROM ocorrencias;"
+        cursor.execute(query)
+        ocorrencia_id = cursor.fetchone()[0]  # Captura o ID obtido (ou None, caso não haja registros)
+
+        return ocorrencia_id
+
+    except Exception as e:
+        print(f"Erro ao obter o ID da última ocorrência: {e}")
+        return None
+
+    finally:
+        cursor.close()
+        conn.close()

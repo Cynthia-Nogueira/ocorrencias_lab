@@ -3,7 +3,7 @@ from nicegui.elements import grid
 import Programa_NiceGui.paginas.interface_layout.global_state as global_state
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection, obter_dados
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao, carregar_notificacoes
-from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import obter_ocorrencias
+from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import obter_ocorrencias, ultima_ocorrencia_id
 
 # --------------------------------------------------- CARREGA A TABELA ---------------------------------------
 
@@ -49,7 +49,7 @@ def atualizar_tabela(grid, dados_tabela):
 
 tabela_recarregada = False
 
-def aceitar_ocorrencia(ocorrencia_id, usuario_id, detalhe_dialog):
+def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
     global tabela_recarregada
 
     conn = get_db_connection()
@@ -57,7 +57,7 @@ def aceitar_ocorrencia(ocorrencia_id, usuario_id, detalhe_dialog):
 
     try:
         # Obtém informações do usuário que aceitou
-        cursor.execute("SELECT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador WHERE id = %s", (usuario_id,))
+        cursor.execute("SELECT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador WHERE id = %s", (ultima_usuario_id,))
         usuario = cursor.fetchone()
         if not usuario:
             ui.notify("Erro: Usuário não encontrado.", type="negative")
@@ -66,7 +66,7 @@ def aceitar_ocorrencia(ocorrencia_id, usuario_id, detalhe_dialog):
         nome_completo = usuario['nome_completo']  # Nome completo do usuário
 
         # Obtém informações da ocorrência
-        cursor.execute("SELECT cliente, num_processo, status FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
+        cursor.execute("SELECT cliente, num_processo, status FROM ocorrencias WHERE id = %s", (ultima_ocorrencia_id,))
         ocorrencia = cursor.fetchone()
         if not ocorrencia:
             ui.notify("Erro: Ocorrência não encontrada.", type="negative")
@@ -80,7 +80,7 @@ def aceitar_ocorrencia(ocorrencia_id, usuario_id, detalhe_dialog):
         conn.commit()
 
         # Busca todos os usuários, menos quem aceitou
-        cursor.execute("SELECT id FROM utilizador WHERE id != %s", (usuario_id,))
+        cursor.execute("SELECT id FROM utilizador WHERE id != %s", (ultima_usuario_id,))
         outros_usuarios = cursor.fetchall()
 
         # Envia notificação para os demais usuários
@@ -92,12 +92,12 @@ def aceitar_ocorrencia(ocorrencia_id, usuario_id, detalhe_dialog):
         ui.notify("Ocorrência aceita com sucesso!", type="success")
 
         # Atualiza a lista de notificações
-        carregar_notificacoes(usuario_id)
+        carregar_notificacoes(ultima_usuario_id)
 
         # Evitar o ciclo chamando carregar_tabela apenas uma vez
         if not tabela_recarregada:
             tabela_recarregada = True
-            carregar_tabela(global_state.grid, usuario_id)  # Carrega a tabela
+            carregar_tabela(global_state.grid, ultima_usuario_id)  # Carrega a tabela
 
 
     except Exception as e:

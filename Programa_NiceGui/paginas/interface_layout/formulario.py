@@ -1,9 +1,9 @@
 from nicegui import app, ui
-from datetime import date
+from datetime import date, datetime
 from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado
 from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
-from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import salvar_ocorrencia
+from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import salvar_ocorrencia, ultima_ocorrencia_id
 
 # ------------------------------------------- ESTRUTURA FORMULARIO -------------------------------------------
 
@@ -23,7 +23,7 @@ def novo_formulario():
 
         with ui.row().classes("w-full justify-between"):
             with ui.grid(columns=2).classes("w-full"):
-                with ui.input('Data', value=hoje).props("readonly") as date_input:  # Data preenchida e somente leitura
+                with ui.input('Data', value=hoje).props("readonly") as date_input:
                     with ui.menu().props('no-parent-event') as menu:
                         with ui.date().bind_value(date_input).style(
                                 "--q-primary:#008B8B; --q-color-calendar-header:#008B8B;"):
@@ -66,8 +66,21 @@ def novo_formulario():
                 ui.notify("O campo 'Conteúdo da ocorrência' é obrigatório.", type="negative")
                 return
 
-            msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, date.value,
-                                             status.value, conteudo.value)
+            # Converter a data para o formato correto para o banco de dados (YYYY-MM-DD)
+            try:
+                data_formatada = datetime.strptime(date_input.value, "%d/%m/%Y").strftime("%Y-%m-%d")
+            except ValueError as e:
+                ui.notify(f"Erro ao formatar a data: {e}", type="negative")
+                return
+
+            # Agora, chamamos a função de salvar com a data formatada corretamente
+            try:
+                msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, data_formatada,
+                                                 status.value, conteudo.value)
+            except Exception as e:
+                ui.notify(f"Erro ao salvar ocorrência: {e}", type="negative")
+                return
+
             if sucesso:
                 ui.notify(msg, type="positive")
 
@@ -85,14 +98,16 @@ def novo_formulario():
                 )
 
                 # Enviar a notificação para os usuários, excluindo o usuário logado
+
                 for user in lista_user:
                     if user['id'] != current_user_id:
-                        enviar_notificacao(user['id'], mensagem_notificacao)
+                        enviar_notificacao(user['id'], mensagem_notificacao, ultima_ocorrencia_id)
 
                 # Limpa os campos do formulário
                 cliente.set_value("")
                 num_processo.set_value("")
-                date.set_value(None)
+                date_input.set_value(
+                    date.today().strftime("%d/%m/%Y"))  # Mostra a data no formato correto para o usuário
                 conteudo.set_value("")
                 status.set_value("Em espera")
 
@@ -100,7 +115,6 @@ def novo_formulario():
 
             else:
                 ui.notify(msg, type="negative")
-
 
         with ui.row().classes("mx-auto gap-x-8"):
             ui.button("Salvar", on_click=btn_salvar).style("color: white; font-weight: bold; "

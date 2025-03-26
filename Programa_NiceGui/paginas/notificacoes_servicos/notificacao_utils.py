@@ -1,6 +1,8 @@
 from nicegui import ui
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.helper_notificacoes import minha_funcao_visualizar_notificacao
+from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import ultima_ocorrencia_id
+
 
 
 def carregar_notificacoes(usuario_id):
@@ -32,8 +34,12 @@ def carregar_notificacoes(usuario_id):
         cursor.close()
         conn.close()
 
+
 def enviar_notificacao(usuario_id, mensagem, ocorrencia_id):
     conn = get_db_connection()
+
+    # Chama a função ultima_ocorrencia_id para obter o valor de ocorrencia_id
+    ocorrencia_id = ultima_ocorrencia_id()
     cursor = conn.cursor()
 
     try:

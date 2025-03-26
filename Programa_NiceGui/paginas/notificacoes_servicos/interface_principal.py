@@ -58,8 +58,9 @@ def main_page():
             {"headerName": "Ações", "field": "acoes", "cellRenderer": "htmlRenderer"},
         ],
         "rowData": [],    #dados_convertidos,
-    }).classes("w-full max-w-[1200px] h-[500px] mx-auto") \
-        .style("background: transparent; border: 5px solid rgba(255, 255, 255, 0.5);")
+    }).classes("w-full h-[500px] mx-auto") \
+        .style(
+        "background: transparent; border: 5px solid rgba(255, 255, 255, 0.5); overflow-x: auto; max-width: 100%; min-width: 300px;")
 
     #carregar_tabela(grid, usuario_logado)
 
