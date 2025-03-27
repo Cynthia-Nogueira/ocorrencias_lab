@@ -4,7 +4,6 @@ from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualiz
 
 # ------------------------------------------- LISTA AS NOTIFICACOES --------------------------------------
 
-
 def carregar_notificacoes(usuario_id):
     conn = get_db_connection()
     cursor = conn.cursor()

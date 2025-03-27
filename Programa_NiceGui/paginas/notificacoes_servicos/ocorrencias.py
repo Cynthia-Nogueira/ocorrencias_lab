@@ -119,7 +119,7 @@ def obter_ocorrencias():
     cursor = conn.cursor()
 
     try:
-        query = "SELECT * FROM ocorrencias"
+        query = "SELECT id, cliente, num_processo, responsavel, data, status, conteudo FROM ocorrencias"
         cursor.execute(query)
         ocorrencias = cursor.fetchall()
 

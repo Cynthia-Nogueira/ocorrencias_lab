@@ -28,14 +28,20 @@ def pag_layout():
         else:
             ui.button('Notificações', icon='notifications', on_click=exibir_notificacoes_menu).props('flat')
 
+        #titulo
+        ui.label("Ocorrências").props('flat').style("color: #5898D4; font-weight: bold; font-size: 18px;")
+
         # Botão (em espera)
-        ui.button("Ocorrências Em espera", icon='arrow_right', on_click=ocorrencia_espera).props('flat')
+        ui.button("Em espera", icon='arrow_right', on_click=ocorrencia_espera).props('flat')
 
         # Botão (em execução)
-        ui.button("Ocorrências Em Execução", icon='arrow_right', on_click=ocorrencia_execucao).props('flat')
+        ui.button("Em Execução", icon='arrow_right', on_click=ocorrencia_execucao).props('flat')
 
         # Botão (concluído)
-        ui.button("Ocorrências Concluídas", icon='arrow_right', on_click=ocorrencia_concluida).props('flat')
+        ui.button("Concluídas", icon='arrow_right', on_click=ocorrencia_concluida).props('flat')
+
+        # Botão (nao atribuido)        SUBSTITUIR FUNCAO PELA CERTA (LISTA SEM RESPONSAVEL)
+        ui.button("Não Atribuídas", icon='arrow_right', on_click=ocorrencia_concluida).props('flat')
 
         # Botão de logout no menu
         ui.button("Sair", icon="logout", on_click=logout).props('flat')
@@ -55,18 +61,9 @@ def pag_layout():
 # ------------------------------------- DESCONECTA DA PAGINA -----------------------------------------
 
 # Função para logout
-# Função para logout
 def logout():
-    # Limpar os dados específicos de usuário armazenados
-    if 'user' in app.storage:
-        del app.storage['user']
-
-    # Limpar também o nome do usuário, se necessário
-    if 'name_logado' in app.storage:
-        del app.storage['name_logado']
-
-    # Redireciona para a página de login
-    return RedirectResponse(url='/login')
+    app.storage.user.clear()
+    ui.redirect('/login_page')
 
 # ------------------------------------- RODA O APP (N FUNCIONA SEM) -----------------------------------------
 
