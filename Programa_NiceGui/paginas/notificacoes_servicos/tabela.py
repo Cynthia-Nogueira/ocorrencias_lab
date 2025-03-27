@@ -1,5 +1,6 @@
 from nicegui import ui
 from nicegui.elements import grid
+from datetime import datetime
 import Programa_NiceGui.paginas.interface_layout.global_state as global_state
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection, obter_dados
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao, carregar_notificacoes
@@ -14,16 +15,33 @@ def carregar_tabela(grid, usuario_logado):
         for ocorrencia in obter_ocorrencias():
             id_, cliente, num_processo, data, status, conteudo, responsavel = ocorrencia
 
+            # Verificar se a variável 'data' é uma string e tentar formatar
+            if isinstance(data, str):
+                try:
+                    # Tentando formatar a data para o formato desejado (dd/mm/yyyy)
+                    data_formatada = datetime.strptime(data, "%Y-%m-%d").strftime("%d/%m/%Y")
+                except ValueError:
+                    # Se a data não for válida, pode colocar uma data padrão ou exibir a string original
+                    ui.notify(f"Erro ao formatar a data: '{data}' não corresponde ao formato esperado.", color="red")
+                    data_formatada = data  # Deixe a string como está
+            elif isinstance(data, datetime):
+                # Se for um objeto datetime, podemos formatar diretamente
+                data_formatada = data.strftime("%d/%m/%Y")
+            else:
+                # Caso a data não seja nem string nem datetime, tratamos como inválida
+                ui.notify(f"Data inválida: {data}", color="red")
+                data_formatada = "Data inválida"
+
             # Convertendo a ocorrência para dicionário (evita erro JSON serializable)
             dados_tabela.append({
                 "id": id_,
                 "cliente": cliente,
                 "num_processo": num_processo,
-                "data": data,
+                "data": data_formatada,  # Usando a data formatada para exibição
                 "status": status,
                 "conteudo": conteudo,
                 "responsavel": responsavel or "Responsável vazio",
-                "acoes": "Botão aqui"  # PlaceHolder (pois UI não pode ser passado para AgGrid)
+                "acoes": "Botão aqui"  # Placeholder (pois UI não pode ser passado para AgGrid)
             })
 
         # Atualiza a tabela com os dados convertidos corretamente

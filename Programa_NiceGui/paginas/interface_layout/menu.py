@@ -85,7 +85,7 @@ def ocorrencia_concluida():
     # Criação do dialog para exibir as ocorrências
     with ui.dialog() as dialog:
         with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
-            ui.label("Ocorrências Concluídas:").style("color: #40403e; font-weight: bold;").classes(
+            ui.label("Ocorrências concluídas").style("color: #40403e; font-weight: bold;").classes(
                 "text-2xl mx-auto font-bold mb-4")
 
             card_notificacoes.classes("q-pa-md")
@@ -99,7 +99,7 @@ def ocorrencia_concluida():
                 try:
                     query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                   FROM ocorrencias 
-                                  WHERE status = "Concluído";"""
+                                  WHERE status = "Concluída";"""
                     cursor.execute(query)
                     ocorrencias = cursor.fetchall()
 
@@ -111,7 +111,8 @@ def ocorrencia_concluida():
                     for ocorrencia in ocorrencias:
                         ocorrencia_id, cliente, num_processo, responsavel, data_ocorrencia, status, conteudo = ocorrencia
 
-                        # Exibe a notificação ou botão para ver mais detalhes
+                        # Exibe a notificação ou botão para ver mais
+                        # detalhes
                         ui.button(
                             f"{cliente} - {num_processo} - {responsavel}",
                             on_click=lambda id=ocorrencia_id: visualizar_notificacao(id)
@@ -138,19 +139,53 @@ def ocorrencia_execucao():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    try:
-        query = """SELECT cliente, num_processo, responsavel, data, status, conteudo 
-                   FROM ocorrencias 
-                   WHERE status = "Em execução";"""
+    # Criação do dialog para exibir as ocorrências
+    with ui.dialog() as dialog:
+        with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
+            ui.label("Ocorrências em execução").style("color: #40403e; font-weight: bold;").classes(
+                "text-2xl mx-auto font-bold mb-4")
 
-        cursor.execute(query)
-        ocorrencias = cursor.fetchall()
-        return ocorrencias if ocorrencias else None
+            card_notificacoes.classes("q-pa-md")
+            card_notificacoes.style(
+                "background-color: #d2e9dd; border-radius: 10px; overflow-y: auto; width: 600px; height: 500px;"
+            )
 
-    finally:
-        cursor.close()
-        conn.close()
+            with ui.column().classes("w-full") as column_notificacoes:
 
+                # Busca as ocorrências concluídas
+                try:
+                    query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
+                                      FROM ocorrencias 
+                                      WHERE status = "Em Execução";"""
+                    cursor.execute(query)
+                    ocorrencias = cursor.fetchall()
+
+                    if not ocorrencias:
+                        ui.notify("Nenhuma ocorrência em execução encontrada.", type="negative")
+                        return
+
+                    # Adiciona as ocorrências no dialog após a pesquisa
+                    for ocorrencia in ocorrencias:
+                        ocorrencia_id, cliente, num_processo, responsavel, data_ocorrencia, status, conteudo = ocorrencia
+
+                        # Exibe a notificação ou botão para ver mais
+                        # detalhes
+                        ui.button(
+                            f"{cliente} - {num_processo} - {responsavel}",
+                            on_click=lambda id=ocorrencia_id: visualizar_notificacao(id)
+                        ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
+                            .classes("q-pa-sm text-left full-width")
+
+                finally:
+                    cursor.close()
+                    conn.close()
+
+            ui.button("Fechar", on_click=dialog.close).style(
+                "color: white; font-weight: bold; background-color: #5a7c71 !important;"
+            ).classes("mx-auto q-mt-md")
+
+    # Abre o dialog com os dados
+    dialog.open()
 
 # ---------------------------------- FILTRA AS OCORRENCIAS: EM ESPERA --------------------------------
 
@@ -159,15 +194,105 @@ def ocorrencia_espera():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    try:
-        query = """SELECT cliente, num_processo, responsavel, data, status, conteudo 
-                   FROM ocorrencias 
-                   WHERE status = "Em espera";"""
+    # Criação do dialog para exibir as ocorrências
+    with ui.dialog() as dialog:
+        with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
+            ui.label("Ocorrências em espera").style("color: #40403e; font-weight: bold;").classes(
+                "text-2xl mx-auto font-bold mb-4")
 
-        cursor.execute(query)
-        ocorrencias = cursor.fetchall()
-        return ocorrencias if ocorrencias else None
+            card_notificacoes.classes("q-pa-md")
+            card_notificacoes.style(
+                "background-color: #d2e9dd; border-radius: 10px; overflow-y: auto; width: 600px; height: 500px;"
+            )
 
-    finally:
-        cursor.close()
-        conn.close()
+            with ui.column().classes("w-full") as column_notificacoes:
+
+                # Busca as ocorrências concluídas
+                try:
+                    query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
+                                      FROM ocorrencias 
+                                      WHERE status = "Em Espera";"""
+                    cursor.execute(query)
+                    ocorrencias = cursor.fetchall()
+
+                    if not ocorrencias:
+                        ui.notify("Nenhuma ocorrência em espera encontrada.", type="negative")
+                        return
+
+                    # Adiciona as ocorrências no dialog após a pesquisa
+                    for ocorrencia in ocorrencias:
+                        ocorrencia_id, cliente, num_processo, responsavel, data_ocorrencia, status, conteudo = ocorrencia
+
+                        # Exibe a notificação ou botão para ver mais
+                        # detalhes
+                        ui.button(
+                            f"{cliente} - {num_processo} - {responsavel}",
+                            on_click=lambda id=ocorrencia_id: visualizar_notificacao(id)
+                        ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
+                            .classes("q-pa-sm text-left full-width")
+
+                finally:
+                    cursor.close()
+                    conn.close()
+
+            ui.button("Fechar", on_click=dialog.close).style(
+                "color: white; font-weight: bold; background-color: #5a7c71 !important;"
+            ).classes("mx-auto q-mt-md")
+
+    # Abre o dialog com os dados
+    dialog.open()
+
+# ---------------------------------- FILTRA AS OCORRENCIAS: NAO ATRIBUIDAS --------------------------------
+
+def nao_atribuida():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Criação do dialog para exibir as ocorrências
+    with ui.dialog() as dialog:
+        with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
+            ui.label("Ocorrências não atribuídas").style("color: #40403e; font-weight: bold;").classes(
+                "text-2xl mx-auto font-bold mb-4")
+
+            card_notificacoes.classes("q-pa-md")
+            card_notificacoes.style(
+                "background-color: #d2e9dd; border-radius: 10px; overflow-y: auto; width: 600px; height: 500px;"
+            )
+
+            with ui.column().classes("w-full") as column_notificacoes:
+
+                # Busca as ocorrências concluídas
+                try:
+                    query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
+                                          FROM ocorrencias 
+                                          WHERE responsavel = NULL;"""
+
+                    cursor.execute(query)
+                    ocorrencias = cursor.fetchall()
+
+                    if not ocorrencias:
+                        ui.notify("Todas as ocorrênicas estão atribuídas.", type="negative")
+                        return
+
+                    # Adiciona as ocorrências no dialog após a pesquisa
+                    for ocorrencia in ocorrencias:
+                        ocorrencia_id, cliente, num_processo, responsavel, data_ocorrencia, status, conteudo = ocorrencia
+
+                        # Exibe a notificação ou botão para ver mais
+                        # detalhes
+                        ui.button(
+                            f"{cliente} - {num_processo} - {responsavel}",
+                            on_click=lambda id=ocorrencia_id: visualizar_notificacao(id)
+                        ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
+                            .classes("q-pa-sm text-left full-width")
+
+                finally:
+                    cursor.close()
+                    conn.close()
+
+            ui.button("Fechar", on_click=dialog.close).style(
+                "color: white; font-weight: bold; background-color: #5a7c71 !important;"
+            ).classes("mx-auto q-mt-md")
+
+    # Abre o dialog com os dados
+    dialog.open()

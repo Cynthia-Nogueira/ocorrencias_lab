@@ -1,7 +1,8 @@
 from nicegui import ui, app
 from fastapi.responses import RedirectResponse
 from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado
-from Programa_NiceGui.paginas.interface_layout.menu import carregar_notificacoes, exibir_notificacoes_menu, ocorrencia_execucao, ocorrencia_espera, ocorrencia_concluida
+from Programa_NiceGui.paginas.interface_layout.menu import (carregar_notificacoes, exibir_notificacoes_menu,
+                        ocorrencia_execucao, ocorrencia_espera, ocorrencia_concluida, nao_atribuida)
 
 
 #---------------------------------------------- INTERFACE DO MENU -----------------------------
@@ -41,7 +42,7 @@ def pag_layout():
         ui.button("Concluídas", icon='arrow_right', on_click=ocorrencia_concluida).props('flat')
 
         # Botão (nao atribuido)        SUBSTITUIR FUNCAO PELA CERTA (LISTA SEM RESPONSAVEL)
-        ui.button("Não Atribuídas", icon='arrow_right', on_click=ocorrencia_concluida).props('flat')
+        ui.button("Não Atribuídas", icon='arrow_right', on_click=nao_atribuida).props('flat')
 
         # Botão de logout no menu
         ui.button("Sair", icon="logout", on_click=logout).props('flat')
@@ -59,11 +60,14 @@ def pag_layout():
 
 
 # ------------------------------------- DESCONECTA DA PAGINA -----------------------------------------
+# essa abordagem nao esta dando certo, nem ui.open, nem ui.Response
 
 # Função para logout
 def logout():
     app.storage.user.clear()
-    ui.redirect('/login_page')
+    ui.notify("Você foi deslogado", color="green")
+    ui.page('/login')
+
 
 # ------------------------------------- RODA O APP (N FUNCIONA SEM) -----------------------------------------
 

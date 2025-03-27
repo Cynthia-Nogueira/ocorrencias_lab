@@ -35,8 +35,8 @@ def visualizar_notificacao(notificacao_id):
         ocorrencia_id, cliente, num_processo, data_ocorrencia, conteudo_ocorrencia = resultado
 
         # Criar o diálogo
-        with ui.dialog() as detalhe_dialog:
-            with ui.card().classes("w-96 mx-auto"):
+        with ui.dialog() as detalhe_dialog:   #coloquei cor, mas parece que nao funciona
+            with ui.card().style('background-colorr: #ebebeb !important;').classes("w-96 mx-auto"):
                 ui.label("Detalhes da Notificação").classes("text-lg font-bold mx-auto q-mb-sm")
 
                 # Exibir detalhes formatados
