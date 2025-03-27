@@ -1,10 +1,11 @@
 from nicegui import ui
 from nicegui.elements import grid
-from datetime import datetime
+from datetime import datetime, date
 import Programa_NiceGui.paginas.interface_layout.global_state as global_state
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection, obter_dados
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao, carregar_notificacoes
 from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import obter_ocorrencias, ultima_ocorrencia_id
+
 
 # --------------------------------------------------- CARREGA A TABELA ---------------------------------------
 
@@ -13,7 +14,7 @@ def carregar_tabela(grid, usuario_logado):
 
     try:
         for ocorrencia in obter_ocorrencias():
-            id_, cliente, num_processo, data, status, conteudo, responsavel = ocorrencia
+            id_, cliente, num_processo, responsavel, data, status, conteudo  = ocorrencia
 
             # Verificar se a variável 'data' é uma string e tentar formatar
             if isinstance(data, str):
@@ -24,7 +25,7 @@ def carregar_tabela(grid, usuario_logado):
                     # Se a data não for válida, pode colocar uma data padrão ou exibir a string original
                     ui.notify(f"Erro ao formatar a data: '{data}' não corresponde ao formato esperado.", color="red")
                     data_formatada = data  # Deixe a string como está
-            elif isinstance(data, datetime):
+            elif isinstance(data, date):
                 # Se for um objeto datetime, podemos formatar diretamente
                 data_formatada = data.strftime("%d/%m/%Y")
             else:

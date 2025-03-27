@@ -7,7 +7,7 @@ from Programa_NiceGui.paginas.banco_dados.db_conection import obter_dados
 from Programa_NiceGui.paginas.interface_layout.formulario import novo_formulario
 from Programa_NiceGui.paginas.notificacoes_servicos.tabela import carregar_tabela
 from nicegui.elements.aggrid import AgGrid
-
+#import debugpy
 
 # ----------------------------------------------- TABELA OCORRENCIA --------------------------------------------
 
