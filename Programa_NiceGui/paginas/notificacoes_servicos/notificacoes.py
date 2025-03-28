@@ -1,5 +1,6 @@
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.tabela import aceitar_ocorrencia
+from datetime import datetime, date
 from nicegui import ui, app
 
 # ----------------------------------- ABRE UMA CAIXA COM DETALHES DA MENSAGEM ------------------------------------
@@ -34,9 +35,14 @@ def visualizar_notificacao(notificacao_id):
 
         ocorrencia_id, cliente, num_processo, data_ocorrencia, conteudo_ocorrencia = resultado
 
+
+        # garante que data_ocorrencia é uma string formatada
+        data_formatada = datetime.strptime(str(data_ocorrencia), "%Y-%m-%d").strftime("%d/%m/%Y")
+
+
         # Criar o diálogo
-        with ui.dialog() as detalhe_dialog:   #coloquei cor, mas parece que nao funciona
-            with ui.card().style('background-colorr: #ebebeb !important;').classes("w-96 mx-auto"):
+        with ui.dialog() as detalhe_dialog:
+            with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
                 ui.label("Detalhes da Notificação").classes("text-lg font-bold mx-auto q-mb-sm")
 
                 # Exibir detalhes formatados
@@ -44,7 +50,7 @@ def visualizar_notificacao(notificacao_id):
                     for titulo, valor in [
                         ("Cliente", cliente),
                         ("Nº Processo", num_processo),
-                        ("Data", data_ocorrencia),
+                        ("Data", data_formatada),
                     ]:
                         with ui.row():
                             ui.label(f"{titulo}:").classes("font-bold")

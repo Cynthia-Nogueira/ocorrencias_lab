@@ -16,20 +16,17 @@ def carregar_tabela(grid, usuario_logado):
         for ocorrencia in obter_ocorrencias():
             id_, cliente, num_processo, responsavel, data, status, conteudo  = ocorrencia
 
-            # Verificar se a variável 'data' é uma string e tentar formatar
+            # Verificar se a variável 'data' é uma string
             if isinstance(data, str):
                 try:
-                    # Tentando formatar a data para o formato desejado (dd/mm/yyyy)
                     data_formatada = datetime.strptime(data, "%Y-%m-%d").strftime("%d/%m/%Y")
                 except ValueError:
-                    # Se a data não for válida, pode colocar uma data padrão ou exibir a string original
                     ui.notify(f"Erro ao formatar a data: '{data}' não corresponde ao formato esperado.", color="red")
-                    data_formatada = data  # Deixe a string como está
+                    data_formatada = data
             elif isinstance(data, date):
-                # Se for um objeto datetime, podemos formatar diretamente
                 data_formatada = data.strftime("%d/%m/%Y")
             else:
-                # Caso a data não seja nem string nem datetime, tratamos como inválida
+                # se a data não for string nem datetime é tratada como invalida
                 ui.notify(f"Data inválida: {data}", color="red")
                 data_formatada = "Data inválida"
 
@@ -38,14 +35,14 @@ def carregar_tabela(grid, usuario_logado):
                 "id": id_,
                 "cliente": cliente,
                 "num_processo": num_processo,
-                "data": data_formatada,  # Usando a data formatada para exibição
+                "data": data_formatada,
                 "status": status,
                 "conteudo": conteudo,
                 "responsavel": responsavel or "Responsável vazio",
                 "acoes": "Botão aqui"  # Placeholder (pois UI não pode ser passado para AgGrid)
             })
 
-        # Atualiza a tabela com os dados convertidos corretamente
+        # Atualiza a tabela
         atualizar_tabela(grid, dados_tabela)
 
     except Exception as e:
