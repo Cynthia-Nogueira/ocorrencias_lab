@@ -26,6 +26,7 @@ def visualizar_notificacao(notificacao_id):
             JOIN ocorrencias o ON n.ocorrencia_id = o.id
             WHERE n.id = %s AND n.usuario_id = %s
         """
+
         cursor.execute(query, (notificacao_id, current_user_id))
         resultado = cursor.fetchone()
 
@@ -33,7 +34,7 @@ def visualizar_notificacao(notificacao_id):
             ui.notify("Erro: Detalhes não encontrados.", type="negative")
             return
 
-        ocorrencia_id, cliente, num_processo, data_ocorrencia, conteudo_ocorrencia = resultado
+        ocorrencia_id, cliente, num_processo, data_ocorrencia, conteudo_ocorrencia, *_ = resultado
 
 
         # garante que data_ocorrencia é uma string formatada
@@ -69,9 +70,10 @@ def visualizar_notificacao(notificacao_id):
                                       ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                     ui.button("Aceitar",
-                              on_click=lambda: aceitar_ocorrencia(ocorrencia_id, current_user_id, detalhe_dialog)
+                              on_click=lambda: mostrar_confirmacao(ocorrencia_id, current_user_id, detalhe_dialog)
                               ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                                       ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+
 
         detalhe_dialog.open()
 
@@ -79,8 +81,26 @@ def visualizar_notificacao(notificacao_id):
         cursor.close()
         conn.close()
 
+# --------------------------------------- CAIXA DE CONFIRMACAO --------------------------------
 
-def fechar_notificacao(detalhe_dialog):
-    detalhe_dialog.close()
+def mostrar_confirmacao(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
+    with ui.dialog() as confirm_dialog:
+        with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
+            ui.label("Tem certeza que deseja aceitar esta ocorrência?").classes(
+                "text-lg font-bold mx-auto q-mb-sm text-center")
+
+            with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
+                ui.button("Não", on_click=confirm_dialog.close).style(
+                    "color: white; font-weight: bold; background-color: #FF6347 !important;"
+                ).classes("text-white font-bold px-4 py-2 w-32 text-center")
+
+                ui.button("Sim", on_click=lambda: aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id,
+                      detalhe_dialog, confirm_dialog)).style("color: white; font-weight: bold; background-color: "
+                      "#008B8B !important;").classes("text-white font-bold px-4 py-2 w-32 text-center")
+
+        confirm_dialog.open()
 
 
+
+#def fechar_notificacao(detalhe_dialog):
+ #   detalhe_dialog.close()

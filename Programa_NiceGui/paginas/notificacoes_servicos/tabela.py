@@ -65,7 +65,7 @@ def atualizar_tabela(grid, dados_tabela):
 
 tabela_recarregada = False
 
-def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
+def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm_dialog):
     global tabela_recarregada
 
     conn = get_db_connection()
@@ -75,20 +75,24 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
         # Obtém informações do usuário que aceitou
         cursor.execute("SELECT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador WHERE id = %s", (ultima_usuario_id,))
         usuario = cursor.fetchone()
+
+
         if not usuario:
             ui.notify("Erro: Usuário não encontrado.", type="negative")
             return
 
-        nome_completo = usuario['nome_completo']  # Nome completo do usuário
+        nome_completo = usuario[0]
 
         # Obtém informações da ocorrência
-        cursor.execute("SELECT cliente, num_processo, status FROM ocorrencias WHERE id = %s", (ultima_ocorrencia_id,))
+        cursor.execute("SELECT cliente, num_processo, responsavel, status FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
         ocorrencia = cursor.fetchone()
+
         if not ocorrencia:
             ui.notify("Erro: Ocorrência não encontrada.", type="negative")
             return
 
-        cliente, num_processo, status = ocorrencia
+        #ocorrencia = ocorrencia[0]
+        cliente, num_processo, responsavel, status = ocorrencia
 
         # Atualiza o status da ocorrência para "Em execução" e atribui o responsável
         query = "UPDATE ocorrencias SET status = 'Em execução', responsavel = %s WHERE id = %s"
@@ -101,8 +105,9 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
 
         # Envia notificação para os demais usuários
         mensagem = f"{nome_completo} aceitou a ocorrência {num_processo} do cliente {cliente}."
+
         for usuario in outros_usuarios:
-            enviar_notificacao(usuario[0], mensagem)
+            enviar_notificacao(usuario[0], mensagem, ocorrencia_id)
 
         # Notifica o usuário que aceitou
         ui.notify("Ocorrência aceita com sucesso!", type="success")
@@ -117,7 +122,7 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
 
 
     except Exception as e:
-        ui.notify(f"Erro ao aceitar ocorrência: {str(e)}", type="negative")
+       ui.notify(f"Erro ao aceitar ocorrência: {str(e)}", type="negative")
 
     finally:
         cursor.close()
