@@ -118,11 +118,12 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         # Evitar o ciclo chamando carregar_tabela apenas uma vez
         if not tabela_recarregada:
             tabela_recarregada = True
-            carregar_tabela(global_state.grid, ultima_usuario_id)  # Carrega a tabela
+            carregar_tabela(global_state.grid, ultima_usuario_id)
 
 
     except Exception as e:
        ui.notify(f"Erro ao aceitar ocorrência: {str(e)}", type="negative")
+
 
     finally:
         cursor.close()

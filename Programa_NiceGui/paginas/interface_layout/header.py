@@ -1,5 +1,4 @@
 from nicegui import ui, app
-from fastapi.responses import RedirectResponse
 from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado
 from Programa_NiceGui.paginas.interface_layout.menu import (carregar_notificacoes, exibir_notificacoes_menu,
                         ocorrencia_execucao, ocorrencia_espera, ocorrencia_concluida, nao_atribuida)

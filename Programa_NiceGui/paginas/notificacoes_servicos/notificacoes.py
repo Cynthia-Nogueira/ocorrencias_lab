@@ -7,13 +7,10 @@ from nicegui import ui, app
 
 
 def visualizar_notificacao(notificacao_id):
-
-    #Busca e exibe os detalhes da notificação em um diálogo.
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        # Obtém o ID do usuário autenticado
         current_user_id = app.storage.user.get("userid", None)
         if current_user_id is None:
             ui.notify("Erro: Usuário não autenticado.", type="negative")

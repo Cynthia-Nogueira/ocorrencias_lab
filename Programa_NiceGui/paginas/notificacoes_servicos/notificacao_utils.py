@@ -19,7 +19,7 @@ def carregar_notificacoes(usuario_id):
         notificacoes_nao_lidas = 0
 
         for notificacao in notificacoes_db:
-            id, mensagem, data_notificacao, lida = notificacao
+            id, mensagem, data_notificacao, lida, ocorrencia_id  = notificacao
             if not lida:
                 notificacoes_nao_lidas += 1
             dados_tabela.append({

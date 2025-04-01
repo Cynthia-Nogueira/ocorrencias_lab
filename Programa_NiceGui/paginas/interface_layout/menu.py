@@ -36,7 +36,6 @@ def carregar_notificacoes(usuario_id):
         conn.close()
 
 
-
 # --------------------------------- EXIBE AS NOTIFICACOES NO MENU ---------------------------
 
 def exibir_notificacoes_menu():
@@ -109,10 +108,16 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                     WHERE {condicao_extra};"""
                         params = ()
                     else:
-                        query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
-                                   FROM ocorrencias 
-                                   WHERE status = %s;"""
-                        params = (status,)
+                        if status is None:
+                            query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
+                                           FROM ocorrencias 
+                                           WHERE status IS NULL;"""
+                            params = ()
+                        else:
+                            query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
+                                           FROM ocorrencias 
+                                           WHERE status = %s;"""
+                            params = (status,)
 
                     cursor.execute(query, params)
                     ocorrencias = cursor.fetchall()
@@ -125,9 +130,10 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                     for ocorrencia in ocorrencias:
                         ocorrencia_id, cliente, num_processo, responsavel, data_ocorrencia, status, conteudo = ocorrencia
 
+                        # Passar o ID da ocorrência de maneira correta dentro do lambda
                         ui.button(
                             f"{cliente} - {num_processo} - {responsavel or 'Não Atribuído'}",
-                            on_click=lambda id=ocorrencia_id: visualizar_notificacao(id)
+                            on_click=lambda id=ocorrencia_id: visualizar_notificacao(id)  # Aqui o ID é passado corretamente
                         ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
                             .classes("q-pa-sm text-left full-width")
 
@@ -140,6 +146,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
             ).classes("mx-auto q-mt-md")
 
     dialog.open()
+
 
 # Funções específicas chamando a função genérica
 
