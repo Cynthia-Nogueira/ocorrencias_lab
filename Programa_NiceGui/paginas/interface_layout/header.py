@@ -40,8 +40,11 @@ def pag_layout():
         # Botão (concluído)
         ui.button("Concluídas", icon='arrow_right', on_click=ocorrencia_concluida).props('flat')
 
-        # Botão (nao atribuido)        SUBSTITUIR FUNCAO PELA CERTA (LISTA SEM RESPONSAVEL)
+        # Botão (nao atribuido)
         ui.button("Não Atribuídas", icon='arrow_right', on_click=nao_atribuida).props('flat')
+
+        # Botão (aceitas)
+        ui.button("Aceitas", icon='arrow_right', on_click=lambda: ui.navigate.to(f"/page_user")).props('flat')
 
         # Botão de logout no menu
         ui.button("Sair", icon="logout", on_click=logout).props('flat')

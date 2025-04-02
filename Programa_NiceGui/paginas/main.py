@@ -6,6 +6,8 @@ from Programa_NiceGui.paginas.interface_layout.auth import login_page, registro_
 from flask import Flask, request, jsonify
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.header import pag_layout
+from Programa_NiceGui.paginas.interface_layout.page_user import carregar_ocorrencias
+
 
 # ---------------------------------------------- Configuração das Rotas --------------------------------------------
 
@@ -25,6 +27,7 @@ def atualizar_status():
         cursor.close()
         conn.close()
         return jsonify({"sucesso": True})
+
     except Exception as e:
         return jsonify({"sucesso": False, "mensagem": str(e)})
 
@@ -52,6 +55,11 @@ def redefinir_senha():
 @ui.page("/recuperacao_senha")
 def recuperacao_senha():
     recuperar_senha.recuperar_senha_page()
+
+@ui.page("/page_user")
+def page_user():
+    pag_layout()
+    carregar_ocorrencias()
 
 
 # ------------------------------------------------ Inicializa o NiceGUI ---------------------------------------------
