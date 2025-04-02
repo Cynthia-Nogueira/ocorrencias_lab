@@ -76,7 +76,6 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         cursor.execute("SELECT CONCAT(nome, ' ', apelido) AS nome_completo FROM utilizador WHERE id = %s", (ultima_usuario_id,))
         usuario = cursor.fetchone()
 
-
         if not usuario:
             ui.notify("Erro: Usuário não encontrado.", type="negative")
             return
@@ -86,6 +85,7 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         # Obtém informações da ocorrência
         cursor.execute("SELECT cliente, num_processo, responsavel, status FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
         ocorrencia = cursor.fetchone()
+
 
         if not ocorrencia:
             ui.notify("Erro: Ocorrência não encontrada.", type="negative")
@@ -103,11 +103,13 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         cursor.execute("SELECT id FROM utilizador WHERE id != %s", (ultima_usuario_id,))
         outros_usuarios = cursor.fetchall()
 
+
         # Envia notificação para os demais usuários
         mensagem = f"{nome_completo} aceitou a ocorrência {num_processo} do cliente {cliente}."
 
         for usuario in outros_usuarios:
             enviar_notificacao(usuario[0], mensagem, ocorrencia_id)
+
 
         # Notifica o usuário que aceitou
         ui.notify("Ocorrência aceita com sucesso!", type="success")

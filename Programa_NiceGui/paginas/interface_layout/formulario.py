@@ -101,13 +101,13 @@ def novo_formulario():
 
                 for user in lista_user:
                     if user['id'] != current_user_id:
-                        enviar_notificacao(user['id'], mensagem_notificacao, ultima_ocorrencia_id)
+                        enviar_notificacao(user['id'], mensagem_notificacao, ultima_ocorrencia_id())
 
                 # Limpa os campos do formulário
                 cliente.set_value("")
                 num_processo.set_value("")
                 date_input.set_value(
-                    date.today().strftime("%d/%m/%Y"))  # Mostra a data no formato correto para o usuário
+                    date.today().strftime("%d/%m/%Y"))  # MOSTRA DATA FORMATADA
                 conteudo.set_value("")
                 status.set_value("Em espera")
 
