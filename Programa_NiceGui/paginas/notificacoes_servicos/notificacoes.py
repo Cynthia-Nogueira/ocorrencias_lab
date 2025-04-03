@@ -7,6 +7,7 @@ from nicegui import ui, app
 
 
 def visualizar_notificacao(notificacao_id):
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -27,9 +28,16 @@ def visualizar_notificacao(notificacao_id):
         cursor.execute(query, (notificacao_id, current_user_id))
         resultado = cursor.fetchone()
 
+
         if not resultado:
             ui.notify("Erro: Detalhes não encontrados.", type="negative")
+            print(
+                f"Erro: Nenhuma ocorrência encontrada para notificacao_id={notificacao_id} e usuario_id={current_user_id}")
             return
+
+        #  if not resultado:
+       #     ui.notify("Erro: Detalhes não encontrados.", type="negative")
+        #    return
 
         ocorrencia_id, cliente, num_processo, data_ocorrencia, conteudo_ocorrencia, *_ = resultado
 

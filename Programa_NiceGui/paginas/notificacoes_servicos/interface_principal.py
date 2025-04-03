@@ -78,7 +78,7 @@ def main_page():
                         " background-color: #008B8B !important;").classes("btn-secondary w-48")
 
     div = ui.element('div').style("height: 100%")
-    div._props['id'] = 'myGrid'  # Adicionando ID manualmente   (apagar???)
+    div._props['id'] = 'myGrid'
 
     carregar_tabela(grid, usuario_logado)
 

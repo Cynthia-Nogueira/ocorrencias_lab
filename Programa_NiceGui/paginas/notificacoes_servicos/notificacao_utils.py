@@ -6,7 +6,7 @@ from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import ultima_oc
 # -------------------------------- CARREGA TODAS AS NOTIFICACOES --------------------------
 
 
-def carregar_notificacoes(usuario_id):
+def carregar_notificacoes(usuario_id: object) -> object:
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -50,6 +50,7 @@ def enviar_notificacao(usuario_id, mensagem, ocorrencia_id):
         cursor.execute(query, (usuario_id, mensagem, ocorrencia_id))
         conn.commit()
 
+
     except Exception as e:
         ui.notify(f"Erro ao enviar notificação: {str(e)}", type="negative")
 
@@ -87,4 +88,26 @@ def add_notificacao(usuario_id, mensagem):
         "lida": False
     })
 
+
+# ---------------------------------- CAPTURA OS DETALHES DAS NOTIFICACAOES -------------------------------
+
+def criar_detalhes_ocorrencia(notificacao_id, ocorrencia_id, conteudo, data_criacao):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        query = """
+            INSERT INTO detalhes_ocorrencias (notificacao_id, ocorrencia_id, conteudo, data_criacao)
+            VALUES (%s, %s, %s, NOW())
+        """
+        cursor.execute(query, (notificacao_id, ocorrencia_id, conteudo, data_criacao))
+        conn.commit()
+
+        print(f"Detalhes da ocorrência para a notificação {notificacao_id} registrados com sucesso!")
+    except Exception as e:
+        print(f"Erro ao registrar detalhes da ocorrência: {e}")
+    finally:
+        cursor.close()
+        conn.close()
 

@@ -62,7 +62,9 @@ def pag_layout():
 
 
 # ------------------------------------- DESCONECTA DA PAGINA -----------------------------------------
+
 # essa abordagem nao esta dando certo, nem ui.open, nem ui.Response
+# fazer rota
 
 # Função para logout
 def logout():

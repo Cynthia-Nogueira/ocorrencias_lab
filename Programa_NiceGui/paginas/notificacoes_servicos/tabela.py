@@ -86,30 +86,33 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         cursor.execute("SELECT cliente, num_processo, responsavel, status FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
         ocorrencia = cursor.fetchone()
 
-
         if not ocorrencia:
             ui.notify("Erro: Ocorrência não encontrada.", type="negative")
             return
 
-        #ocorrencia = ocorrencia[0]
+        # Dados da ocorrência
         cliente, num_processo, responsavel, status = ocorrencia
 
         # Atualiza o status da ocorrência para "Em execução" e atribui o responsável
-        query = "UPDATE ocorrencias SET status = 'Em execução', responsavel = %s WHERE id = %s"
-        cursor.execute(query, (nome_completo, ocorrencia_id))
+        query = """
+            UPDATE ocorrencias 
+            SET status = 'Em execução', 
+                responsavel = %s, 
+                responsavel_id = %s 
+            WHERE id = %s
+        """
+        cursor.execute(query, (nome_completo, ultima_usuario_id, ocorrencia_id))
         conn.commit()
 
         # Busca todos os usuários, menos quem aceitou
         cursor.execute("SELECT id FROM utilizador WHERE id != %s", (ultima_usuario_id,))
         outros_usuarios = cursor.fetchall()
 
-
         # Envia notificação para os demais usuários
-        mensagem = f"{nome_completo} aceitou a ocorrência {num_processo} do cliente {cliente}."
+        mensagem = f"{nome_completo} aceitou a ocorrência ({num_processo}) do cliente {cliente}"
 
         for usuario in outros_usuarios:
             enviar_notificacao(usuario[0], mensagem, ocorrencia_id)
-
 
         # Notifica o usuário que aceitou
         ui.notify("Ocorrência aceita com sucesso!", type="success")
@@ -122,14 +125,15 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
             tabela_recarregada = True
             carregar_tabela(global_state.grid, ultima_usuario_id)
 
-
     except Exception as e:
-       ui.notify(f"Erro ao aceitar ocorrência: {str(e)}", type="negative")
-
+        # Melhora a exceção, para diagnóstico mais detalhado
+        ui.notify(f"Erro ao aceitar ocorrência: {str(e)}", type="negative")
+        print(f"Detalhes do erro: {e}")  # Imprime no console do servidor para depuração
 
     finally:
         cursor.close()
         conn.close()
 
     detalhe_dialog.close()
+
 

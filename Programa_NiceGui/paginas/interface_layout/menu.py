@@ -123,17 +123,16 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                     ocorrencias = cursor.fetchall()
 
                     if not ocorrencias:
-                        ui.notify(f"Nenhuma ocorrência encontrada para '{titulo}'.", type="negative")
+                        ui.notify(f"Nenhuma resultado encontrado para '{titulo}'.", type="negative")
                         return
 
                     # resultado da pesquisa
                     for ocorrencia in ocorrencias:
                         ocorrencia_id, cliente, num_processo, responsavel, data_ocorrencia, status, conteudo = ocorrencia
 
-                        # Passar o ID da ocorrência de maneira correta dentro do lambda
                         ui.button(
-                            f"{cliente} - {num_processo} - {responsavel or 'Não Atribuído'}",
-                            on_click=lambda id=ocorrencia_id: visualizar_notificacao(id)  # Aqui o ID é passado corretamente
+                            f"{responsavel or 'Não Atribuído'}: cliente  {cliente} - processo ({num_processo})",
+                            on_click=lambda id=ocorrencia_id: visualizar_notificacao(id)
                         ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
                             .classes("q-pa-sm text-left full-width")
 
