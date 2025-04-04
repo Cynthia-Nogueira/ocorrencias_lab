@@ -14,7 +14,7 @@ def carregar_tabela(grid, usuario_logado):
 
     try:
         for ocorrencia in obter_ocorrencias():
-            id_, cliente, num_processo, responsavel, data, status, conteudo  = ocorrencia
+            id_, cliente, num_processo, responsavel, data, status, titulo, conteudo  = ocorrencia
 
             # Verificar se a variável 'data' é uma string
             if isinstance(data, str):
@@ -37,6 +37,7 @@ def carregar_tabela(grid, usuario_logado):
                 "num_processo": num_processo,
                 "data": data_formatada,
                 "status": status,
+                "titulo": titulo,
                 "conteudo": conteudo,
                 "responsavel": responsavel or "Responsável vazio",
                 "acoes": "Botão aqui"  # Placeholder (pois UI não pode ser passado para AgGrid)

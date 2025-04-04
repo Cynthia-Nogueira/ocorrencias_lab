@@ -54,6 +54,7 @@ def main_page():
             {"headerName": "Responsável", "field": "responsavel"},
             {"headerName": "Data", "field": "data"},
             {"headerName": "Status", "field": "status", "cellRenderer": "CustomButtonComponent"},
+            {"headerName": "Título", "field": "titulo"},
             {"headerName": "Conteúdo", "field": "conteudo"},
             {"headerName": "Ações", "field": "acoes", "cellRenderer": "htmlRenderer"},
         ],

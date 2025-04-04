@@ -1,4 +1,5 @@
 from nicegui import ui
+import traceback
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
 # ------------------------------- Atualiza a ocorrência no banco --------------------------------
@@ -42,10 +43,6 @@ def excluir_ocorrencia(id_):
         ui.notify("Ocorrência excluida com sucesso!", type="positive")
         return True
 
-    except Exception as e:
-        ui.notify(f"Erro ao excluir ocorrência: {e}", color="red")  # Notificação de erro
-        return False
-
     finally:
         cursor.close()
         conn.close()
@@ -78,6 +75,10 @@ def nova_ocorrencia(cliente, num_processo, data, status, conteudo, usuario_criad
         for usuario in usuarios:
             enviar_notificacao(usuario[0], mensagem, ocorrencia_id)
 
+    except Exception as e:
+        print("Ocorreu um erro ao salvar a ocorrência:")
+        print(traceback.format_exc())  # Exibe o traceback completo
+
     finally:
         cursor.close()
         conn.close()
@@ -85,8 +86,10 @@ def nova_ocorrencia(cliente, num_processo, data, status, conteudo, usuario_criad
 
 # ------------------------------------- SALVA FORMULÁRIO ----------------------------------------
 
-def salvar_ocorrencia(cliente, num_processo, data_formatada, status, conteudo):
+import traceback
 
+
+def salvar_ocorrencia(cliente, num_processo, data_formatada, status, titulo, conteudo):
     if len(conteudo) > 400:
         return "Erro: o campo não pode exceder 400 caracteres."
 
@@ -94,18 +97,25 @@ def salvar_ocorrencia(cliente, num_processo, data_formatada, status, conteudo):
     cursor = conn.cursor()
 
     try:
-        insert_stmt=("INSERT INTO ocorrencias "
-                       "(cliente, num_processo, data, responsavel, status, conteudo)"
-                       "VALUES (%s, %s, %s, NULL, %s, %s)"
+        insert_stmt = (
+            "INSERT INTO ocorrencias "
+            "(cliente, num_processo, data, status, titulo, conteudo)"
+            "VALUES (%s, %s, %s, %s, %s, %s)"
         )
-        #valores que vao entrar na tabela
-        cont = (cliente, num_processo, data_formatada, status, conteudo)
+        # valores que vão entrar na tabela
+        cont = (cliente, num_processo, data_formatada, status, titulo, conteudo)
         cursor.execute(insert_stmt, cont)
         conn.commit()
         return "Ocorrência salva com sucesso!", True
 
     except Exception as e:
-        return f"Erro ao salvar ocorrência: {e}", False
+        # Exibe o erro completo no terminal para depuração
+        print("Ocorreu um erro ao salvar a ocorrência:")
+        print(traceback.format_exc())  # Exibe o traceback completo
+
+        # Notificação de erro
+        ui.notify(f"Erro ao salvar ocorrência: {e}. Verifique os dados preenchidos.", color="red")
+        return False
 
     finally:
         cursor.close()
@@ -119,7 +129,7 @@ def obter_ocorrencias():
     cursor = conn.cursor()
 
     try:
-        query = "SELECT id, cliente, num_processo, responsavel, data, status, conteudo FROM ocorrencias"
+        query = "SELECT id, cliente, num_processo, responsavel, data, status, titulo, conteudo FROM ocorrencias"
         cursor.execute(query)
         ocorrencias = cursor.fetchall()
 
@@ -139,7 +149,7 @@ def formulario_edicao(id_):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM ocorrencias WHERE id = %s", (id_,))
+        cursor.execute("SELECT id, cliente, num_processo, data, titulo, conteudo, status FROM ocorrencias WHERE id = %s", (id_,))
         ocorrencia = cursor.fetchone()
     finally:
         if cursor:
@@ -148,7 +158,7 @@ def formulario_edicao(id_):
            conn.close()
 
     if ocorrencia:
-        id_, cliente, num_processo, data, conteudo, status = ocorrencia
+        id_, cliente, num_processo, data, titulo, conteudo, status = ocorrencia
 
         with ui.dialog() as dialog, ui.card():
             ui.label(f"Editar Ocorrência #{id_}").classes("text-2xl font-bold mb-4")
@@ -156,6 +166,7 @@ def formulario_edicao(id_):
             cliente_input = ui.input("Cliente", value=cliente).classes("w-full")
             num_processo_input = ui.input("Nº Processo", value=num_processo).classes("w-full")
             data_picker = ui.date(label="Data", value=data).classes("w-full")
+            titulo_input = ui.input("Título", value=conteudo).classes("w-full")
             conteudo_input = ui.textarea("Conteúdo", value=conteudo).classes("w-full")
             status_input = ui.select(["Em espera", "Em execução", "Concluído"], label="Status", value=status).classes(
                 "w-full")
@@ -164,7 +175,7 @@ def formulario_edicao(id_):
                 try:
                     # salva a ocorrencia no banco
                     update_ocorrencia(id_, cliente_input.value,
-                                      data_picker.value, conteudo_input.value,
+                                      data_picker.value, titulo_input.value, conteudo_input.value,
                                       status_input.value)
 
                     # ntificacao de sucesso
@@ -174,6 +185,7 @@ def formulario_edicao(id_):
                     cliente_input.set_value("")
                     num_processo_input.set_value("")
                     data_picker.set_value(None)
+                    titulo_input.set_value("")
                     conteudo_input.set_value("")
                     status_input.set_value(None)
 

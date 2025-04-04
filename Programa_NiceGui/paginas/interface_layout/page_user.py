@@ -1,4 +1,5 @@
 from nicegui import ui, app
+from datetime import datetime
 from nicegui.elements.aggrid import AgGrid
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
@@ -6,12 +7,11 @@ from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 # ------------------------------ BUSCA OCORRENCIAS ACEITAS ---------------------------
 
 def buscar_ocorrencias_aceitas(usuario_id):
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
     query = """
-    SELECT id, cliente, num_processo, status, conteudo, data
+    SELECT id, cliente, num_processo, data, responsavel, status, titulo, conteudo
     FROM ocorrencias
     WHERE responsavel_id = %s
     """
@@ -22,14 +22,14 @@ def buscar_ocorrencias_aceitas(usuario_id):
 
     return [{
         "id": o[0],
-        "cliente": o[1] if o[1] is not None else "Sem cliente",
-        "num_processo": o[2] if o[2] is not None else "Sem número",
-        "status": o[3] if o[3] is not None else "Desconhecido",
-        "conteudo": o[4] if o[4] is not None else "Sem conteúdo",
-        "data": o[5].strftime("%d/%m/%Y") if o[5] is not None else "Sem data"
-       # "acoes": o[6] if o[6 is not None else] "Sem ação"
-
-    } for o in ocorrencias]
+        "cliente": o[1] if o[1] else "Sem cliente",
+        "num_processo": o[2] if o[2] else "Sem número",
+        "data": o[3].strftime("%d/%m/%Y") if isinstance(o[3], datetime) else "Sem data",
+        "responsavel": o[4] if o[4] else "Desconhecido",
+        "status": o[5] if o[5] else "Desconhecido",
+        "titulo": o[6] if o[6] else "Sem título",
+        "conteudo": o[7] if o[7] else "Sem conteúdo"
+    } for o in ocorrencias] if ocorrencias else []
 
 
 # ---------------------------------- CARREGA AS OCORRENCIAS  -------------------------------
@@ -53,6 +53,17 @@ def carregar_ocorrencias_user():
         ui.label("Nenhuma ocorrência atribuída!").classes("text-red-500 text-lg")
         return
 
+        # Formatar a data para cada ocorrência
+    for o in ocorrencias:
+        # Verifica se o campo 'data' existe e não é None, e formata a data
+        if o["data"] == "Sem data":
+            o["data"] = "Data não informada"
+        else:
+            try:
+                o["data"] = datetime.strptime(o["data"], "%Y-%m-%d").strftime("%d/%m/%Y")
+            except ValueError:
+                o["data"] = "Data inválida"
+
     global grid
     grid = ui.aggrid({
         "columnDefs": [
@@ -60,6 +71,7 @@ def carregar_ocorrencias_user():
             {"headerName": "Cliente", "field": "cliente"},
             {"headerName": "Nº Processo", "field": "num_processo"},
             {"headerName": "Status", "field": "status", "cellRenderer": "CustomButtonComponent"},
+            {"headerName": "Título", "field": "titulo"},
             {"headerName": "Conteúdo", "field": "conteudo"},
             {"headerName": "Data", "field": "data"},
             {"headerName": "Ações", "field": "acoes", "cellRenderer": "htmlRenderer"}, # Placeholder (pois UI não pode ser passado para AgGrid)

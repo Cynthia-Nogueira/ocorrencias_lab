@@ -11,7 +11,7 @@ def novo_formulario():
     app.add_static_files('/static', '../static')
     ui.add_head_html('<script src="/static/js/scripts.js"></script>')
 
-    with ui.dialog() as dialog, ui.card().classes("w-4/5 h-[530px] mx-auto"):    #h600
+    with ui.dialog() as dialog, ui.card().classes("w-4/5 h-[600px] mx-auto"):    #h530
         ui.label("Nova Ocorrência").classes("text-2xl mx-auto font-bold mb-4")
 
         with ui.row().classes("w-full justify-between"):
@@ -35,7 +35,9 @@ def novo_formulario():
 
                 status = ui.input("Status", value="Em espera").props("readonly").classes("w-full")
 
-        conteudo = ui.textarea("Conteúdo da ocorrência").props("maxlength=400").classes("w-full mr-2 mr-2")
+        titulo = ui.input("Título").props("maxlength=400").style("background-color: transparent !important; "
+                                          "box-shadow: none !important;").classes("w-full mr-2")
+        conteudo = ui.textarea("Conteúdo da ocorrência").props("maxlength=400").classes("w-full mr-2")
         contador = ui.label("0/400 caracteres").classes("text-sm text-gray-500 mb-4")
 
         def atualizar_contador():
@@ -48,11 +50,10 @@ def novo_formulario():
                 contador.classes(replace="text-sm text-gray-500 mb-4")
 
         # chama a atualizacao
-
         # conteudo.on("input", lambda: atualizar_contador())
 
         conteudo.on("keydown", lambda: atualizar_contador())
-        conteudo.on("keyup", lambda: ())
+       # conteudo.on("keyup", lambda: ())
 
         atualizar_contador()
 
@@ -60,10 +61,15 @@ def novo_formulario():
         nome_user = obter_user_logado(current_user_id)
 
         def btn_salvar():
-            """ Salva a ocorrência e envia notificações para outros usuários """
+
+            #Salva a ocorrência e envia notificações para outros usuários
 
             if not conteudo.value.strip():  # Verifica se o campo está vazio
                 ui.notify("O campo 'Conteúdo da ocorrência' é obrigatório.", type="negative")
+                return
+
+            if not titulo.value.strip():  # Verifica se o campo está vazio
+                ui.notify("O campo 'Título' é obrigatório.", type="negative")
                 return
 
             # Converter a data para o formato correto para o banco de dados (YYYY-MM-DD)
@@ -74,11 +80,12 @@ def novo_formulario():
                 return
 
             # Agora, chamamos a função de salvar com a data formatada corretamente
+
             try:
                 msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, data_formatada,
-                                                 status.value, conteudo.value)
+                                                 status.value, titulo.value, conteudo.value)
             except Exception as e:
-                ui.notify(f"Erro ao salvar ocorrência: {e}", type="negative")
+                ui.notify(f"Erro ao salvar: {e}. Verifique os dados preenchidos.", type="negative")
                 return
 
             if sucesso:
@@ -106,8 +113,8 @@ def novo_formulario():
                 # Limpa os campos do formulário
                 cliente.set_value("")
                 num_processo.set_value("")
-                date_input.set_value(
-                    date.today().strftime("%d/%m/%Y"))  # MOSTRA DATA FORMATADA
+                date_input.set_value(date.today().strftime("%d/%m/%Y"))  # MOSTRA DATA FORMATADA
+                titulo.set_value("")
                 conteudo.set_value("")
                 status.set_value("Em espera")
 
@@ -115,6 +122,7 @@ def novo_formulario():
 
             else:
                 ui.notify(msg, type="negative")
+
 
         with ui.row().classes("mx-auto gap-x-8"):
             ui.button("Salvar", on_click=btn_salvar).style("color: white; font-weight: bold; "
