@@ -86,17 +86,13 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # dialog para exibir as ocorrências
     with ui.dialog() as dialog:
         with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
-            ui.label(titulo).style("color: #40403e; font-weight: bold;").classes(
-                "text-2xl mx-auto font-bold mb-4"
-            )
+            ui.label(titulo).style("color: #40403e; font-weight: bold;").classes("text-2xl mx-auto font-bold mb-4")
 
             card_notificacoes.classes("q-pa-md")
             card_notificacoes.style(
-                "background-color: #d2e9dd; border-radius: 10px; overflow-y: auto; width: 600px; height: 500px;"
-            )
+                "background-color: #d2e9dd; border-radius: 10px; overflow-y: auto; width: 600px; height: 500px;")
 
             with ui.column().classes("w-full") as column_notificacoes:
 
@@ -108,31 +104,74 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                     WHERE {condicao_extra};"""
                         params = ()
                     else:
-                        if status is None:
+                        if status == "Em Espera":
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
-                                           FROM ocorrencias 
-                                           WHERE status IS NULL;"""
+                                       FROM ocorrencias 
+                                       WHERE responsavel IS NOT NULL AND status = 'Em Espera';"""
+                            params = ()
+                        elif status == "Não Atribuída":
+                            query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
+                                       FROM ocorrencias 
+                                       WHERE responsavel IS NULL;"""
                             params = ()
                         else:
-                            query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
+                            if status is None:
+                                query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
+                                           FROM ocorrencias 
+                                           WHERE status IS NULL;"""
+                                params = ()
+                            else:
+                                query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                            FROM ocorrencias 
                                            WHERE status = %s;"""
-                            params = (status,)
+                                params = (status,)
 
                     cursor.execute(query, params)
                     ocorrencias = cursor.fetchall()
 
                     if not ocorrencias:
-                        ui.notify(f"Nenhuma resultado encontrado para '{titulo}'.", type="negative")
+                        ui.notify(f"Nenhum resultado encontrado para '{titulo}'.", type="negative")
                         return
 
-                    # resultado da pesquisa
-                    for ocorrencia in ocorrencias:
-                        ocorrencia_id, cliente, num_processo, responsavel, data_ocorrencia, status, conteudo = ocorrencia
+                    # Criar uma função para abrir o diálogo ao clicar em um botão
+                    def abrir_detalhes(ocorrencia):
+                        ocorrencia_id, cliente, num_processo, responsavel, data_ocorrencia, status, conteudo_ocorrencia = ocorrencia
 
+                        with ui.dialog() as detalhe_dialog:
+                            with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
+                                ui.label("Detalhes da Ocorrência").classes("text-lg font-bold mx-auto q-mb-sm")
+
+                                with ui.column():
+                                    for titulo, valor in [
+                                        ("Cliente", cliente),
+                                        ("Nº Processo", num_processo),
+                                        ("Data", data_ocorrencia),
+                                    ]:
+                                        with ui.row():
+                                            ui.label(f"{titulo}:").classes("font-bold")
+                                            ui.label(valor)
+
+                                    # Justificar o texto de detalhes
+                                    with ui.row():
+                                        ui.label("Detalhes:").classes("font-bold")
+                                    with ui.row():
+                                        ui.label(conteudo_ocorrencia).classes("text-justify").style(
+                                            "text-align: justify;")
+
+                                # Botões centralizados
+                                with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
+                                    ui.button("Fechar", on_click=detalhe_dialog.close
+                                              ).style(
+                                        "color: white; font-weight: bold; background-color: #008B8B !important;") \
+                                        .classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
+
+                            detalhe_dialog.open()
+
+                    # Criar botões para cada ocorrência
+                    for ocorrencia in ocorrencias:
                         ui.button(
-                            f"{responsavel or 'Não Atribuído'}: cliente  {cliente} - processo ({num_processo})",
-                            on_click=lambda id=ocorrencia_id: visualizar_notificacao(id)
+                            f"{ocorrencia[3] or 'Não Atribuído'}: Cliente {ocorrencia[1]} - Processo ({ocorrencia[2]})",
+                            on_click=lambda o=ocorrencia: abrir_detalhes(o)
                         ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
                             .classes("q-pa-sm text-left full-width")
 
@@ -141,13 +180,12 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                     conn.close()
 
             ui.button("Fechar", on_click=dialog.close).style(
-                "color: white; font-weight: bold; background-color: #5a7c71 !important;"
-            ).classes("mx-auto q-mt-md")
+                "color: white; font-weight: bold; background-color: #5a7c71 !important;").classes("mx-auto q-mt-md")
 
     dialog.open()
 
 
-# Funções específicas chamando a função genérica
+# ---------------------------- Funções específicas chamando a função genérica -------------------------------------
 
 def ocorrencia_concluida():
     ocorrencias_filtradas("Concluída", "Ocorrências concluídas")

@@ -23,7 +23,6 @@ def status_renderer(params):
 
 # ------------------------------------------- CONFIGURA O GRID --------------------------------------
 
-
 def configurar_grid(novo_valor):
     global_state.grid = novo_valor  # Modifica a variável global
 

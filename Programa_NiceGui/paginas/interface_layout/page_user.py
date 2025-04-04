@@ -49,13 +49,26 @@ def carregar_ocorrencias_user():
 
     ocorrencias = buscar_ocorrencias_aceitas(current_user_id)
 
+    #renderiza a tabela
+
+    if not ocorrencias:
+        ocorrencias = [{
+            "id": "",
+            "cliente": "",
+            "num_processo": "",
+            "data": "",
+            "responsavel": "",
+            "status": "",
+            "titulo": "",
+            "conteudo": ""
+        }]
+
     if not ocorrencias:
         ui.label("Nenhuma ocorrência atribuída!").classes("text-red-500 text-lg")
         return
 
         # Formatar a data para cada ocorrência
     for o in ocorrencias:
-        # Verifica se o campo 'data' existe e não é None, e formata a data
         if o["data"] == "Sem data":
             o["data"] = "Data não informada"
         else:
@@ -77,10 +90,8 @@ def carregar_ocorrencias_user():
             {"headerName": "Ações", "field": "acoes", "cellRenderer": "htmlRenderer"}, # Placeholder (pois UI não pode ser passado para AgGrid)
         ],
         "rowData": ocorrencias,
-    }).classes("w-full h-[500px] mx-auto") \
-        .style(
-        "background: transparent; border: 5px solid rgba(255, 255, 255, 0.5); overflow-x: auto; max-width: 100%; min-width: 300px;"
-    )
+    }).classes("w-full h-[500px] mx-auto").style("background: transparent; border: 5px solid "
+              "rgba(255, 255, 255, 0.5); overflow-x: auto; max-width: 100%; min-width: 300px;")
 
     # botao auxiliar
     with ui.row().classes("mx-auto gap-x-10"):
@@ -88,12 +99,20 @@ def carregar_ocorrencias_user():
             "color: white; font-weight: bold;"
             " background-color: #008B8B !important;").classes("btn-secondary w-48")
 
+# ---------------------------------- ATUALIZA A TABELA OCORRENCIAS  -------------------------------
 
 def carregar_ocorrencia():
-    """Atualiza a tabela sem precisar recriar a interface"""
+    global grid  # está acessando o grid globalmente
+
     if grid:
         current_user_id = app.storage.user.get("userid", None)
         novas_ocorrencias = buscar_ocorrencias_aceitas(current_user_id)
+
+        grid.set_data(novas_ocorrencias)  # Atualizando a tabela com a nova lista de dados
+
+
+
+
 
 
 

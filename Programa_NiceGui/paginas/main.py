@@ -1,4 +1,4 @@
-from nicegui import ui
+from nicegui import ui, app
 from Programa_NiceGui.paginas.interface_layout.formulario import novo_formulario
 from Programa_NiceGui.paginas.notificacoes_servicos.interface_principal import main_page
 from Programa_NiceGui.paginas.notificacoes_servicos import recuperar_senha

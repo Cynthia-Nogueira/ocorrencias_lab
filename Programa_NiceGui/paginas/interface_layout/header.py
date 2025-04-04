@@ -50,9 +50,21 @@ def pag_layout():
         ui.button("Sair", icon="logout", on_click=logout).props('flat')
 
     # Cabeçalho (Header)
+
     with ui.header(elevated=True).style('background-color: #009696').classes('items-center justify-between'):
-        ui.label('Colocar logo à esquerda').style('color: white; font-size: 20px; font-weight: bold;')
-        #ui.button(on_click=lambda: right_drawer.toggle(), icon='menu').props('flat color=white')
+        with ui.column().classes("self-start ml-4 gap-0"):
+            ui.button('IEP', on_click=lambda: ui.navigate.to('/main')).props('flat').style("color: white !important; font-size:"
+                     "20px; background: transparent !important; border: none; padding: 0; margin: 0;")
+            ui.label("Instituto Electrotécnico Português").style("color: white; font-size: 12px; line-height: 1.2; margin-top: -5px;")
+
+
+            #with ui.header(elevated=True).style('background-color: #009696').classes('items-center justify-between'):
+     #   ui.button('IEP', on_click=lambda: ui.navigate.to('/main')).props('flat').style("color: white !important; font-size:"
+      #            " 20px; background: transparent !important; border: none; box-shadow: none;").classes("no-hover")
+
+        #ui.label('IEP').style('color: white; font-size: 20px; font-weight: bold;')
+
+
 
         # Ícone de menu e nome do usuário logado
         with ui.row().classes('items-center gap-x-4'):
@@ -60,18 +72,18 @@ def pag_layout():
             ui.button(on_click=lambda: right_drawer.toggle(), icon='menu').props('flat color=white')
 
 
-
 # ------------------------------------- DESCONECTA DA PAGINA -----------------------------------------
-
-# essa abordagem nao esta dando certo, nem ui.open, nem ui.Response
-# fazer rota
 
 # Função para logout
 def logout():
-    app.storage.user.clear()
-    ui.notify("Você foi deslogado", color="green")
-    ui.page('/login')
+    app.storage.user.clear() #remove dados da sessao
+    ui.run_javascript("window.location.replace('/');")
 
+# qdo subir o programa para um servidor interno, talvez precise ajustar a URL de redirecionamento
+
+# ui.run_javascript("window.location.replace('http://127.0.0.1:3305/');") HOST e PORTA do BD
+# ou
+# ui.run_javascript("window.location.replace('http://intranet.local/app/');")
 
 # ------------------------------------- RODA O APP (N FUNCIONA SEM) -----------------------------------------
 
