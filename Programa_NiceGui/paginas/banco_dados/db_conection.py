@@ -4,7 +4,7 @@ import mysql.connector
 # ------------------------------- CONECTA AO BANCO DE DADOS -------------------------------
 
 def get_db_connection():
-    """Estabelece e retorna uma conexão com o banco de dados."""
+    #Estabelece e retorna uma conexão com o banco de dados.
     return mysql.connector.connect(
         host="127.0.0.1",
         port=3305,

@@ -1,7 +1,8 @@
 from nicegui import ui, app
-from datetime import datetime
-from nicegui.elements.aggrid import AgGrid
+from datetime import datetime, timedelta
+#from nicegui.elements.aggrid import AgGrid
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
+from Programa_NiceGui.paginas.interface_layout.ocorrencias_vencidas import feriados_portugal, horas_uteis
 
 
 # ------------------------------ BUSCA OCORRENCIAS ACEITAS ---------------------------
@@ -10,27 +11,64 @@ def buscar_ocorrencias_aceitas(usuario_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    query = """
-    SELECT id, cliente, num_processo, data, responsavel, status, titulo, conteudo
-    FROM ocorrencias
-    WHERE responsavel_id = %s
-    """
+    try:
+        query = """
+        SELECT id, cliente, num_processo, data, responsavel, status, titulo, conteudo, data_aceite
+        FROM ocorrencias
+        WHERE responsavel_id = %s
+        """
 
-    cursor.execute(query, (usuario_id,))
-    ocorrencias = cursor.fetchall()
-    conn.close()
+        cursor.execute(query, (usuario_id,))
+        ocorrencias = cursor.fetchall()
 
-    return [{
-        "id": o[0],
-        "cliente": o[1] if o[1] else "Sem cliente",
-        "num_processo": o[2] if o[2] else "Sem número",
-        "data": o[3].strftime("%d/%m/%Y") if isinstance(o[3], datetime) else "Sem data",
-        "responsavel": o[4] if o[4] else "Desconhecido",
-        "status": o[5] if o[5] else "Desconhecido",
-        "titulo": o[6] if o[6] else "Sem título",
-        "conteudo": o[7] if o[7] else "Sem conteúdo"
-    } for o in ocorrencias] if ocorrencias else []
+        # Obter os feriados do ano atual
+        ano_atual = datetime.now().year
+        feriados = feriados_portugal(ano_atual)
 
+        resultado = []
+
+        for o in ocorrencias:
+            # verifica se a ocorrência foi aceita há mais de 48 horas
+            id_ocorrencia, cliente, num_processo, data, responsavel, status, titulo, conteudo, data_aceite = o
+
+            if data_aceite:
+                # converte para datetime
+                data_aceite = datetime.strptime(str(data_aceite), "%Y-%m-%d %H:%M:%S")
+                agora = datetime.now()
+
+                # Calcular as horas úteis passadas
+                horas_passadas = horas_uteis(data_aceite, agora, feriados)
+
+                # Se passaram mais de 48h, muda o status para "Não Atribuída"
+                if horas_passadas > 48 and status == "Em espera":
+                    # Atualiza o status para "Não Atribuída"
+                    update_query = """
+                    UPDATE ocorrencias
+                    SET status = 'Não Atribuída', responsavel_id = NULL, data_aceite = NULL
+                    WHERE id = %s
+                    """
+                    cursor.execute(update_query, (id_ocorrencia,))
+                    conn.commit()
+
+                    status = "Não Atribuída"
+
+            # Adiciona ao resultado final
+            resultado.append({
+                "id": id_ocorrencia,
+                "cliente": cliente if cliente else "Sem cliente",
+                "num_processo": num_processo if num_processo else "Sem número",
+                "data": data.strftime("%d/%m/%Y") if isinstance(data, datetime) else "Sem data",
+                "responsavel": responsavel if responsavel else "Responsável vázio",
+                "status": status if status else "Desconhecido",
+                "titulo": titulo if titulo else "Sem título",
+                "conteudo": conteudo if conteudo else "Sem conteúdo"
+            })
+
+        return resultado if resultado else []
+
+    finally:
+        cursor.close()
+        conn.close()
 
 # ---------------------------------- CARREGA AS OCORRENCIAS  -------------------------------
 

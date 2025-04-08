@@ -1,7 +1,8 @@
 from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado
 from Programa_NiceGui.paginas.interface_layout.menu import (carregar_notificacoes, exibir_notificacoes_menu,
-                        ocorrencia_execucao, ocorrencia_espera, ocorrencia_concluida, nao_atribuida)
+                                                            ocorrencia_execucao, ocorrencia_espera,
+                                                            ocorrencia_concluida, nao_atribuida, ocorrencia_devolvida)
 
 
 #---------------------------------------------- INTERFACE DO MENU -----------------------------
@@ -28,6 +29,9 @@ def pag_layout():
         else:
             ui.button('Notificações', icon='notifications', on_click=exibir_notificacoes_menu).props('flat')
 
+        # Botão (aceitas)
+        ui.button("Minhas Ocorrências", icon='star', on_click=lambda: ui.navigate.to(f"/page_user")).props('flat')
+
         #titulo
         ui.label("Ocorrências").props('flat').style("color: #5898D4; font-weight: bold; font-size: 18px;")
 
@@ -43,8 +47,8 @@ def pag_layout():
         # Botão (nao atribuido)
         ui.button("Não Atribuídas", icon='arrow_right', on_click=nao_atribuida).props('flat')
 
-        # Botão (aceitas)
-        ui.button("Aceitas", icon='arrow_right', on_click=lambda: ui.navigate.to(f"/page_user")).props('flat')
+        # Botão (devolvido)
+        ui.button("Devolvidas", icon='arrow_right', on_click=ocorrencia_devolvida).props('flat')
 
         # Botão de logout no menu
         ui.button("Sair", icon="logout", on_click=logout).props('flat')

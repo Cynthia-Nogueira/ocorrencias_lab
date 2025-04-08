@@ -99,10 +99,12 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
             UPDATE ocorrencias 
             SET status = 'Em execução', 
                 responsavel = %s, 
-                responsavel_id = %s 
+                responsavel_id = %s,
+                data_aceite = %s
             WHERE id = %s
         """
-        cursor.execute(query, (nome_completo, ultima_usuario_id, ocorrencia_id))
+        cursor.execute(query, (nome_completo, ultima_usuario_id, datetime.now(), ocorrencia_id))
+
         conn.commit()
 
         # Busca todos os usuários, menos quem aceitou
@@ -116,7 +118,7 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
             enviar_notificacao(usuario[0], mensagem, ocorrencia_id)
 
         # Notifica o usuário que aceitou
-        ui.notify("Ocorrência aceita com sucesso!", type="success")
+        ui.notify("Ocorrência aceita com sucesso!", color="green")
 
         # Atualiza a lista de notificações
         carregar_notificacoes(ultima_usuario_id)
@@ -127,9 +129,8 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
             carregar_tabela(global_state.grid, ultima_usuario_id)
 
     except Exception as e:
-        # Melhora a exceção, para diagnóstico mais detalhado
         ui.notify(f"Erro ao aceitar ocorrência: {str(e)}", type="negative")
-        print(f"Detalhes do erro: {e}")  # Imprime no console do servidor para depuração
+        print(f"Detalhes do erro: {e}")
 
     finally:
         cursor.close()

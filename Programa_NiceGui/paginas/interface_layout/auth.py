@@ -88,8 +88,8 @@ def registro_page():
                 ui.notify("As senhas não coincidem!", type="negative")
                 return
 
-            if not re.match(r"[^@]+@[^@]+\.[^@]+", email.value):
-                ui.notify("E-mail inválido!", type="negative")
+            if not re.match(r"^[\w\.-]+@iep\.pt$", email.value):
+                ui.notify("O e-mail deve terminar com @iep.pt", type="negative")
                 return
 
             conn = get_db_connection()

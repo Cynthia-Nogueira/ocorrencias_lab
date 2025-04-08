@@ -1,5 +1,4 @@
 from nicegui import ui, app
-#from functools import partial
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao
 
@@ -104,7 +103,13 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                     WHERE {condicao_extra};"""
                         params = ()
                     else:
-                        if status == "Em Espera":
+                        # Adicionando o caso de status "Devolvidos"
+                        if status == "Devolvidos":
+                            query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
+                                       FROM ocorrencias 
+                                       WHERE status = 'Devolvida';"""
+                            params = ()
+                        elif status == "Em Espera":
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                        FROM ocorrencias 
                                        WHERE responsavel IS NOT NULL AND status = 'Em Espera';"""
@@ -196,5 +201,9 @@ def ocorrencia_execucao():
 def ocorrencia_espera():
     ocorrencias_filtradas("Em Espera", "Ocorrências em espera")
 
+def ocorrencia_devolvida():
+    ocorrencias_filtradas("Devolvidos", "Ocorrências devolvidas")
+
 def nao_atribuida():
     ocorrencias_filtradas("", "Ocorrências não atribuídas", "responsavel IS NULL")
+

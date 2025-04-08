@@ -1,5 +1,4 @@
 from nicegui import ui
-import traceback
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
 # ------------------------------- Atualiza a ocorrência no banco --------------------------------
@@ -168,7 +167,7 @@ def formulario_edicao(id_):
             data_picker = ui.date(label="Data", value=data).classes("w-full")
             titulo_input = ui.input("Título", value=conteudo).classes("w-full")
             conteudo_input = ui.textarea("Conteúdo", value=conteudo).classes("w-full")
-            status_input = ui.select(["Em espera", "Em execução", "Concluído"], label="Status", value=status).classes(
+            status_input = ui.select(["Em espera", "Em execução", "Concluída", "Devolvida"], label="Status", value=status).classes(
                 "w-full")
 
             def btn_salvar():
