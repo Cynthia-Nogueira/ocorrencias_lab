@@ -106,6 +106,3 @@ def mostrar_confirmacao(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
         confirm_dialog.open()
 
 
-
-#def fechar_notificacao(detalhe_dialog):
- #   detalhe_dialog.close()

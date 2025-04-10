@@ -1,6 +1,7 @@
 from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
-from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao, mostrar_confirmacao
+
 
 # ------------------------------------------- LISTA AS NOTIFICACOES --------------------------------------
 
@@ -64,7 +65,6 @@ def exibir_notificacoes_menu():
                         ui.button(
                             mensagem,
                             on_click=lambda id=notificacao_id: visualizar_notificacao(id)
-                            # Passa o id no momento correto
                         ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
                             .classes("q-pa-sm text-left full-width")
 
@@ -96,14 +96,13 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
             with ui.column().classes("w-full") as column_notificacoes:
 
                 try:
-                    # monta a query
+                    # Monta a query
                     if condicao_extra:
                         query = f"""SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                     FROM ocorrencias 
                                     WHERE {condicao_extra};"""
                         params = ()
                     else:
-                        # Adicionando o caso de status "Devolvidos"
                         if status == "Devolvidos":
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                        FROM ocorrencias 
@@ -115,9 +114,10 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                        WHERE responsavel IS NOT NULL AND status = 'Em Espera';"""
                             params = ()
                         elif status == "Não Atribuída":
+                            # Aqui buscamos "Em Espera" com responsavel NULL
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                        FROM ocorrencias 
-                                       WHERE responsavel IS NULL;"""
+                                       WHERE responsavel IS NULL AND status = 'Em Espera';"""
                             params = ()
                         else:
                             if status is None:
@@ -138,7 +138,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                         ui.notify(f"Nenhum resultado encontrado para '{titulo}'.", type="negative")
                         return
 
-                    # Criar uma função para abrir o diálogo ao clicar em um botão
+                    # Função para abrir os detalhes da ocorrência
                     def abrir_detalhes(ocorrencia):
                         ocorrencia_id, cliente, num_processo, responsavel, data_ocorrencia, status, conteudo_ocorrencia = ocorrencia
 
@@ -169,6 +169,16 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                               ).style(
                                         "color: white; font-weight: bold; background-color: #008B8B !important;") \
                                         .classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
+
+                                    # Mostrar botão "Aceitar" se a ocorrência for "Devolvida" ou "Não Atribuída"
+                                    if status == "Devolvida" or responsavel is None:  # Verifica se é "Devolvida" ou "Não Atribuída"
+                                        ui.button("Aceitar",
+                                                  on_click=lambda o_id=ocorrencia_id,
+                                                                  u_id=app.storage.user.get("userid"):
+                                                  mostrar_confirmacao(o_id, u_id, detalhe_dialog)
+                                                  ).style(
+                                            "color: white; font-weight: bold; background-color: #008B8B !important;") \
+                                            .classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                             detalhe_dialog.open()
 
