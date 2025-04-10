@@ -1,4 +1,6 @@
+import traceback
 from nicegui import ui
+from datetime import datetime
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
 # ------------------------------- Atualiza a ocorrência no banco --------------------------------
@@ -85,9 +87,6 @@ def nova_ocorrencia(cliente, num_processo, data, status, conteudo, usuario_criad
 
 # ------------------------------------- SALVA FORMULÁRIO ----------------------------------------
 
-import traceback
-
-
 def salvar_ocorrencia(cliente, num_processo, data_formatada, status, titulo, conteudo):
     if len(conteudo) > 400:
         return "Erro: o campo não pode exceder 400 caracteres."
@@ -96,23 +95,33 @@ def salvar_ocorrencia(cliente, num_processo, data_formatada, status, titulo, con
     cursor = conn.cursor()
 
     try:
+        # data convertida para datetime com a hora atual
+        if isinstance(data_formatada, str):
+            data_formatada = datetime.strptime(data_formatada, "%Y-%m-%d")
+            data_formatada = datetime.combine(data_formatada, datetime.now().time())
+
+        # caso a data ja esteja formatada
+        elif isinstance(data_formatada, datetime):
+            if data_formatada.hour == 0 and data_formatada.minute == 0 and data_formatada.second == 0:
+                data_formatada = datetime.combine(data_formatada.date(), datetime.now().time())
+
+        # consulta de inserção
         insert_stmt = (
             "INSERT INTO ocorrencias "
             "(cliente, num_processo, data, status, titulo, conteudo)"
             "VALUES (%s, %s, %s, %s, %s, %s)"
         )
-        # valores que vão entrar na tabela
+        #valores da tabela
         cont = (cliente, num_processo, data_formatada, status, titulo, conteudo)
         cursor.execute(insert_stmt, cont)
         conn.commit()
         return "Ocorrência salva com sucesso!", True
 
     except Exception as e:
-        # Exibe o erro completo no terminal para depuração
+        # caso ocorra erro exibe o erro completo, para depurar
         print("Ocorreu um erro ao salvar a ocorrência:")
-        print(traceback.format_exc())  # Exibe o traceback completo
+        print(traceback.format_exc())
 
-        # Notificação de erro
         ui.notify(f"Erro ao salvar ocorrência: {e}. Verifique os dados preenchidos.", color="red")
         return False
 

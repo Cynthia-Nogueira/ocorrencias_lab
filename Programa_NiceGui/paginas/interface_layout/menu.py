@@ -100,39 +100,44 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                     if condicao_extra:
                         query = f"""SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                     FROM ocorrencias 
-                                    WHERE {condicao_extra};"""
+                                    WHERE {condicao_extra}
+                                    ORDER BY data DESC;"""  # Ordenando pela coluna `data` de forma decrescente
                         params = ()
 
                     else:
                         if status == "Devolvida":
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                        FROM ocorrencias 
-                                       WHERE status = 'Devolvida';"""
+                                       WHERE status = 'Devolvida'
+                                       ORDER BY data DESC;"""  # Ordenando pela coluna `data` de forma decrescente
                             params = ()
 
                         elif status == "Em Espera":
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                        FROM ocorrencias 
-                                       WHERE responsavel IS NOT NULL AND status = 'Em Espera';"""
+                                       WHERE responsavel IS NOT NULL AND status = 'Em Espera'
+                                       ORDER BY data DESC;"""  # Ordenando pela coluna `data` de forma decrescente
                             params = ()
 
                         elif status == "Não Atribuída":
-                            # Aqui buscamos "Em Espera" com responsavel NULL
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                        FROM ocorrencias 
-                                       WHERE responsavel IS NULL AND status = 'Não atribuída';"""
+                                       WHERE responsavel IS NULL AND status = 'Não atribuída'
+                                       ORDER BY data DESC;"""  # Ordenando pela coluna `data` de forma decrescente
                             params = ()
 
                         else:
                             if status is None:
                                 query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                            FROM ocorrencias 
-                                           WHERE status IS NULL;"""
+                                           WHERE status IS NULL
+                                           ORDER BY data DESC;"""  # Ordenando pela coluna `data` de forma decrescente
                                 params = ()
                             else:
                                 query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                            FROM ocorrencias 
-                                           WHERE status = %s;"""
+                                           WHERE status = %s
+                                           ORDER BY data DESC;"""  # Ordenando pela coluna `data` de forma decrescente
                                 params = (status,)
 
                     cursor.execute(query, params)
@@ -203,7 +208,6 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                 "color: white; font-weight: bold; background-color: #5a7c71 !important;").classes("mx-auto q-mt-md")
 
     dialog.open()
-
 
 # ---------------------------- Funções específicas chamando a função genérica -------------------------------------
 

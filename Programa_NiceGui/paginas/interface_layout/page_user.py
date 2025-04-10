@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 #from nicegui.elements.aggrid import AgGrid
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.ocorrencias_vencidas import feriados_portugal, horas_uteis
+from Programa_NiceGui.paginas.notificacoes_servicos.helper_notificacoes import formatar_data_para_interface
 
 
 # ------------------------------ BUSCA OCORRENCIAS ACEITAS ---------------------------
@@ -56,7 +57,7 @@ def buscar_ocorrencias_aceitas(usuario_id):
                 "id": id_ocorrencia,
                 "cliente": cliente if cliente else "Sem cliente",
                 "num_processo": num_processo if num_processo else "Sem número",
-                "data": data.strftime("%d/%m/%Y") if isinstance(data, datetime) else "Sem data",
+                "data": formatar_data_para_interface(data),
                 "responsavel": responsavel if responsavel else "Responsável vázio",
                 "status": status if status else "Desconhecido",
                 "titulo": titulo if titulo else "Sem título",

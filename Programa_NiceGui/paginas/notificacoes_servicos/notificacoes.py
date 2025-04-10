@@ -1,13 +1,11 @@
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.tabela import aceitar_ocorrencia
-from datetime import datetime, date
+from datetime import datetime
 from nicegui import ui, app
 
 # ----------------------------------- ABRE UMA CAIXA COM DETALHES DA MENSAGEM ------------------------------------
 
-
 def visualizar_notificacao(notificacao_id):
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -28,23 +26,17 @@ def visualizar_notificacao(notificacao_id):
         cursor.execute(query, (notificacao_id, current_user_id))
         resultado = cursor.fetchone()
 
-
         if not resultado:
             ui.notify("Erro: Detalhes não encontrados.", type="negative")
             print(
                 f"Erro: Nenhuma ocorrência encontrada para notificacao_id={notificacao_id} e usuario_id={current_user_id}")
             return
 
-        #  if not resultado:
-       #     ui.notify("Erro: Detalhes não encontrados.", type="negative")
-        #    return
-
+        # Desempacota os dados retornados
         ocorrencia_id, cliente, num_processo, data_ocorrencia, conteudo_ocorrencia, *_ = resultado
 
-
-        # garante que data_ocorrencia é uma string formatada
-        data_formatada = datetime.strptime(str(data_ocorrencia), "%Y-%m-%d").strftime("%d/%m/%Y")
-
+        # Mantém a hora no backend, mas converte apenas a data (ignorando a hora) para exibição
+        data_formatada = datetime.strptime(str(data_ocorrencia), "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y")
 
         # Criar o diálogo
         with ui.dialog() as detalhe_dialog:
@@ -56,7 +48,7 @@ def visualizar_notificacao(notificacao_id):
                     for titulo, valor in [
                         ("Cliente", cliente),
                         ("Nº Processo", num_processo),
-                        ("Data", data_formatada),
+                        ("Data", data_formatada),  # Apenas a data será exibida para o usuário
                     ]:
                         with ui.row():
                             ui.label(f"{titulo}:").classes("font-bold")
@@ -79,12 +71,12 @@ def visualizar_notificacao(notificacao_id):
                               ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                                       ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
-
         detalhe_dialog.open()
 
     finally:
         cursor.close()
         conn.close()
+
 
 # --------------------------------------- CAIXA DE CONFIRMACAO --------------------------------
 
