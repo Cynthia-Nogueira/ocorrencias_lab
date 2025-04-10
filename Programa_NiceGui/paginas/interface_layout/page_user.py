@@ -93,8 +93,8 @@ def carregar_ocorrencias_user():
             "id": "",
             "cliente": "",
             "num_processo": "",
-            "data": "",
             "responsavel": "",
+            "data": "",
             "status": "",
             "titulo": "",
             "conteudo": ""
@@ -104,15 +104,9 @@ def carregar_ocorrencias_user():
         ui.label("Nenhuma ocorrência atribuída!").classes("text-red-500 text-lg")
         return
 
-        # Formatar a data para cada ocorrência
     for o in ocorrencias:
         if o["data"] == "Sem data":
             o["data"] = "Data não informada"
-        else:
-            try:
-                o["data"] = datetime.strptime(o["data"], "%Y-%m-%d").strftime("%d/%m/%Y")
-            except ValueError:
-                o["data"] = "Data inválida"
 
     global grid
     grid = ui.aggrid({
@@ -120,10 +114,11 @@ def carregar_ocorrencias_user():
             {"headerName": "ID", "field": "id"},
             {"headerName": "Cliente", "field": "cliente"},
             {"headerName": "Nº Processo", "field": "num_processo"},
+            {"headerName": "Responsável", "field": "responsavel"},
+            {"headerName": "Data", "field": "data"},
             {"headerName": "Status", "field": "status", "cellRenderer": "CustomButtonComponent"},
             {"headerName": "Título", "field": "titulo"},
             {"headerName": "Conteúdo", "field": "conteudo"},
-            {"headerName": "Data", "field": "data"},
             {"headerName": "Ações", "field": "acoes", "cellRenderer": "htmlRenderer"}, # Placeholder (pois UI não pode ser passado para AgGrid)
         ],
         "rowData": ocorrencias,

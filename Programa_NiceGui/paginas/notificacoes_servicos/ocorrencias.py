@@ -128,7 +128,11 @@ def obter_ocorrencias():
     cursor = conn.cursor()
 
     try:
-        query = "SELECT id, cliente, num_processo, responsavel, data, status, titulo, conteudo FROM ocorrencias"
+        query = """
+        SELECT id, cliente, num_processo, responsavel, data, status, titulo, conteudo
+        FROM ocorrencias
+        WHERE status IN ('Devolvida', 'Não Atribuída', 'Em espera')
+        """
         cursor.execute(query)
         ocorrencias = cursor.fetchall()
 

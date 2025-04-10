@@ -102,23 +102,27 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                     FROM ocorrencias 
                                     WHERE {condicao_extra};"""
                         params = ()
+
                     else:
-                        if status == "Devolvidos":
+                        if status == "Devolvida":
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                        FROM ocorrencias 
                                        WHERE status = 'Devolvida';"""
                             params = ()
+
                         elif status == "Em Espera":
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                        FROM ocorrencias 
                                        WHERE responsavel IS NOT NULL AND status = 'Em Espera';"""
                             params = ()
+
                         elif status == "Não Atribuída":
                             # Aqui buscamos "Em Espera" com responsavel NULL
                             query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
                                        FROM ocorrencias 
-                                       WHERE responsavel IS NULL AND status = 'Em Espera';"""
+                                       WHERE responsavel IS NULL AND status = 'Não atribuída';"""
                             params = ()
+
                         else:
                             if status is None:
                                 query = """SELECT id, cliente, num_processo, responsavel, data, status, conteudo 
@@ -182,6 +186,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
                             detalhe_dialog.open()
 
+
                     # Criar botões para cada ocorrência
                     for ocorrencia in ocorrencias:
                         ui.button(
@@ -212,7 +217,7 @@ def ocorrencia_espera():
     ocorrencias_filtradas("Em Espera", "Ocorrências em espera")
 
 def ocorrencia_devolvida():
-    ocorrencias_filtradas("Devolvidos", "Ocorrências devolvidas")
+    ocorrencias_filtradas("Devolvida", "Ocorrências devolvidas")
 
 def nao_atribuida():
     ocorrencias_filtradas("", "Ocorrências não atribuídas", "responsavel IS NULL")

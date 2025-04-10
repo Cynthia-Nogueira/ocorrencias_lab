@@ -9,11 +9,11 @@ from Programa_NiceGui.paginas.notificacoes_servicos.tabela import carregar_tabel
 from nicegui.elements.aggrid import AgGrid
 #import debugpy
 
-# ----------------------------------------------- TABELA OCORRENCIA --------------------------------------------
+# ------------------------------------- TABELA OCORRENCIA  (SEM USO) ------------------------------------
 
 def status_renderer(params):
     #Renderiza um select editável dentro da célula do AG Grid
-    status_options = ["Em espera", "Em execução", "Concluído"]
+    status_options = ["Em espera", "Em execução", "Concluída", "Devolvida", "Não atribuída", "Cancelada"]
 
     # Criar um dropdown UI dentro da célula
     with ui.row():
@@ -38,11 +38,6 @@ def main_page():
 
     ui.label("Lista de Ocorrências").classes("text-4xl font-bold mb-4 mx-auto text-center")
 
-    #(alteracoes feitas)
-    #dados_banco = obter_dados()
-    # Converte cada Row para dicionário antes de usar no AgGrid
-    #dados_convertidos = [dict(row) for row in dados_banco]
-
     # Tabela de Ocorrências
     global grid
     grid = AgGrid({
@@ -62,9 +57,6 @@ def main_page():
         .style(
         "background: transparent; border: 5px solid rgba(255, 255, 255, 0.5); overflow-x: auto; max-width: 100%; min-width: 300px;")
 
-    #carregar_tabela(grid, usuario_logado)
-
-    #configurar_grid(grid)
 
     usuario_logado = app.storage.user.get("username", None) # Obtém o usuário da sessão
     carregar_tabela(grid, usuario_logado)  # Passa para a função de carregamento

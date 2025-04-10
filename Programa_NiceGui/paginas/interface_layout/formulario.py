@@ -33,7 +33,7 @@ def novo_formulario():
                         ui.icon('edit_calendar', color="#008B8B").on('click', menu.open).classes(
                             'cursor-pointer w-full')
 
-                status = ui.input("Status", value="Em espera").props("readonly").classes("w-full")
+                status = ui.input("Status", value="Não atribuída").props("readonly").classes("w-full")
 
         titulo = ui.input("Título").props("maxlength=400").style("background-color: transparent !important; "
                                           "box-shadow: none !important;").classes("w-full mr-2")
@@ -116,7 +116,7 @@ def novo_formulario():
                 date_input.set_value(date.today().strftime("%d/%m/%Y"))  # MOSTRA DATA FORMATADA
                 titulo.set_value("")
                 conteudo.set_value("")
-                status.set_value("Em espera")
+                status.set_value("Não atribuída")
 
                 atualizar_contador()
 
