@@ -56,7 +56,7 @@ def ocorrencias_expiradas():
 
 def inicia_verificacao():
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(ocorrencias_expiradas, 'interval', seconds=20)  # TROCAR O TEMPO PARA TESTAR, DEPOIS QUE TODOS OS BOTOES FUNCIONAR
+    scheduler.add_job(ocorrencias_expiradas, 'interval', hours=3)  # TROCAR O TEMPO PARA TESTAR, DEPOIS QUE TODOS OS BOTOES FUNCIONAR
     scheduler.start()
 
 # ---------------------------------------------- FERIADOS PORTUGAL -------------------------------------------------

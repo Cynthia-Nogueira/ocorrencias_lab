@@ -22,8 +22,7 @@ def buscar_ocorrencias_aceitas(usuario_id):
         ocorrencias = cursor.fetchall()
 
         # Obter os feriados do ano atual
-        ano_atual = datetime.now().year
-        feriados = feriados_portugal(ano_atual)
+        feriados = feriados_portugal()
 
         resultado = []
 
@@ -40,7 +39,7 @@ def buscar_ocorrencias_aceitas(usuario_id):
                 horas_passadas = horas_uteis(data_aceite, agora, feriados)
 
                 # Se passaram mais de 48h, muda o status para "Não Atribuída"
-                if horas_passadas > 48 and status == "Em espera":
+                if horas_passadas.total_seconds() / 3600 > 48 and status == "Em espera":
                     # Atualiza o status para "Não Atribuída"
                     update_query = """
                     UPDATE ocorrencias
