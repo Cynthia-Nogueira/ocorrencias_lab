@@ -5,6 +5,8 @@ from nicegui import ui, app
 
 # ----------------------------------- ABRE UMA CAIXA COM DETALHES DA MENSAGEM ------------------------------------
 
+from datetime import datetime
+
 def visualizar_notificacao(notificacao_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -17,7 +19,7 @@ def visualizar_notificacao(notificacao_id):
 
         # Consulta os detalhes da notificação
         query = """
-            SELECT o.id, o.cliente, o.num_processo, o.data, o.conteudo
+            SELECT o.id, o.cliente, o.num_processo, o.data, o.titulo, o.conteudo, o.responsavel_id
             FROM notificacoes n
             JOIN ocorrencias o ON n.ocorrencia_id = o.id
             WHERE n.id = %s AND n.usuario_id = %s
@@ -28,33 +30,34 @@ def visualizar_notificacao(notificacao_id):
 
         if not resultado:
             ui.notify("Erro: Detalhes não encontrados.", type="negative")
-            print(
-                f"Erro: Nenhuma ocorrência encontrada para notificacao_id={notificacao_id} e usuario_id={current_user_id}")
+            print(f"[ERRO] Nenhuma ocorrência encontrada (notificacao_id={notificacao_id}, usuario_id={current_user_id})")
             return
 
         # Desempacota os dados retornados
-        ocorrencia_id, cliente, num_processo, data_ocorrencia, conteudo_ocorrencia, *_ = resultado
+        ocorrencia_id, cliente, num_processo, data_ocorrencia, titulo_ocorrencia, conteudo_ocorrencia, responsavel_id = resultado
 
-        # Mantém a hora no backend, mas converte apenas a data (ignorando a hora) para exibição
-        data_formatada = datetime.strptime(str(data_ocorrencia), "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y")
+        # Formatar data (assume datetime, senão faz parse de string)
+        if isinstance(data_ocorrencia, str):
+            data_ocorrencia = datetime.strptime(data_ocorrencia, "%Y-%m-%d %H:%M:%S")
+        data_formatada = data_ocorrencia.strftime("%d/%m/%Y")
 
         # Criar o diálogo
         with ui.dialog() as detalhe_dialog:
             with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
                 ui.label("Detalhes da Notificação").classes("text-lg font-bold mx-auto q-mb-sm")
 
-                # Exibir detalhes formatados
                 with ui.column():
-                    for titulo, valor in [
+                    for title, valor in [
                         ("Cliente", cliente),
                         ("Nº Processo", num_processo),
-                        ("Data", data_formatada),  # Apenas a data será exibida para o usuário
+                        ("Data", data_formatada),
+                        ("Título", titulo_ocorrencia),  # Corrigido aqui!
                     ]:
                         with ui.row():
-                            ui.label(f"{titulo}:").classes("font-bold")
+                            ui.label(f"{title}:").classes("font-bold")
                             ui.label(valor)
 
-                    # Justificar o texto de detalhes
+                    # Justificar o texto
                     with ui.row():
                         ui.label("Detalhes:").classes("font-bold")
                     with ui.row():
@@ -66,10 +69,12 @@ def visualizar_notificacao(notificacao_id):
                               ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                                       ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
-                    ui.button("Aceitar",
-                              on_click=lambda: mostra_confirmacao(ocorrencia_id, current_user_id, detalhe_dialog)
-                              ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
-                                      ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+                    # Só mostra botão "Aceitar" se a ocorrência ainda não tiver responsável
+                    if responsavel_id is None:
+                        ui.button("Aceitar",
+                                  on_click=lambda: mostra_confirmacao(ocorrencia_id, current_user_id, detalhe_dialog)
+                                  ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
+                                          ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
         detalhe_dialog.open()
 
