@@ -11,7 +11,11 @@ def carregar_notificacoes(usuario_id: object) -> object:
     cursor = conn.cursor()
 
     try:
-        query = "SELECT id, mensagem, data_notificacao, lida, ocorrencia_id FROM notificacoes WHERE usuario_id = %s ORDER BY data_notificacao DESC"
+        query = ("SELECT id, mensagem, data_notificacao, lida, ocorrencia_id "
+                 "FROM notificacoes "
+                 "WHERE usuario_id = %s "
+                 "ORDER BY data_notificacao DESC")
+
         cursor.execute(query, (usuario_id,))
         notificacoes_db = cursor.fetchall()
 
@@ -61,7 +65,6 @@ def enviar_notificacao(usuario_id, mensagem, ocorrencia_id):
 
 # -------------------------------- ATUALIZA INTERFACE NOTIFICACOES --------------------------
 
-
 def atualiza_interface_notficacoes():
     global notificacoes
     with ui.column().classes("w-full"):
@@ -77,14 +80,14 @@ def atualiza_interface_notficacoes():
 
 
 
-# ---------------------------------- ADICIONA UMA NOCA NOTIFICACAO AO DICIONARIO -------------------------------
+# ---------------------------------- ADICIONA UMA NOTIFICACAO AO DICIONARIO -------------------------------
 
 def add_notificacao(usuario_id, mensagem):
-    enviar_notificacao(usuario_id, mensagem)  # Insere no banco
+    enviar_notificacao(usuario_id, mensagem)
     notificacoes.append({
-        "id": len(notificacoes) + 1,  # Pode ser ajustado para pegar do banco
+        "id": len(notificacoes) + 1,
         "mensagem": mensagem,
-        "data_notificacao": None,  # Pode ser ajustada para a data atual com datetime.
+        "data_notificacao": None,
         "lida": False
     })
 

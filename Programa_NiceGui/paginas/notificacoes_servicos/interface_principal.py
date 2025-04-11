@@ -59,8 +59,8 @@ def main_page():
         "background: transparent; border: 5px solid rgba(255, 255, 255, 0.5); overflow-x: auto; max-width: 100%; min-width: 300px;")
 
 
-    usuario_logado = app.storage.user.get("username", None) # Obtém o usuário da sessão
-    carregar_tabela(grid, usuario_logado)  # Passa para a função de carregamento
+    usuario_logado = app.storage.user.get("username", None) # pega o usuário da sessão
+    carregar_tabela(grid, usuario_logado)  # passa para a função de carregamento
 
 
     # botoes auxiliares

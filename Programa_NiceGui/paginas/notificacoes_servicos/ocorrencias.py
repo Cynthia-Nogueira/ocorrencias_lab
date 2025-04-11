@@ -141,6 +141,7 @@ def obter_ocorrencias():
         SELECT id, cliente, num_processo, responsavel, data, status, titulo, conteudo
         FROM ocorrencias
         WHERE status IN ('Devolvida', 'Não Atribuída', 'Em espera')
+        ORDER BY data DESC
         """
         cursor.execute(query)
         ocorrencias = cursor.fetchall()

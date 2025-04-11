@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.ocorrencias_vencidas import feriados_portugal, horas_uteis
 from Programa_NiceGui.paginas.notificacoes_servicos.helper_notificacoes import formatar_data_para_interface
+from Programa_NiceGui.paginas.notificacoes_servicos.tabela import atualizar_tabela
 
 
 # ------------------------------ BUSCA OCORRENCIAS ACEITAS ---------------------------
@@ -17,6 +18,7 @@ def buscar_ocorrencias_aceitas(usuario_id):
         SELECT id, cliente, num_processo, data, responsavel, status, titulo, conteudo, data_aceite
         FROM ocorrencias
         WHERE responsavel_id = %s
+        ORDER BY data_aceite DESC
         """
 
         cursor.execute(query, (usuario_id,))
@@ -78,18 +80,25 @@ def carregar_ocorrencias_user():
     ui.add_head_html('<script src="/static/customButtonComponent.js"></script>')
     ui.add_head_html('<script src="/static/main.js"></script>')
 
+    global grid
+
     ui.label("Ocorrências Atribuídas").classes("text-4xl font-bold mb-4 mx-auto text-center")
 
     current_user_id = app.storage.user.get("userid", None)
+
     if not current_user_id:
         ui.label("Erro: Usuário não encontrado.").classes("text-red-500 text-lg")
         return
 
-    ocorrencias = buscar_ocorrencias_aceitas(current_user_id)
+    ocorrencias_acete = buscar_ocorrencias_aceitas(current_user_id)
+    ocorrencias = ocorrencias_acete or []
+
+    for o in ocorrencias_acete:
+        if o["data"] == "Sem data":
+            o["data"] = "Data não informada"
 
     #renderiza a tabela
-
-    if not ocorrencias:
+    if not ocorrencias_acete:
         ocorrencias = [{
             "id": "",
             "cliente": "",
@@ -109,7 +118,6 @@ def carregar_ocorrencias_user():
         if o["data"] == "Sem data":
             o["data"] = "Data não informada"
 
-    global grid
     grid = ui.aggrid({
         "columnDefs": [
             {"headerName": "ID", "field": "id"},
@@ -126,11 +134,16 @@ def carregar_ocorrencias_user():
     }).classes("w-full h-[500px] mx-auto").style("background: transparent; border: 5px solid "
               "rgba(255, 255, 255, 0.5); overflow-x: auto; max-width: 100%; min-width: 300px;")
 
-    # botao auxiliar
+    atualizar_tabela(grid, ocorrencias_acete)
+
+    # Botão de atualizar
     with ui.row().classes("mx-auto gap-x-10"):
-        ui.button("Atualizar", on_click=lambda: carregar_ocorrencia()).style(
-            "color: white; font-weight: bold;"
-            " background-color: #008B8B !important;").classes("btn-secondary w-48")
+        ui.button("Atualizar",
+                  on_click=lambda: atualizar_tabela(grid, buscar_ocorrencias_aceitas(current_user_id))).style(
+            "color: white; font-weight: bold; background-color: #008B8B !important;"
+             ).classes("btn-secondary w-48")
+
+
 
 # ---------------------------------- ATUALIZA A TABELA OCORRENCIAS  -------------------------------
 

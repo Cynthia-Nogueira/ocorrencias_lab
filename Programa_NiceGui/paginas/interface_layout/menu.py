@@ -1,6 +1,6 @@
 from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
-from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao, mostrar_confirmacao
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao, mostra_confirmacao
 
 
 # ------------------------------------------- LISTA AS NOTIFICACOES --------------------------------------
@@ -180,11 +180,11 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                         .classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                                     # Mostrar botão "Aceitar" se a ocorrência for "Devolvida" ou "Não Atribuída"
-                                    if status == "Devolvida" or responsavel is None:  # Verifica se é "Devolvida" ou "Não Atribuída"
+                                    if status == "Devolvida" or responsavel is None:  # Verifica o status "Devolvida" ou "Não Atribuída"
                                         ui.button("Aceitar",
                                                   on_click=lambda o_id=ocorrencia_id,
-                                                                  u_id=app.storage.user.get("userid"):
-                                                  mostrar_confirmacao(o_id, u_id, detalhe_dialog)
+                                                  u_id=app.storage.user.get("userid"):
+                                                  mostra_confirmacao(o_id, u_id, detalhe_dialog)
                                                   ).style(
                                             "color: white; font-weight: bold; background-color: #008B8B !important;") \
                                             .classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")

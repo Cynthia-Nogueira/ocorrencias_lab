@@ -16,7 +16,7 @@ def carregar_tabela(grid, usuario_logado):
         for ocorrencia in obter_ocorrencias():
             id_, cliente, num_processo, responsavel, data, status, titulo, conteudo  = ocorrencia
 
-            # Verificar se a variável 'data' é uma string
+            # Verifica se a variável 'data' é uma string
             if isinstance(data, str):
                 try:
                     data_formatada = datetime.strptime(data, "%Y-%m-%d").strftime("%d/%m/%Y")
@@ -26,7 +26,7 @@ def carregar_tabela(grid, usuario_logado):
             elif isinstance(data, date):
                 data_formatada = data.strftime("%d/%m/%Y")
             else:
-                # se a data não for string nem datetime é tratada como invalida
+                # se a data não for string nem datetime trata o erro
                 ui.notify(f"Data inválida: {data}", color="red")
                 data_formatada = "Data inválida"
 
@@ -35,11 +35,11 @@ def carregar_tabela(grid, usuario_logado):
                 "id": id_,
                 "cliente": cliente,
                 "num_processo": num_processo,
+                "responsavel": responsavel or "Responsável vazio",
                 "data": data_formatada,
                 "status": status,
                 "titulo": titulo,
                 "conteudo": conteudo,
-                "responsavel": responsavel or "Responsável vazio",
                 "acoes": "Botão aqui"  # Placeholder (pois UI não pode ser passado para AgGrid)
             })
 

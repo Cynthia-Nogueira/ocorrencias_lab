@@ -67,7 +67,7 @@ def visualizar_notificacao(notificacao_id):
                                       ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                     ui.button("Aceitar",
-                              on_click=lambda: mostrar_confirmacao(ocorrencia_id, current_user_id, detalhe_dialog)
+                              on_click=lambda: mostra_confirmacao(ocorrencia_id, current_user_id, detalhe_dialog)
                               ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                                       ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
@@ -77,10 +77,9 @@ def visualizar_notificacao(notificacao_id):
         cursor.close()
         conn.close()
 
-
 # --------------------------------------- CAIXA DE CONFIRMACAO --------------------------------
 
-def mostrar_confirmacao(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
+def mostra_confirmacao(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
     with ui.dialog() as confirm_dialog:
         with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
             ui.label("Tem certeza que deseja aceitar esta ocorrência?").classes(
