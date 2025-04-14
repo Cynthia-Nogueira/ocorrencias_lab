@@ -57,7 +57,7 @@ def buscar_ocorrencias_aceitas(usuario_id):
                 "id": id_ocorrencia,
                 "cliente": cliente if cliente else "Sem cliente",
                 "num_processo": num_processo if num_processo else "Sem número",
-                "data": formatar_data_para_interface(data),
+                "data": formatar_data_para_interface(data_aceite),
                 "responsavel": responsavel if responsavel else "Responsável vázio",
                 "status": status if status else "Desconhecido",
                 "titulo": titulo if titulo else "Sem título",
@@ -146,13 +146,13 @@ def carregar_ocorrencias_user():
 # ---------------------------------- ATUALIZA A TABELA OCORRENCIAS  -------------------------------
 
 def carregar_ocorrencia():
-    global grid  # está acessando o grid globalmente
+    global grid  # acessa o grid globalmente
 
     if grid:
         current_user_id = app.storage.user.get("userid", None)
         novas_ocorrencias = buscar_ocorrencias_aceitas(current_user_id)
 
-        grid.set_data(novas_ocorrencias)  # Atualizando a tabela com a nova lista de dados
+        grid.set_data(novas_ocorrencias)  # atualiza a tabela
 
 
 

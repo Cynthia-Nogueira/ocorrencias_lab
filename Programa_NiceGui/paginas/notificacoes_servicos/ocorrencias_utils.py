@@ -1,11 +1,12 @@
-from nicegui import ui
+from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.page_user import carregar_ocorrencias_user
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import notifica_ocorrencia_devolvida
 
 
 #------------------------------------ DEVOLVE A OCORRENCIA DO USER ----------------------------
 
-def devolver_ocorrencia(ocorrencia_id, detalhe_dialog):
+def confirmar_devolucao(ocorrencia_id, detalhe_dialog):
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -20,32 +21,84 @@ def devolver_ocorrencia(ocorrencia_id, detalhe_dialog):
 
         ui.notify("Ocorrência devolvida com sucesso!", type="warning")
 
+        # notifica todos os usuários
+        nome_usuario = app.storage.user.get("username") or "Um usuário"
+        for user_id in app.storage.user_ids():
+            app.storage.user(user_id).notify(f"🔄 {nome_usuario} devolveu a ocorrência #{ocorrencia_id}")
+
+        # Fecha o diálogo de detalhes
         detalhe_dialog.close()
 
-        # Atualiza a lista principal
-        carregar_ocorrencias_user("Devolvida", "Ocorrências Devolvidas")
+        # Atualiza a lista do user
+        carregar_ocorrencias_user()
 
     finally:
         cursor.close()
         conn.close()
 
 
-# --------------------------------------- CONFIRMA A DEVOLUCAO --------------------------------------
+# ---------------------------------- ATUALIZA STATUS -------------------------------
+def atualiza_status(ocorrencia_id, novo_status):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        if novo_status == "Devolvida":
+            # Atualiza status e remove o responsável
+            cursor.execute("""
+                UPDATE ocorrencias
+                SET status = %s, responsavel_id = NULL
+                WHERE id = %s
+            """, (novo_status, ocorrencia_id))
+        else:
+            # Atualiza apenas o status
+            cursor.execute("""
+                UPDATE ocorrencias
+                SET status = %s
+                WHERE id = %s
+            """, (novo_status, ocorrencia_id))
+
+        conn.commit()
+
+        # Notificação para todos os usuários quando for devolvida
+        if novo_status == "Devolvida":
+            user_id = app.storage.user.get("userid")
+            nome_usuario = app.storage.user.get("username") or "Um usuário"
+
+            notifica_ocorrencia_devolvida(
+                f"🔄 {nome_usuario} (ID: {user_id}) devolveu a ocorrência #{ocorrencia_id}"
+            )
+
+        ui.notify(f"Status atualizado para {novo_status}.", type="positive")
+
+    except Exception as e:
+        ui.notify(f"Erro ao atualizar status: {e}", type="negative")
+    finally:
+        cursor.close()
+        conn.close()
 
 
-def confirma_devolucao(ocorrencia_id, detalhe_dialog):
 
-    with ui.dialog() as dialog_confirmacao:
-        with ui.card().classes("w-96 mx-auto q-pa-md").style("background-color: #fff3cd;"):
-            ui.label("⚠️ Tem certeza que deseja devolver essa ocorrência?").classes("text-md font-bold text-center")
+# --------------------------------- CONFIRMA A ALTERACAO PARA OS USERS --------------------------------
 
-            with ui.row().classes("justify-around mt-4"):
-                ui.button("Não", on_click=dialog_confirmacao.close)
+def confirmar_alteracao_status(ocorrencia_id, novo_status, detalhe_dialog):
+    with ui.dialog() as confirm_dialog:
+        with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
+            ui.label(f"Tem certeza que deseja alterar o status para '{novo_status}'?").classes(
+                "text-lg font-bold mx-auto q-mb-sm text-center")
 
-                ui.button("Sim", on_click=lambda:[devolver_ocorrencia(ocorrencia_id, detalhe_dialog),
-                                                            dialog_confirmacao.close()
-                                                            ]).style("background-color: #ff6b6b; color: white; font-weight: bold;")
+            with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
+                ui.button("Não", on_click=confirm_dialog.close).style(
+                    "color: white; font-weight: bold; background-color: #FF6347 !important;"
+                ).classes("text-white font-bold px-4 py-2 w-32 text-center")
 
-    dialog_confirmacao.open()
+                ui.button("Sim",
+                          on_click=lambda: [
+                              atualiza_status(ocorrencia_id, novo_status),
+                              confirm_dialog.close(),
+                              detalhe_dialog.close()
+                          ]).style(
+                    "color: white; font-weight: bold; background-color: #008B8B !important;"
+                ).classes("text-white font-bold px-4 py-2 w-32 text-center")
 
 
+    confirm_dialog.open()

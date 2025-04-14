@@ -29,26 +29,6 @@ async def atualizar_status(request: dict):
     except Exception as e:
         return {"sucesso": False, "mensagem": str(e)}
 
-"""
-@app.route('/atualizar_status', methods=['POST'])
-def atualizar_status():
-    dados = request.json
-    id_ = dados.get("id")
-    novo_status = dados.get("status")
-
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("UPDATE ocorrencias SET status = %s WHERE id = %s", (novo_status, id_))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return jsonify({"sucesso": True})
-
-    except Exception as e:
-        return jsonify({"sucesso": False, "mensagem": str(e)})
-        
-"""
 
 @ui.page("/")
 def index():

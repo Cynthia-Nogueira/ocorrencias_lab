@@ -101,4 +101,10 @@ def mostra_confirmacao(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
 
         confirm_dialog.open()
 
+# ---------------------------------- NOTIFICA OS USERS DA OCORRENCIA DEVOLVIDA ------------------------
+
+def notifica_ocorrencia_devolvida(mensagem: str):
+    for user_id in app.storage.user_id():
+        app.storage.user(user_id).notify(mensagem)
+
 

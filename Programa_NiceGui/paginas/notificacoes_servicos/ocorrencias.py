@@ -26,7 +26,7 @@ def update_ocorrencia(id, cliente, num_processo, data, status, conteudo):
 
 # ------------------------------------- Exclui ocorrência -----------------------------------------
 
-def excluir_ocorrencia(id_):
+def cancelar_ocorrencia(id_):
 
     # msg para confirmar exclusao
     confirmacao = ui.confirm(f"Tem certeza que deseja excluir esta ocorrência? Esta ação não pode ser desfeita.")
