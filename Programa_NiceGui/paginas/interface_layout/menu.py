@@ -1,16 +1,23 @@
 from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
+
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import carregar_notificacoes
+
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao, mostra_confirmacao
 
 
 # ------------------------------------------- LISTA AS NOTIFICACOES --------------------------------------
-
+"""
 def carregar_notificacoes(usuario_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        query = "SELECT id, mensagem, data_notificacao, lida, ocorrencia_id FROM notificacoes WHERE usuario_id = %s ORDER BY data_notificacao DESC"
+        query = ("SELECT id, mensagem, data_notificacao, lida, ocorrencia_id "
+                 "FROM notificacoes "
+                 "WHERE usuario_id = %s "
+                 "ORDER BY data_notificacao DESC")
+
         cursor.execute(query, (usuario_id,))
         notificacoes_db = cursor.fetchall()
 
@@ -35,6 +42,7 @@ def carregar_notificacoes(usuario_id):
         cursor.close()
         conn.close()
 
+"""
 
 # --------------------------------- EXIBE AS NOTIFICACOES NO MENU ---------------------------
 
@@ -151,6 +159,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
                     # Função para abrir os detalhes da ocorrência
                     def abrir_detalhes(ocorrencia):
+
                         ocorrencia_id, cliente, num_processo, responsavel, responsavel_id, data_ocorrencia, status, titulo, conteudo_ocorrencia = ocorrencia
 
                         with ui.dialog() as detalhe_dialog:

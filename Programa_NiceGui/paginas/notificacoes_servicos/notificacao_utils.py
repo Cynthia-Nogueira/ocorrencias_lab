@@ -5,7 +5,6 @@ from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import ultima_oc
 
 # -------------------------------- CARREGA TODAS AS NOTIFICACOES --------------------------
 
-
 def carregar_notificacoes(usuario_id: object) -> object:
     conn = get_db_connection()
     cursor = conn.cursor()

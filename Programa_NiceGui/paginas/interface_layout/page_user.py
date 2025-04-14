@@ -1,6 +1,5 @@
 from nicegui import ui, app
 from datetime import datetime
-#from nicegui.elements.aggrid import AgGrid
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.ocorrencias_vencidas import feriados_portugal, horas_uteis
 from Programa_NiceGui.paginas.notificacoes_servicos.helper_notificacoes import formatar_data_para_interface

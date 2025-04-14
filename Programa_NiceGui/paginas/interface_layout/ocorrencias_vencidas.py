@@ -5,10 +5,7 @@ from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
 #-------------------------------------------- VERIFICA OCORRENCIAS EXPIRADAS --------------------------------------------
 
-
-
 # FAZER TESTES PARA VER SE ESTA FUNCIONANDO
-
 
 def ocorrencias_expiradas():
     print("[SCHEDULER] Verificando ocorrências expiradas...")

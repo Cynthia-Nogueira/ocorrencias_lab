@@ -3,6 +3,7 @@ from nicegui import ui
 from datetime import datetime
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
+
 # ------------------------------- Atualiza a ocorrência no banco --------------------------------
 
 def update_ocorrencia(id, cliente, num_processo, data, status, conteudo):
@@ -255,3 +256,11 @@ def ultima_ocorrencia_id():
     finally:
         cursor.close()
         conn.close()
+
+# ----------------------------------- VOLTA OCORRENCIA DEVOLVIDA --------------------------------------
+
+
+
+
+
+
