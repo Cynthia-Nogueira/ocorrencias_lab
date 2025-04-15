@@ -1,11 +1,10 @@
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
 from Programa_NiceGui.paginas.notificacoes_servicos.tabela import aceitar_ocorrencia
 from datetime import datetime
 from nicegui import ui, app
 
 # ----------------------------------- ABRE UMA CAIXA COM DETALHES DA MENSAGEM ------------------------------------
-
-from datetime import datetime
 
 def visualizar_notificacao(notificacao_id):
     conn = get_db_connection()
@@ -43,7 +42,8 @@ def visualizar_notificacao(notificacao_id):
 
         # Criar o diálogo
         with ui.dialog() as detalhe_dialog:
-            with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
+            with ui.card().style("background-color: #ebebeb !important; border: 2px solid #008B8B; border-radius: 10px; "
+                                                "box-shadow: 0 0 10px #008B8B;").classes("w-96 mx-auto"):
                 ui.label("Detalhes da Notificação").classes("text-lg font-bold mx-auto q-mb-sm")
 
                 with ui.column():
@@ -103,8 +103,30 @@ def mostra_confirmacao(ocorrencia_id, ultima_usuario_id, detalhe_dialog):
 
 # ---------------------------------- NOTIFICA OS USERS DA OCORRENCIA DEVOLVIDA ------------------------
 
-def notifica_ocorrencia_devolvida(mensagem: str):
-    for user_id in app.storage.user_id():
-        app.storage.user(user_id).notify(mensagem)
+def notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT cliente, titulo FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
+        cliente, titulo = cursor.fetchone()
+
+        mensagem = f"🔄 {nome_usuario} devolveu a ocorrência do Cliente: {cliente} (Processo: {titulo})"
+
+        # Pegando users
+        cursor.execute("SELECT id FROM utilizador")
+        usuarios = cursor.fetchall()
+
+        for (usuario_id,) in usuarios:
+            enviar_notificacao(usuario_id, mensagem, ocorrencia_id)
+
+    except Exception as e:
+        ui.notify(f"Erro ao notificar devolução: {e}", type="negative")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
 
 

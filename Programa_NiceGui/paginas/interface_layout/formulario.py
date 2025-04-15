@@ -100,7 +100,7 @@ def novo_formulario():
 
                 # Criando a notificação formatada
                 mensagem_notificacao = (
-                    f"• Nova ocorrência registada por:\n"
+                    f"🟠 Nova ocorrência registada por:\n"
                     f"  {nome_user}\n"
                 )
 
@@ -113,7 +113,7 @@ def novo_formulario():
                 # Limpa os campos do formulário
                 cliente.set_value("")
                 num_processo.set_value("")
-                date_input.set_value(date.today().strftime("%d/%m/%Y"))  # MOSTRA DATA FORMATADA
+                date_input.set_value(date.today().strftime("%d/%m/%Y"))
                 titulo.set_value("")
                 conteudo.set_value("")
                 status.set_value("Não atribuída")

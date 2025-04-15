@@ -16,37 +16,38 @@ def exibir_notificacoes_menu():
 
     with ui.dialog() as dialog:
         with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
-            ui.label("Notificações:").style("color: #40403e; font-weight: bold;").classes(
-                "text-2xl mx-auto font-bold mb-4")
+            card_notificacoes.style("background-color: #008B8B ; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
 
-            card_notificacoes.classes("q-pa-md")
-            card_notificacoes.style(
-                "background-color: #d2e9dd; border-radius: 10px; overflow-y: auto;"
-                "width: 600px; height: 500px;"
-            )
+            # Título fixo no topo
+            with ui.row().classes("w-full justify-center items-center q-pa-sm").style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;"):
+                ui.label("Notificações").style("background-color: #008B8B; color: #fff8ff !important;").classes("text-2xl font-bold text-center")
 
-            with ui.column().classes("w-full"):
-                for notificacao in notificacoes:
-                    notificacao_id = notificacao["id"]
-                    mensagem = notificacao["mensagem"]
+            # Área scrollável com notificações
+            with ui.scroll_area().style("flex-grow: 1; overflow-y: auto; background-color: #ececf5;").classes("w-full q-px-md q-pt-sm"):
+                with ui.column().classes("w-full gap-2"):
+                    for notificacao in notificacoes:
+                        notificacao_id = notificacao["id"]
+                        mensagem = notificacao["mensagem"]
 
-                    if not notificacao["lida"]:
-                        ui.button(
-                            mensagem,
-                            on_click=lambda id=notificacao_id: visualizar_notificacao(id)
-                        ).style("color: white; font-weight: bold; background-color: #B6C9BF !important;") \
-                            .classes("q-pa-sm text-left full-width")
+                        if not notificacao["lida"]:
+                            ui.button(
+                                mensagem,
+                                on_click=lambda id=notificacao_id: visualizar_notificacao(id)
+                            ).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
+                            ).classes("q-pa-sm text-left full-width")
+                        else:
+                            ui.label(mensagem).style("background-color: #008B8B  !important; border-radius: 8px; padding: 8px;"
+                                                     ).classes("q-pa-sm text-left text-gray-500 full-width")
 
-                    else:
-                        ui.label(mensagem).classes("q-pa-sm text-gray-500") \
-                            .style("background-color: #d2e9dd !important; border-radius: 8px; padding: 8px;")
 
-            ui.button("Fechar", on_click=dialog.close).style(
-                "color: white; font-weight: bold; background-color: #5a7c71 !important;"
-            ).classes("mx-auto q-mt-md")
+            # Botão fechar fixo no rodapé
+            with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B ; z-index: 1;").classes("w-full justify-center q-pa-sm"):
+
+                ui.button("Fechar", on_click=dialog.close).style(
+                    "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
+                ).classes("text-white font-bold px-4 py-2")
 
         dialog.open()
-
 
 # ----------------------------------- FILTRA AS OCORRENCIAS POR STATUS -------------------------------------
 
@@ -59,9 +60,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
             ui.label(titulo).style("color: #40403e; font-weight: bold;").classes("text-2xl mx-auto font-bold mb-4")
 
             card_notificacoes.classes("q-pa-md")
-            card_notificacoes.style(
-                "background-color: #d2e9dd; border-radius: 10px; overflow-y: auto; width: 600px; height: 500px;"
-            )
+            card_notificacoes.style("background-color: #D9CFC1 ; border-radius: 10px; overflow-y: auto; width: 600px; height: 500px;")
 
             with ui.column().classes("w-full") as column_notificacoes:
                 try:
@@ -143,16 +142,9 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                         ).style("background-color: white; min-width: 200px;").props("outlined dense")
 
                                 # Área com rolagem para os dados da ocorrência
-                                with ui.column().style(
-                                        """
-                                        max-height: 220px;
-                                        overflow-y: auto;
-                                        overflow-x: hidden;
-                                        padding-right: 8px;
-                                        width: 100%;
-                                        box-sizing: border-box;
-                                        """
-                                ).classes("q-mb-md"):
+                                with ui.column().style("max-height: 300px; overflow-y: auto; overflow-x: hidden;"
+                                        "padding-right: 0 8px; width: 100%; box-sizing: border-box;").classes("q-mb-sm"):
+
                                     for titulo_info, valor in [
                                         ("Cliente", cliente),
                                         ("Nº Processo", num_processo),

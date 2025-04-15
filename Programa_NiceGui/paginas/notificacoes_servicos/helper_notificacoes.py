@@ -1,4 +1,6 @@
 from datetime import datetime
+from nicegui import app
+
 
 # ---------------------------- EVITA BUG NA VIEW DE NOTIFICACAOES --------------------------------------
 
@@ -23,3 +25,8 @@ def formatar_data_para_interface(data_raw):
             continue
 
     return "Sem data"
+
+# ------------------------------------- CHAMA O NOME DO USER -----------------------------------
+
+def atribui_nome_usuario():
+    return app.storage.user.get("username") or "Um usuário"

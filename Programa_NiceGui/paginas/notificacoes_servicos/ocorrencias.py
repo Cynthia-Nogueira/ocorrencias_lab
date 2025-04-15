@@ -72,7 +72,7 @@ def nova_ocorrencia(cliente, num_processo, data, status, conteudo, usuario_criad
         cursor.execute(query_usuarios, (usuario_criador,))
         usuarios = cursor.fetchall()
 
-        mensagem = f"Nova ocorrência registrada: {cliente} - processo {num_processo}."
+        mensagem = f"Nova ocorrência registada: {cliente} - processo {num_processo}."
 
         for usuario in usuarios:
             enviar_notificacao(usuario[0], mensagem, ocorrencia_id)

@@ -112,7 +112,7 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         outros_usuarios = cursor.fetchall()
 
         # Envia notificação para os demais usuários
-        mensagem = f"{nome_completo} aceitou a ocorrência ({num_processo}) do cliente {cliente}"
+        mensagem = f"✅ {nome_completo} aceitou a ocorrência ({num_processo}) do cliente {cliente}"
 
         for usuario in outros_usuarios:
             enviar_notificacao(usuario[0], mensagem, ocorrencia_id)

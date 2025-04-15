@@ -1,6 +1,7 @@
 from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.page_user import carregar_ocorrencias_user
+from Programa_NiceGui.paginas.notificacoes_servicos.helper_notificacoes import atribui_nome_usuario
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import notifica_ocorrencia_devolvida
 
 
@@ -22,9 +23,9 @@ def confirmar_devolucao(ocorrencia_id, detalhe_dialog):
         ui.notify("Ocorrência devolvida com sucesso!", type="warning")
 
         # notifica todos os usuários
-        nome_usuario = app.storage.user.get("username") or "Um usuário"
-        for user_id in app.storage.user_ids():
-            app.storage.user(user_id).notify(f"🔄 {nome_usuario} devolveu a ocorrência #{ocorrencia_id}")
+        nome_usuario = atribui_nome_usuario()
+
+        notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario)
 
         # Fecha o diálogo de detalhes
         detalhe_dialog.close()
@@ -61,12 +62,8 @@ def atualiza_status(ocorrencia_id, novo_status):
 
         # Notificação para todos os usuários quando for devolvida
         if novo_status == "Devolvida":
-            user_id = app.storage.user.get("userid")
-            nome_usuario = app.storage.user.get("username") or "Um usuário"
-
-            notifica_ocorrencia_devolvida(
-                f"🔄 {nome_usuario} (ID: {user_id}) devolveu a ocorrência #{ocorrencia_id}"
-            )
+            nome_usuario = atribui_nome_usuario()
+            notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario)
 
         ui.notify(f"Status atualizado para {novo_status}.", type="positive")
 
@@ -75,8 +72,6 @@ def atualiza_status(ocorrencia_id, novo_status):
     finally:
         cursor.close()
         conn.close()
-
-
 
 # --------------------------------- CONFIRMA A ALTERACAO PARA OS USERS --------------------------------
 
