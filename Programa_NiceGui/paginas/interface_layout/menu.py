@@ -57,13 +57,11 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
     with ui.dialog() as dialog:
         with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
-            card_notificacoes.style("background-color: #008B8B ; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
+            card_notificacoes.style("background-color: #008B8B ; border-radius: 10px; overflow-y: auto; width: 600px; height: 500px;")
+
+            ui.label(titulo).style("background-color: #008B8B; color: #fff8ff !important;").classes("text-2xl font-bold text-center q-mb-sm")
 
 
-            with ui.dialog() as dialog:
-                with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
-                    card_notificacoes.style(
-                        "background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 00px;")
 
             with ui.column().classes("w-full") as column_notificacoes:
                 try:
