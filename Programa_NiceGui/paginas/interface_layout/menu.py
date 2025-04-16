@@ -14,7 +14,7 @@ def exibir_notificacoes_menu():
         notificacoes, _ = carregar_notificacoes(current_user_id)
 
     with ui.dialog() as dialog:
-        with ui.card() as card_notificacoes:
+        with ui.card().classes("w-120 mx-auto").style("padding: 8px 0;") as card_notificacoes:
             card_notificacoes.style("background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
 
 
@@ -60,12 +60,12 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
     cursor = conn.cursor()
 
     with ui.dialog() as dialog:
-        with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
+        with ui.card().classes("w-120 mx-auto").style("padding: 8px 0;") as card_notificacoes:
             card_notificacoes.style("background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
 
             # Título fixo no topo
             with ui.row().classes("w-full justify-center items-center q-pa-sm").style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;"):
-                ui.label(titulo).style("background-color: #008B8B; color: #fff8ff !important;").classes("text-center font-bold text-2xl")
+                ui.label(titulo).style("background-color: #008B8B; color: #fff8ff !important; padding: 8px 0 4px 0").classes("text-center font-bold text-2xl")
 
             # Scroll Area para as notificações
             with ui.column().classes("w-full") as column_notificacoes:
@@ -126,7 +126,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
                         for ocorrencia in ocorrencias:
                             ui.button(
-                                f"{ocorrencia[3] or 'Não Atribuído'}: Cliente {ocorrencia[1]} - Processo ({ocorrencia[2]})",
+                                f"{ocorrencia[3] or 'Não Atribuído'}: Cliente  {ocorrencia[1]} - Título:  '{ocorrencia[7]}'",
                                 on_click=lambda o=ocorrencia: detalhes_ocorrencia(o)).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
                                                                                             ).classes("q-pa-sm text-left full-width")
 
@@ -135,7 +135,8 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                         conn.close()
 
                 # Botão de Fechar no rodapé
-                with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1;").classes("w-full justify-center q-pa-sm"):
+                with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1; padding: 4px 0 8px 0;").classes(
+                                                                                                                "w-full justify-center"):
                     ui.button("Fechar", on_click=dialog.close).style(
                         "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
                     ).classes("text-white font-bold px-4 py-2")
@@ -153,7 +154,8 @@ def detalhes_ocorrencia(ocorrencia):
     with detalhe_dialog:
         with ui.card().style('background-color: #ebebeb !important; width: 480px; height: 440px;').classes("mx-auto"):
 
-            ui.label("Detalhes da Ocorrência").style("font-size: 1rem;").classes("text-center font-bold q-mb-sm")
+            ui.label("Detalhes da Ocorrência").style("font-size: 1.25rem; margin: 0 auto; display: block;").classes(
+                "font-bold q-mb-sm")
 
             # --- SELECT de status (só se o user for o responsável) ---
             if responsavel_id == current_user_id:

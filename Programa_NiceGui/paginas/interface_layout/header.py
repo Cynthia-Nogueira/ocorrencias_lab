@@ -50,6 +50,9 @@ def pag_layout():
         # Botão (devolvido)
         ui.button("Devolvidas", icon='arrow_right', on_click=ocorrencia_devolvida).props('flat')
 
+        # Botão (devolvido)                         #aplicar funcao  (def cancelar_ocorrencia(id_):)
+        ui.button("Canceladas", icon='arrow_right', on_click=ocorrencia_devolvida).props('flat')
+
         # Botão de logout no menu
         ui.button("Sair", icon="logout", on_click=logout).props('flat')
 
