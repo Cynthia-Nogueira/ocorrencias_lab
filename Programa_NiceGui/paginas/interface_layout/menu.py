@@ -4,7 +4,6 @@ from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import car
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao, mostra_confirmacao
 from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias_utils import atualiza_status, confirmar_alteracao_status
 
-
 # --------------------------------- EXIBE AS NOTIFICACOES NO MENU ---------------------------
 
 def exibir_notificacoes_menu():
@@ -15,8 +14,9 @@ def exibir_notificacoes_menu():
         notificacoes, _ = carregar_notificacoes(current_user_id)
 
     with ui.dialog() as dialog:
-        with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
-            card_notificacoes.style("background-color: #008B8B ; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
+        with ui.card() as card_notificacoes:
+            card_notificacoes.style("background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
+
 
             # Título fixo no topo
             with ui.row().classes("w-full justify-center items-center q-pa-sm").style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;"):
@@ -24,10 +24,14 @@ def exibir_notificacoes_menu():
 
             # Área scrollável com notificações
             with ui.scroll_area().style("flex-grow: 1; overflow-y: auto; background-color: #ececf5;").classes("w-full q-px-md q-pt-sm"):
+
                 with ui.column().classes("w-full gap-2"):
                     for notificacao in notificacoes:
                         notificacao_id = notificacao["id"]
                         mensagem = notificacao["mensagem"]
+
+
+                        #ISSO MUDA A COR????
 
                         if not notificacao["lida"]:
                             ui.button(
@@ -41,7 +45,7 @@ def exibir_notificacoes_menu():
 
 
             # Botão fechar fixo no rodapé
-            with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B ; z-index: 1;").classes("w-full justify-center q-pa-sm"):
+            with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1;").classes("w-full justify-center q-pa-sm"):
 
                 ui.button("Fechar", on_click=dialog.close).style(
                     "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
@@ -57,86 +61,88 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
     with ui.dialog() as dialog:
         with ui.card().classes("w-120 mx-auto q-pa-md") as card_notificacoes:
-            card_notificacoes.style("background-color: #008B8B ; border-radius: 10px; overflow-y: auto; width: 600px; height: 500px;")
+            card_notificacoes.style("background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
 
-            ui.label(titulo).style("background-color: #008B8B; color: #fff8ff !important;").classes("text-2xl font-bold text-center q-mb-sm")
+            # Título fixo no topo
+            with ui.row().classes("w-full justify-center items-center q-pa-sm").style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;"):
+                ui.label(titulo).style("background-color: #008B8B; color: #fff8ff !important;").classes("text-center font-bold text-2xl")
 
-
-
+            # Scroll Area para as notificações
             with ui.column().classes("w-full") as column_notificacoes:
-                try:
-                    if condicao_extra:
-                        query = f"""
-                            SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                            FROM ocorrencias 
-                            WHERE {condicao_extra}
-                            ORDER BY data DESC;
-                        """
-                        params = ()
-
-                    else:
-                        if status == "Em Espera":
-                            query = """
+                with ui.scroll_area().style("flex-grow: 1; overflow-y: auto; background-color: #ececf5;").classes("w-full q-px-md q-pt-sm"):
+                    try:
+                        if condicao_extra:
+                            query = f"""
                                 SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
                                 FROM ocorrencias 
-                                WHERE responsavel IS NOT NULL AND status = 'Em Espera'
-                                ORDER BY data DESC;
-                            """
-                            params = ()
-
-                        elif status == "Não Atribuída":
-                            query = """
-                                SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                FROM ocorrencias 
-                                WHERE responsavel IS NULL AND status = 'Não atribuída'
-                                ORDER BY data DESC;
-                            """
-                            params = ()
-
-                        elif status is None:
-                            query = """
-                                SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                FROM ocorrencias 
-                                WHERE status IS NULL
+                                WHERE {condicao_extra}
                                 ORDER BY data DESC;
                             """
                             params = ()
 
                         else:
-                            query = """
-                                SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                FROM ocorrencias 
-                                WHERE status = %s
-                                ORDER BY data DESC;
-                            """
-                            params = (status,)
+                            if status == "Em Espera":
+                                query = """
+                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
+                                    FROM ocorrencias 
+                                    WHERE responsavel IS NOT NULL AND status = 'Em Espera'
+                                    ORDER BY data DESC;
+                                """
+                                params = ()
 
-                    cursor.execute(query, params)
+                            elif status == "Não Atribuída":
+                                query = """
+                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
+                                    FROM ocorrencias 
+                                    WHERE responsavel IS NULL AND status = 'Não atribuída'
+                                    ORDER BY data DESC;
+                                """
+                                params = ()
 
-                    ocorrencias = cursor.fetchall()
+                            elif status is None:
+                                query = """
+                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
+                                    FROM ocorrencias 
+                                    WHERE status IS NULL
+                                    ORDER BY data DESC;
+                                """
+                                params = ()
 
-                    if not ocorrencias:
-                        ui.notify(f"Nenhum resultado encontrado para '{titulo}'.", type="negative")
-                        return
+                            else:
+                                query = """
+                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
+                                    FROM ocorrencias 
+                                    WHERE status = %s
+                                    ORDER BY data DESC;
+                                """
+                                params = (status,)
 
-                    for ocorrencia in ocorrencias:
-                        ui.button(
-                            f"{ocorrencia[3] or 'Não Atribuído'}: Cliente {ocorrencia[1]} - Processo ({ocorrencia[2]})",
-                            on_click=lambda o=ocorrencia: detalhes_ocorrencia(o)
-                        ).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
-                        ).classes("q-pa-sm text-left full-width")
+                        cursor.execute(query, params)
+                        ocorrencias = cursor.fetchall()
 
-                finally:
-                    cursor.close()
-                    conn.close()
+                        if not ocorrencias:
+                            ui.notify(f"Nenhum resultado encontrado para '{titulo}'.", type="negative")
+                            return
 
-            ui.button("Fechar", on_click=dialog.close).style(
-                "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
-            ).classes("mx-auto q-mt-md")
+                        for ocorrencia in ocorrencias:
+                            ui.button(
+                                f"{ocorrencia[3] or 'Não Atribuído'}: Cliente {ocorrencia[1]} - Processo ({ocorrencia[2]})",
+                                on_click=lambda o=ocorrencia: detalhes_ocorrencia(o)).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
+                                                                                            ).classes("q-pa-sm text-left full-width")
 
-    dialog.open()
+                    finally:
+                        cursor.close()
+                        conn.close()
 
-# ----------------------------------- CHAMA O DETALHE DAS OCORRENCIAS --------------------------------------------
+                # Botão de Fechar no rodapé
+                with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1;").classes("w-full justify-center q-pa-sm"):
+                    ui.button("Fechar", on_click=dialog.close).style(
+                        "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
+                    ).classes("text-white font-bold px-4 py-2")
+
+            dialog.open()
+
+# ------------------------------------------------- CHAMA O DETALHE DAS OCORRENCIAS ------------------------------------------------
 
 def detalhes_ocorrencia(ocorrencia):
     ocorrencia_id, cliente, num_processo, responsavel, responsavel_id, data_ocorrencia, status, titulo, conteudo_ocorrencia = ocorrencia
@@ -145,11 +151,11 @@ def detalhes_ocorrencia(ocorrencia):
     detalhe_dialog = ui.dialog()
 
     with detalhe_dialog:
-        with ui.card().style(
-                'background-color: #ebebeb !important; width: 500px; height: 440px;').classes("mx-auto"):
+        with ui.card().style('background-color: #ebebeb !important; width: 480px; height: 440px;').classes("mx-auto"):
 
             ui.label("Detalhes da Ocorrência").style("font-size: 1rem;").classes("text-center font-bold q-mb-sm")
 
+            # --- SELECT de status (só se o user for o responsável) ---
             if responsavel_id == current_user_id:
                 with ui.row().classes("items-center q-mb-md"):
                     ui.label("Atualizar Status:").classes("font-bold")
@@ -158,13 +164,21 @@ def detalhes_ocorrencia(ocorrencia):
                         value=""
                     ).style("background-color: white; min-width: 200px;").props("outlined dense")
 
-            with ui.column().style("max-height: 300px; overflow-y: auto; overflow-x: hidden;"
-                    "padding-right: 0 8px; width: 100%; box-sizing: border-box;").classes("q-mb-sm"):
+            # Área com rolagem para os dados da ocorrência (corrigido duplicação de with)
+            with ui.column().style(
+                "max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; box-sizing: border-box;"
+            ).classes("q-mb-sm"):
+
+                from datetime import datetime
+
+                if isinstance(data_ocorrencia, str):
+                    data_ocorrencia = datetime.strptime(data_ocorrencia, "%Y-%m-%d %H:%M:%S")
+                data_formatada = data_ocorrencia.strftime('%d-%m-%y')
 
                 for titulo_info, valor in [
                     ("Cliente", cliente),
                     ("Nº Processo", num_processo),
-                    ("Data", data_ocorrencia),
+                    ("Data", data_formatada),
                     ("Título", titulo),
                 ]:
                     with ui.row():
@@ -176,6 +190,7 @@ def detalhes_ocorrencia(ocorrencia):
                 with ui.row():
                     ui.label(conteudo_ocorrencia).style("text-align: justify; white-space: pre-wrap; width: 100%;").classes("text-base")
 
+            # Botões de ação
             with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
                 ui.button("Fechar", on_click=detalhe_dialog.close).style(
                     "color: white; font-weight: bold; background-color: #008B8B !important;"
@@ -204,6 +219,7 @@ def detalhes_ocorrencia(ocorrencia):
                         ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
     detalhe_dialog.open()
+
 
 # ---------------------------- Funções específicas chamando a função genérica -------------------------------------
 

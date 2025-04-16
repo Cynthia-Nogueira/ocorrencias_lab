@@ -42,8 +42,11 @@ def visualizar_notificacao(notificacao_id):
 
         # Criar o diálogo
         with ui.dialog() as detalhe_dialog:
-            with ui.card().style("background-color: #ebebeb !important; border: 2px solid #008B8B; border-radius: 10px; "
-                                                "box-shadow: 0 0 10px #008B8B;").classes("w-96 mx-auto"):
+            with ui.card().style(
+                    "background-color: #ebebeb !important; border: 2px solid #008B8B; border-radius: 10px; "
+                    "box-shadow: 0 0 10px #008B8B; width: 480px; height: 440px;"
+                    ).classes("mx-auto"):
+
                 ui.label("Detalhes da Notificação").classes("text-lg font-bold mx-auto q-mb-sm")
 
                 with ui.column():
@@ -111,7 +114,7 @@ def notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario):
         cursor.execute("SELECT cliente, titulo FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
         cliente, titulo = cursor.fetchone()
 
-        mensagem = f"🔄 {nome_usuario} devolveu a ocorrência do Cliente: {cliente} (Processo: {titulo})"
+        mensagem = f"🔄 {nome_usuario} devolveu a ocorrência do Cliente: {cliente} (Título: {titulo})"
 
         # Pegando users
         cursor.execute("SELECT id FROM utilizador")
