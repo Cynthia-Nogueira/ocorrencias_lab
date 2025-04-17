@@ -3,7 +3,6 @@ from nicegui import ui
 from datetime import datetime
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
-
 # ------------------------------- Atualiza a ocorrência no banco --------------------------------
 
 def update_ocorrencia(id, cliente, num_processo, data, status, conteudo):
@@ -26,28 +25,7 @@ def update_ocorrencia(id, cliente, num_processo, data, status, conteudo):
 
 # ------------------------------------- Exclui ocorrência -----------------------------------------
 
-def cancelar_ocorrencia(id_):
 
-    # msg para confirmar exclusao
-    confirmacao = ui.confirm(f"Tem certeza que deseja excluir esta ocorrência? Esta ação não pode ser desfeita.")
-
-    if not confirmacao:
-        ui.notify("Exclusão cancelada.", type="negative")
-        return False
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        query = "DELETE FROM ocorrencias WHERE id = %s"
-        cursor.execute(query, (id_,))
-        conn.commit()
-        ui.notify("Ocorrência excluida com sucesso!", type="positive")
-        return True
-
-    finally:
-        cursor.close()
-        conn.close()
 
 # ----------------------------- Cria uma nova ocorrência no banco -------------------------
 

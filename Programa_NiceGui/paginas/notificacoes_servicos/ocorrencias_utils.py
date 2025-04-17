@@ -46,14 +46,16 @@ def atualiza_status(ocorrencia_id, novo_status):
     cursor = conn.cursor()
     try:
         if novo_status == "Devolvida":
-            # Atualiza status e remove o responsável
+            #     atualiza status e remove responsavel
             cursor.execute("""
                 UPDATE ocorrencias
                 SET status = %s, 
                     responsavel_id = NULL,
-                    data_status_alterado
+                    data_aceite = %s,
+                    data_status_alterado = %s
                 WHERE id = %s
-            """, (novo_status, datetime.now(), ocorrencia_id))
+            """, (novo_status, datetime.now(), datetime.now(), ocorrencia_id))
+
 
         elif novo_status == "Em Espera":
             # Atualiza o status para 'Em Espera' e também atualiza data_status_alterado
@@ -82,6 +84,16 @@ def atualiza_status(ocorrencia_id, novo_status):
                 WHERE id = %s
             """, (novo_status, datetime.now(), ocorrencia_id))
 
+        elif novo_status == "Cancelada":
+            # Atualiza o status para 'Cancelada', remove o responsável e atualiza a data de alteração de status
+            cursor.execute("""
+                UPDATE ocorrencias
+                SET status = %s,
+                    responsavel_id = NULL,  
+                    data_status_alterado = %s
+                WHERE id = %s
+            """, (novo_status, datetime.now(), ocorrencia_id))
+
         else:
             # Atualiza apenas o status
             cursor.execute("""
@@ -97,7 +109,10 @@ def atualiza_status(ocorrencia_id, novo_status):
             nome_usuario = atribui_nome_usuario()
             notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario)
 
-        ui.notify(f"Status atualizado para {novo_status}.", type="positive")
+        if novo_status == "Cancelada":
+            ui.notify("Ocorrência cancelada com sucesso!", type="positive")
+        else:
+            ui.notify(f"Status atualizado para {novo_status}.", type="positive")
 
     except Exception as e:
         ui.notify(f"Erro ao atualizar status: {e}", type="negative")

@@ -109,6 +109,15 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                 """
                                 params = ()
 
+                            elif status == "Cancelada":
+                                query = """
+                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
+                                    FROM ocorrencias 
+                                    WHERE responsavel IS NULL AND status = 'Não atribuída'
+                                    ORDER BY data_status_alterado DESC, data DESC;
+                                """
+                                params = ()
+
                             elif status is None:
                                 query = """
                                     SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
@@ -157,7 +166,6 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
 def detalhes_ocorrencia(ocorrencia):
     ocorrencia_id, cliente, num_processo, responsavel, responsavel_id, data_ocorrencia, status, titulo, conteudo_ocorrencia = ocorrencia
-    #current_user_id = app.storage.user.get("userid")
     current_user_id = int(app.storage.user.get("userid"))
     responsavel_id = int(responsavel_id) if responsavel_id is not None else None
 
@@ -251,6 +259,9 @@ def ocorrencia_espera():
 
 def ocorrencia_devolvida():
     ocorrencias_filtradas("Devolvida", "Ocorrências devolvidas")
+
+def ocorrencia_cancelada():
+    ocorrencias_filtradas("Cancelada", "Canceladas")
 
 def nao_atribuida():
     ocorrencias_filtradas("", "Ocorrências não atribuídas", "responsavel IS NULL")

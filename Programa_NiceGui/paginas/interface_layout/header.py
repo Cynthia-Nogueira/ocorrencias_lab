@@ -2,8 +2,8 @@ from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado
 from Programa_NiceGui.paginas.interface_layout.menu import (carregar_notificacoes, exibir_notificacoes_menu,
                                                             ocorrencia_execucao, ocorrencia_espera,
-                                                            ocorrencia_concluida, nao_atribuida, ocorrencia_devolvida)
-
+                                                            ocorrencia_concluida, nao_atribuida, ocorrencia_devolvida,
+                                                            ocorrencia_cancelada)
 
 #---------------------------------------------- INTERFACE DO MENU -----------------------------
 
@@ -51,7 +51,8 @@ def pag_layout():
         ui.button("Devolvidas", icon='arrow_right', on_click=ocorrencia_devolvida).props('flat')
 
         # Botão (devolvido)                         #aplicar funcao  (def cancelar_ocorrencia(id_):)
-        ui.button("Canceladas", icon='arrow_right', on_click=ocorrencia_devolvida).props('flat')
+        # Supondo que você tenha a variável 'ocorrencia_id' contendo o ID da ocorrência
+        ui.button("Canceladas", icon='arrow_right', on_click=lambda: ocorrencia_cancelada).props('flat')
 
         # Botão de logout no menu
         ui.button("Sair", icon="logout", on_click=logout).props('flat')
