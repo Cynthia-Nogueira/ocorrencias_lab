@@ -1,4 +1,5 @@
 from nicegui import ui, app
+from datetime import datetime
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import carregar_notificacoes
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao, mostra_confirmacao
@@ -147,7 +148,9 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
 def detalhes_ocorrencia(ocorrencia):
     ocorrencia_id, cliente, num_processo, responsavel, responsavel_id, data_ocorrencia, status, titulo, conteudo_ocorrencia = ocorrencia
-    current_user_id = app.storage.user.get("userid")
+    #current_user_id = app.storage.user.get("userid")
+    current_user_id = int(app.storage.user.get("userid"))
+    responsavel_id = int(responsavel_id) if responsavel_id is not None else None
 
     detalhe_dialog = ui.dialog()
 
@@ -157,8 +160,13 @@ def detalhes_ocorrencia(ocorrencia):
             ui.label("Detalhes da Ocorrência").style("font-size: 1.25rem; margin: 0 auto; display: block;").classes(
                 "font-bold q-mb-sm")
 
+            print("Responsável ID:", responsavel_id)
+            print("User logado ID:", current_user_id)
+            print("Status atual:", status)
+
+
             # --- SELECT de status (só se o user for o responsável) ---
-            if responsavel_id == current_user_id:
+            if responsavel_id == current_user_id and status in ["Em execução", "Em espera"]:
                 with ui.row().classes("items-center q-mb-md"):
                     ui.label("Atualizar Status:").classes("font-bold")
                     status_selecionado = ui.select(
@@ -170,8 +178,6 @@ def detalhes_ocorrencia(ocorrencia):
             with ui.column().style(
                 "max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; box-sizing: border-box;"
             ).classes("q-mb-sm"):
-
-                from datetime import datetime
 
                 if isinstance(data_ocorrencia, str):
                     data_ocorrencia = datetime.strptime(data_ocorrencia, "%Y-%m-%d %H:%M:%S")
@@ -198,7 +204,7 @@ def detalhes_ocorrencia(ocorrencia):
                     "color: white; font-weight: bold; background-color: #008B8B !important;"
                 ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
-                if responsavel_id == current_user_id:
+                if responsavel_id == current_user_id and status in ["Em execução", "Em espera"]:
                     ui.button(
                         "Confirmar",
                         on_click=lambda: (

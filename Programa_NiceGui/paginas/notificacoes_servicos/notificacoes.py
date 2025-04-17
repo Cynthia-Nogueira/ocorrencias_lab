@@ -42,12 +42,10 @@ def visualizar_notificacao(notificacao_id):
 
         # Criar o diálogo
         with ui.dialog() as detalhe_dialog:
-            with ui.card().style(
-                    "background-color: #ebebeb !important; border: 2px solid #008B8B; border-radius: 10px; "
-                    "box-shadow: 0 0 10px #008B8B; width: 480px; height: 440px;"
-                    ).classes("mx-auto"):
+            with ui.card().style('background-color: #ebebeb !important; width: 480px; height: 440px;').classes("mx-auto"):
 
-                ui.label("Detalhes da Notificação").classes("text-lg font-bold mx-auto q-mb-sm")
+                ui.label("Detalhes da Notificação").style("font-size: 1.25rem; margin: 0 auto; display: block;").classes(
+                "font-bold q-mb-sm")
 
                 with ui.column():
                     for title, valor in [
