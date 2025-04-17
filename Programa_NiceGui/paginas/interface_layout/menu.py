@@ -87,8 +87,17 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                     SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
                                     FROM ocorrencias 
                                     WHERE responsavel IS NOT NULL AND status = 'Em Espera'
-                                    ORDER BY data DESC;
+                                    ORDER BY data_status_alterado DESC, data DESC;
                                 """
+                                params = ()
+
+                            elif status == "Devolvida":
+                                query = """
+                                   SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
+                                   FROM ocorrencias 
+                                   WHERE status = 'Devolvida'
+                                   ORDER BY data_status_alterado DESC, data DESC;
+                               """
                                 params = ()
 
                             elif status == "Não Atribuída":
@@ -96,7 +105,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                     SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
                                     FROM ocorrencias 
                                     WHERE responsavel IS NULL AND status = 'Não atribuída'
-                                    ORDER BY data DESC;
+                                    ORDER BY data_status_alterado DESC, data DESC;
                                 """
                                 params = ()
 
@@ -105,7 +114,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                     SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
                                     FROM ocorrencias 
                                     WHERE status IS NULL
-                                    ORDER BY data DESC;
+                                    ORDER BY data_status_alterado DESC, data DESC;
                                 """
                                 params = ()
 
@@ -114,7 +123,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                     SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
                                     FROM ocorrencias 
                                     WHERE status = %s
-                                    ORDER BY data DESC;
+                                    ORDER BY data_status_alterado DESC, data DESC;
                                 """
                                 params = (status,)
 

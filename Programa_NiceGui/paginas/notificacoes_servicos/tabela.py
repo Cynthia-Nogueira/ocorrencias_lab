@@ -100,10 +100,11 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
             SET status = 'Em execução', 
                 responsavel = %s, 
                 responsavel_id = %s,
-                data_aceite = %s
+                data_aceite = %s,
+                data_status_alterado = %s
             WHERE id = %s
         """
-        cursor.execute(query, (nome_completo, ultima_usuario_id, datetime.now(), ocorrencia_id))
+        cursor.execute(query, (nome_completo, ultima_usuario_id, datetime.now(), datetime.now(), ocorrencia_id))
 
         conn.commit()
 

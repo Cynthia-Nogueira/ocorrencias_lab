@@ -1,4 +1,5 @@
 from nicegui import ui, app
+from datetime import datetime
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.page_user import carregar_ocorrencias_user
 from Programa_NiceGui.paginas.notificacoes_servicos.helper_notificacoes import atribui_nome_usuario
@@ -39,6 +40,7 @@ def confirmar_devolucao(ocorrencia_id, detalhe_dialog):
 
 
 # ---------------------------------- ATUALIZA STATUS -------------------------------
+
 def atualiza_status(ocorrencia_id, novo_status):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -47,9 +49,39 @@ def atualiza_status(ocorrencia_id, novo_status):
             # Atualiza status e remove o responsável
             cursor.execute("""
                 UPDATE ocorrencias
-                SET status = %s, responsavel_id = NULL
+                SET status = %s, 
+                    responsavel_id = NULL,
+                    data_status_alterado
                 WHERE id = %s
-            """, (novo_status, ocorrencia_id))
+            """, (novo_status, datetime.now(), ocorrencia_id))
+
+        elif novo_status == "Em Espera":
+            # Atualiza o status para 'Em Espera' e também atualiza data_status_alterado
+            cursor.execute("""
+                UPDATE ocorrencias
+                SET status = %s, 
+                    data_status_alterado = %s
+                WHERE id = %s
+            """, (novo_status, datetime.now(), ocorrencia_id))
+
+        elif novo_status == "Em Execução":
+            # Atualiza o status para 'Em execucao' e também atualiza data_status_alterado
+            cursor.execute("""
+                UPDATE ocorrencias
+                SET status = %s, 
+                    data_status_alterado = %s
+                WHERE id = %s
+            """, (novo_status, datetime.now(), ocorrencia_id))
+
+        elif novo_status == "Concluída":
+            # Atualiza o status para 'Concluída' e também atualiza data_status_alterado
+            cursor.execute("""
+                UPDATE ocorrencias
+                SET status = %s, 
+                    data_status_alterado = %s
+                WHERE id = %s
+            """, (novo_status, datetime.now(), ocorrencia_id))
+
         else:
             # Atualiza apenas o status
             cursor.execute("""
