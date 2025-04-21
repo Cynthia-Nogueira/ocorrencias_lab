@@ -3,12 +3,13 @@ from datetime import datetime
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.page_user import carregar_ocorrencias_user
 from Programa_NiceGui.paginas.notificacoes_servicos.helper_notificacoes import atribui_nome_usuario
-from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import notifica_ocorrencia_devolvida
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import notifica_ocorrencia_devolvida, \
+    notifica_ocorrencia_cancelada
 
 
 #------------------------------------ DEVOLVE A OCORRENCIA DO USER ----------------------------
 
-def confirmar_devolucao(ocorrencia_id, detalhe_dialog):
+def confirmar_devolucao_cacelamento(ocorrencia_id, detalhe_dialog):
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -27,6 +28,7 @@ def confirmar_devolucao(ocorrencia_id, detalhe_dialog):
         nome_usuario = atribui_nome_usuario()
 
         notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario)
+        notifica_ocorrencia_cancelada(ocorrencia_id, nome_usuario)
 
         # Fecha o diálogo de detalhes
         detalhe_dialog.close()
@@ -104,13 +106,15 @@ def atualiza_status(ocorrencia_id, novo_status):
 
         conn.commit()
 
+        nome_usuario = atribui_nome_usuario()
+
         # Notificação para todos os usuários quando for devolvida
         if novo_status == "Devolvida":
-            nome_usuario = atribui_nome_usuario()
             notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario)
 
-        if novo_status == "Cancelada":
-            ui.notify("Ocorrência cancelada com sucesso!", type="positive")
+        elif novo_status == "Cancelada":
+            notifica_ocorrencia_cancelada(ocorrencia_id, nome_usuario)
+
         else:
             ui.notify(f"Status atualizado para {novo_status}.", type="positive")
 

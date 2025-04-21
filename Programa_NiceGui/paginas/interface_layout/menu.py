@@ -113,7 +113,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                 query = """
                                     SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
                                     FROM ocorrencias 
-                                    WHERE responsavel IS NULL AND status = 'Não atribuída'
+                                    WHERE responsavel IS NOT NULL AND status = 'Cancelada'
                                     ORDER BY data_status_alterado DESC, data DESC;
                                 """
                                 params = ()
@@ -153,7 +153,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                         cursor.close()
                         conn.close()
 
-                # Botão de Fechar no rodapé
+                # Botão de Fechar rodapé
                 with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1; padding: 4px 0 8px 0;").classes(
                                                                                                                 "w-full justify-center"):
                     ui.button("Fechar", on_click=dialog.close).style(
@@ -228,10 +228,8 @@ def detalhes_ocorrencia(ocorrencia):
                             confirmar_alteracao_status(ocorrencia_id, status_selecionado.value, detalhe_dialog)
                             if status_selecionado.value else ui.notify(
                                 "Por favor, selecione um status válido!", type="warning")
-                        )
-                    ).style(
-                        "color: white; font-weight: bold; background-color: #008B8B !important;"
-                    ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
+                        )).style("color: white; font-weight: bold; background-color: #008B8B !important;"
+                        ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                 elif (status == "Devolvida" or responsavel is None) and responsavel_id is None:
                     if current_user_id:
@@ -239,9 +237,16 @@ def detalhes_ocorrencia(ocorrencia):
                             "Aceitar",
                             on_click=lambda o_id=ocorrencia_id, u_id=current_user_id:
                             mostra_confirmacao(o_id, u_id, detalhe_dialog)
-                        ).style(
-                            "color: white; font-weight: bold; background-color: #008B8B !important;"
+                        ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                         ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+
+                elif status == "Cancelada":
+                    ui.button(
+                        "Fechar",
+                        on_click=detalhe_dialog.close
+                    ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
+                    ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
+
 
     detalhe_dialog.open()
 
@@ -249,7 +254,7 @@ def detalhes_ocorrencia(ocorrencia):
 # ---------------------------- Funções específicas chamando a função genérica -------------------------------------
 
 def ocorrencia_concluida():
-    ocorrencias_filtradas("Concluída", "Ocorrências concluídas")
+    ocorrencias_filtradas("Concluída", "Ocorrências concludes")
 
 def ocorrencia_execucao():
     ocorrencias_filtradas("Em Execução", "Ocorrências em execução")

@@ -91,25 +91,4 @@ def add_notificacao(usuario_id, mensagem):
     })
 
 
-# ---------------------------------- CAPTURA OS DETALHES DAS NOTIFICACAOES -------------------------------
-
-def criar_detalhes_ocorrencia(notificacao_id, ocorrencia_id, conteudo, data_criacao):
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        query = """
-            INSERT INTO detalhes_ocorrencias (notificacao_id, ocorrencia_id, conteudo, data_criacao)
-            VALUES (%s, %s, %s, NOW())
-        """
-        cursor.execute(query, (notificacao_id, ocorrencia_id, conteudo, data_criacao))
-        conn.commit()
-
-        print(f"Detalhes da ocorrência para a notificação {notificacao_id} registrados com sucesso!")
-    except Exception as e:
-        print(f"Erro ao registrar detalhes da ocorrência: {e}")
-    finally:
-        cursor.close()
-        conn.close()
 

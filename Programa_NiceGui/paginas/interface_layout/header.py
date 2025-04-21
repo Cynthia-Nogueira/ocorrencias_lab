@@ -50,9 +50,8 @@ def pag_layout():
         # Botão (devolvido)
         ui.button("Devolvidas", icon='arrow_right', on_click=ocorrencia_devolvida).props('flat')
 
-        # Botão (devolvido)                         #aplicar funcao  (def cancelar_ocorrencia(id_):)
-        # Supondo que você tenha a variável 'ocorrencia_id' contendo o ID da ocorrência
-        ui.button("Canceladas", icon='arrow_right', on_click=lambda: ocorrencia_cancelada).props('flat')
+        # Botão (cacelada)
+        ui.button("Canceladas", icon='arrow_right', on_click=ocorrencia_cancelada).props('flat')
 
         # Botão de logout no menu
         ui.button("Sair", icon="logout", on_click=logout).props('flat')

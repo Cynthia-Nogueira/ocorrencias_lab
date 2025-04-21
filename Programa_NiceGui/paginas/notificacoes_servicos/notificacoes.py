@@ -127,7 +127,30 @@ def notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario):
         cursor.close()
         conn.close()
 
+# ---------------------------------- NOTIFICA OS USERS DA OCORRENCIA canceladas ------------------------
 
+def notifica_ocorrencia_cancelada(ocorrencia_id, nome_usuario):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT cliente, titulo FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
+        cliente, titulo = cursor.fetchone()
+
+        mensagem = f"📛 {nome_usuario} cancelou a ocorrência do cliente: {cliente}"
+
+        # Pegando users
+        cursor.execute("SELECT id FROM utilizador")
+        usuarios = cursor.fetchall()
+
+        for (usuario_id,) in usuarios:
+            enviar_notificacao(usuario_id, mensagem, ocorrencia_id)
+
+    except Exception as e:
+        ui.notify(f"Erro ao notificar devolução: {e}", type="negative")
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
