@@ -111,9 +111,11 @@ def atualiza_status(ocorrencia_id, novo_status):
         # Notificação para todos os usuários quando for devolvida
         if novo_status == "Devolvida":
             notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario)
+            ui.notify("✅ Ocorrência devolvida com sucesso!", type="positive")
 
         elif novo_status == "Cancelada":
             notifica_ocorrencia_cancelada(ocorrencia_id, nome_usuario)
+            ui.notify("❌ Ocorrência cancelada com sucesso!", type="warning")
 
         else:
             ui.notify(f"Status atualizado para {novo_status}.", type="positive")

@@ -62,12 +62,12 @@ def pag_layout():
         with ui.column().classes("self-start ml-4 gap-0"):
             ui.button('IEP', on_click=lambda: ui.navigate.to('/main')).props('flat').style(
                 "color: white !important; font-size: 16px !important; background-color: transparent !important; border: none !important; "
-                "transition: none !important;")
-            ui.label("Instituto Electrotécnico Português").style("color: white; font-size: 12px; line-height: 1.2; margin-top: -5px;")
+                "transition: none !important; font-size: 1.25em;")
+            ui.label("Instituto Electrotécnico Português").style("color: white; font-size: 12px; line-height: 1.2; margin-top: -5px; font-size: 1em;")
 
         # Ícone de menu e nome do usuário logado
         with ui.row().classes('items-center gap-x-4'):
-            ui.label(name_logado).style('color: white; font-size: 16px;')
+            ui.label(name_logado).style('color: white; font-size: 18px;')
             ui.button(on_click=lambda: right_drawer.toggle(), icon='menu').props('flat color=white')
 
 

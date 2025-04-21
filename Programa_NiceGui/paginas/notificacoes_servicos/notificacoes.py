@@ -18,7 +18,7 @@ def visualizar_notificacao(notificacao_id):
 
         # Consulta os detalhes da notificação
         query = """
-            SELECT o.id, o.cliente, o.num_processo, o.data, o.titulo, o.conteudo, o.responsavel_id
+            SELECT o.id, o.cliente, o.num_processo, o.data, o.titulo, o.conteudo, o.responsavel_id, o.status
             FROM notificacoes n
             JOIN ocorrencias o ON n.ocorrencia_id = o.id
             WHERE n.id = %s AND n.usuario_id = %s
@@ -27,13 +27,14 @@ def visualizar_notificacao(notificacao_id):
         cursor.execute(query, (notificacao_id, current_user_id))
         resultado = cursor.fetchone()
 
+
         if not resultado:
             ui.notify("Erro: Detalhes não encontrados.", type="negative")
             print(f"[ERRO] Nenhuma ocorrência encontrada (notificacao_id={notificacao_id}, usuario_id={current_user_id})")
             return
 
         # Desempacota os dados retornados
-        ocorrencia_id, cliente, num_processo, data_ocorrencia, titulo_ocorrencia, conteudo_ocorrencia, responsavel_id = resultado
+        ocorrencia_id, cliente, num_processo, data_ocorrencia, titulo_ocorrencia, conteudo_ocorrencia, responsavel_id, status_ocorrencia  = resultado
 
         # Formatar data (assume datetime, senão faz parse de string)
         if isinstance(data_ocorrencia, str):
@@ -71,7 +72,7 @@ def visualizar_notificacao(notificacao_id):
                                       ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                     # Só mostra botão "Aceitar" se a ocorrência ainda não tiver responsável
-                    if responsavel_id is None:
+                    if responsavel_id is None and status_ocorrencia != "Cancelada":
                         ui.button("Aceitar",
                                   on_click=lambda: mostra_confirmacao(ocorrencia_id, current_user_id, detalhe_dialog)
                                   ).style("color: white; font-weight: bold; background-color: #008B8B !important;"

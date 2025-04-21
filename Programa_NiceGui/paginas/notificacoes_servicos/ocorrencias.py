@@ -22,11 +22,6 @@ def update_ocorrencia(id, cliente, num_processo, data, status, conteudo):
         cursor.close()
         conn.close()
 
-
-# ------------------------------------- Exclui ocorrência -----------------------------------------
-
-
-
 # ----------------------------- Cria uma nova ocorrência no banco -------------------------
 
 def nova_ocorrencia(cliente, num_processo, data, status, conteudo, usuario_criador):
@@ -119,7 +114,7 @@ def obter_ocorrencias():
         query = """
         SELECT id, cliente, num_processo, responsavel, data, status, titulo, conteudo
         FROM ocorrencias
-        WHERE status IN ('Devolvida', 'Não Atribuída', 'Em espera')
+        WHERE status IN ('Devolvida', 'Não Atribuída', 'Em espera', 'Cancelada')
         ORDER BY data DESC
         """
         cursor.execute(query)
@@ -130,9 +125,7 @@ def obter_ocorrencias():
         conn.close()
         return ocorrencias
 
-
 # ------------------------------------- Editar ocorrência -----------------------------------------
-
 
 def formulario_edicao(id_):
     #abre a ocorrência selecionada para edição

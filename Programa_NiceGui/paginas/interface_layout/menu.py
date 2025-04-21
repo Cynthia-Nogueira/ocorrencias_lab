@@ -240,13 +240,6 @@ def detalhes_ocorrencia(ocorrencia):
                         ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                         ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
-                elif status == "Cancelada":
-                    ui.button(
-                        "Fechar",
-                        on_click=detalhe_dialog.close
-                    ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
-                    ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
-
 
     detalhe_dialog.open()
 

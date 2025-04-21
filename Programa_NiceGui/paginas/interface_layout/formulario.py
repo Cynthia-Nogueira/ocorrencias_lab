@@ -49,11 +49,7 @@ def novo_formulario():
             else:
                 contador.classes(replace="text-sm text-gray-500 mb-4")
 
-        # chama a atualizacao
-        # conteudo.on("input", lambda: atualizar_contador())
-
         conteudo.on("keydown", lambda: atualizar_contador())
-       # conteudo.on("keyup", lambda: ())
 
         atualizar_contador()
 
@@ -100,6 +96,7 @@ def novo_formulario():
 
                 # Criando a notificação formatada
                 mensagem_notificacao = (
+
                     f"🟠 Nova ocorrência registada por:\n"
                     f"  {nome_user}\n"
                 )
