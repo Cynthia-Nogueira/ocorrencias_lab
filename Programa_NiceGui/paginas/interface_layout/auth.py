@@ -126,6 +126,15 @@ def registro_page():
                                     " background-color: #008B8B !important;").classes("w-full")
 
 
+#------------------------------- PROTEGE A PAG PARA QUE NAO SEJA POSSIVEL VOLTAR AO MAIN -------------------------------
+
+def pagina_protegida():
+    if not app.storage.user.get("userid"):
+        ui.notify("Sessão expirada. Faça login novamente.", type="warning")
+        ui.navigate.to("/")
+        return False
+    return True
+
 #------------------------------------------------ Login Page -----------------------------------------------------
 
 # Página de Login

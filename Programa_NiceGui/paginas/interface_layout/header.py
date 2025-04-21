@@ -73,15 +73,26 @@ def pag_layout():
 
 # ------------------------------------- DESCONECTA DA PAGINA -----------------------------------------
 
+def logout():
+    app.storage.user.clear()
+
+    # Redireciona após um pequeno delay, sem JavaScript
+    def redireciona():
+        ui.navigate.to("/")
+
+    ui.timer(0.5, redireciona)
+
+
+"""
 # Função para logout
 def logout():
     app.storage.user.clear() #remove dados da sessao
     ui.run_javascript("window.location.replace('/');")
+"""
 
 # ------------------------------------- RODA O APP (N FUNCIONA SEM) -----------------------------------------
 
-
-# Chama a função para rodar o app
+# Chama a função para rodar o programa
 ui.run(storage_secret="minha_chave_secreta_aleatoria")
 
 
