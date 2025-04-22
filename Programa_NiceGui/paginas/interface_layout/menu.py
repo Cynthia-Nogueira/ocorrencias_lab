@@ -248,6 +248,15 @@ def detalhes_ocorrencia(ocorrencia):
                         ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                         ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
+                elif (status == "Expirada" or responsavel is None) and responsavel_id is None:
+                    if current_user_id:
+                        ui.button(
+                            "Aceitar",
+                            on_click=lambda o_id=ocorrencia_id, u_id=current_user_id:
+                            mostra_confirmacao(o_id, u_id, detalhe_dialog)
+                        ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
+                        ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+
 
     detalhe_dialog.open()
 

@@ -87,9 +87,8 @@ def ocorrencias_expiradas(modo_teste=False):
 
 def inicia_verificacao():
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(lambda: ocorrencias_expiradas(modo_teste=True), 'interval', seconds=20)
+    scheduler.add_job(ocorrencias_expiradas, 'interval', hours=3)
     scheduler.start()
-
 # ---------------------------------------------- FERIADOS PORTUGAL -------------------------------------------------
 
 def feriados_portugal():
