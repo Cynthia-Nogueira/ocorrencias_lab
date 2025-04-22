@@ -2,21 +2,24 @@ import holidays
 from datetime import datetime, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
+from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user
+
 
 #-------------------------------------------- VERIFICA OCORRENCIAS EXPIRADAS --------------------------------------------
 
-# FAZER TESTES PARA VER SE ESTA FUNCIONANDO
-
-def ocorrencias_expiradas():
+def ocorrencias_expiradas(modo_teste=False):
     print("[SCHEDULER] Verificando ocorrências expiradas...")
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # Busca ocorrências em "Em Espera" com data de aceite
     query = """
     SELECT id, data_aceite
     FROM ocorrencias
     WHERE status = 'Em espera' AND data_aceite IS NOT NULL
+    ORDER BY data_status_alterado DESC, data DESC;
     """
     cursor.execute(query)
     ocorrencias = cursor.fetchall()
@@ -25,34 +28,66 @@ def ocorrencias_expiradas():
     feriados = feriados_portugal()
 
     for id_ocorrencia, data_aceite in ocorrencias:
+        # Converte string para datetime se necessário
         if isinstance(data_aceite, str):
             try:
                 data_aceite = datetime.strptime(data_aceite, "%Y-%m-%d %H:%M:%S")
             except ValueError:
                 data_aceite = datetime.strptime(data_aceite, "%Y-%m-%d")
 
+        # Calcula o tempo passado
         total_horas = horas_uteis(data_aceite, agora, feriados)
+        total_segundos = total_horas.total_seconds()
+        total_horas_em_horas = total_segundos / 3600
 
-        # Convertendo o timedelta para horas
-        total_horas_em_horas = total_horas.total_seconds() / 3600
+        # Define limite com base no modo de teste ou não
+        limite_segundos = 30 if modo_teste else 48 * 3600
 
-        if total_horas_em_horas >= 48:
-            print(f"[INFO] Ocorrência {id_ocorrencia} devolvida!")                #APAGAR
+        print(f"[DEBUG] Ocorrência {id_ocorrencia}: {total_horas_em_horas:.2f}h desde aceite | Limite: {limite_segundos / 3600:.2f}h")
+
+        if total_segundos >= limite_segundos:
+            # Busca o título e o responsável atual da ocorrência
+            cursor.execute("SELECT titulo, responsavel_id FROM ocorrencias WHERE id = %s", (id_ocorrencia,))
+            resultado = cursor.fetchone()
+            titulo = resultado[0] if resultado else "Sem título"
+            responsavel_id = resultado[1] if resultado else None
+
+            # Lista de usuários para notificar
+            lista_user = obter_lista_user()
+
+            # Mensagem de notificação
+            mensagem_notificacao = f"⏳ Ocorrência '{titulo}' expirou!"
+
+            for user in lista_user:
+               # if user['id'] != responsavel_id:
+                enviar_notificacao(user['id'], mensagem_notificacao, id_ocorrencia)
+
+            # Atualiza o status da ocorrência para "Expirada" e limpa os campos relacionados
             cursor.execute("""
-                   UPDATE ocorrencias
-                   SET status = 'Devolvida', responsavel_id = NULL, data_aceite = NULL
-                   WHERE id = %s
-               """, (id_ocorrencia,))
+                UPDATE ocorrencias
+                SET status = 'Expirada', responsavel_id = NULL, data_aceite = NULL
+                WHERE id = %s
+            """, (id_ocorrencia,))
             conn.commit()
+
+            # Envia notificação de expiração para todos os usuários
+            cursor.execute("SELECT id FROM utilizador")  # Pega os usuários
+            usuarios = cursor.fetchall()
+
+            for (usuario_id,) in usuarios:
+                mensagem = f"⏳ A ocorrência '{titulo}' foi devolvida automaticamente devido ao prazo expirado!"
+                # Envia como tipo "Expiração"
+                enviar_notificacao(usuario_id, mensagem, id_ocorrencia, tipo_ocorrencia="Expiração")
 
     cursor.close()
     conn.close()
+
 
 # -------------------------------------- CARREGA O PROGRAMA A CADA X HORAS --------------------------------------------
 
 def inicia_verificacao():
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(ocorrencias_expiradas, 'interval', hours=3)  # TROCAR O TEMPO PARA TESTAR, DEPOIS QUE TODOS OS BOTOES FUNCIONAR
+    scheduler.add_job(lambda: ocorrencias_expiradas(modo_teste=True), 'interval', seconds=20)
     scheduler.start()
 
 # ---------------------------------------------- FERIADOS PORTUGAL -------------------------------------------------
@@ -70,13 +105,12 @@ def is_feriado(data, feriados):
 # ----------------------------------------- CALCULA AS HORAS --------------------------------------------
 
 def horas_uteis(data_inicio, data_fim, feriados):
-    horas_totais = timedelta()
-    while data_inicio < data_fim:
-        if data_inicio.weekday() < 5 and not is_feriado(data_inicio, feriados):
-            horas_totais += timedelta(hours=24)
-        data_inicio += timedelta(days=1)
+    horas = 0
+    atual = data_inicio
 
-    # subtraindo o tempo restante do último dia
-    horas_restantes = timedelta(seconds=(data_fim - data_inicio).total_seconds())
-    horas_totais -= horas_restantes
-    return horas_totais
+    while atual < data_fim:
+        if atual.weekday() < 5 and atual.date() not in feriados:
+            horas += 1
+        atual += timedelta(hours=1)
+
+    return timedelta(hours=horas)

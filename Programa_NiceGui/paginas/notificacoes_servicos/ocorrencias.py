@@ -114,7 +114,7 @@ def obter_ocorrencias():
         query = """
         SELECT id, cliente, num_processo, responsavel, data, status, titulo, conteudo
         FROM ocorrencias
-        WHERE status IN ('Devolvida', 'Não Atribuída', 'Em espera', 'Cancelada')
+        WHERE status IN ('Devolvida', 'Não Atribuída', 'Em espera', 'Cancelada', 'Expirada')
         ORDER BY data DESC
         """
         cursor.execute(query)
@@ -187,26 +187,7 @@ def formulario_edicao(id_):
         dialog.open()
 
 
-# ---------------------------------------- UPDATE STATUS ---------------------------------------
-"""def update_status(id_, novo_status):
-    # Implementa a atualização no banco de dados
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("""
-            #UPDATE ocorrencias
-            #SET status = %s
-            #WHERE id = %s
-""", (novo_status, id_))
-        conn.commit()
-    except Exception as e:
-        ui.notify(f"Erro ao atualizar status: {e}", color="red")
-    finally:
-        cursor.close()
-        conn.close()"""
-
-
-# ------------------------------  DEF PARA OEGAR A ULTIMA ID CRIADA ---------------------------------
+# ------------------------------  DEF PARA PEGAR A ULTIMA ID CRIADA ---------------------------------
 
 def ultima_ocorrencia_id():
     conn = get_db_connection()
@@ -228,7 +209,6 @@ def ultima_ocorrencia_id():
         cursor.close()
         conn.close()
 
-# ----------------------------------- VOLTA OCORRENCIA DEVOLVIDA --------------------------------------
 
 
 

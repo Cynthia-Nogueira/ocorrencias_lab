@@ -38,6 +38,33 @@ def carregar_notificacoes(usuario_id: object) -> object:
         cursor.close()
         conn.close()
 
+
+# -------------------------------- ATUALIZA INTERFACE NOTIFICACOES --------------------------
+
+def atualiza_interface_notficacoes():
+    global notificacoes
+    with ui.column().classes("w-full"):
+        for notificacao in notificacoes:
+            if not notificacao["lida"]:
+                ui.button(
+                    notificacao["mensagem"],
+                    on_click=lambda id=notificacao["id"]: minha_funcao_visualizar_notificacao(id)).style("color: gray; font-weight: "
+                                    "bold; background-color: #D7EDE1 !important;").classes("q-pa-sm text-left full-width")
+            else:
+                ui.label(f"{notificacao['mensagem']}").classes("q-pa-sm text-gray-500").style("background-color: #d2e9dd "
+                                                                   "!important; border-radius: 8px; padding: 8px;")
+
+# ---------------------------------- ADICIONA UMA NOTIFICACAO AO DICIONARIO -------------------------------
+
+def add_notificacao(usuario_id, mensagem):
+    enviar_notificacao(usuario_id, mensagem)
+    notificacoes.append({
+        "id": len(notificacoes) + 1,
+        "mensagem": mensagem,
+        "data_notificacao": None,
+        "lida": False
+    })
+
 # -------------------------------- ENVIA AS NOTIFICACOES QUANDO UMA ACAO E REALIZADA --------------------------
 
 def enviar_notificacao(usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia="Info"):
@@ -62,33 +89,7 @@ def enviar_notificacao(usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia="Inf
         conn.close()
 
 
-# -------------------------------- ATUALIZA INTERFACE NOTIFICACOES --------------------------
 
-def atualiza_interface_notficacoes():
-    global notificacoes
-    with ui.column().classes("w-full"):
-        for notificacao in notificacoes:
-            if not notificacao["lida"]:
-                ui.button(
-                    notificacao["mensagem"],
-                    on_click=lambda id=notificacao["id"]: minha_funcao_visualizar_notificacao(id)).style("color: gray; font-weight: "
-                                    "bold; background-color: #D7EDE1 !important;").classes("q-pa-sm text-left full-width")
-            else:
-                ui.label(f"{notificacao['mensagem']}").classes("q-pa-sm text-gray-500").style("background-color: #d2e9dd "
-                                                                   "!important; border-radius: 8px; padding: 8px;")
-
-
-
-# ---------------------------------- ADICIONA UMA NOTIFICACAO AO DICIONARIO -------------------------------
-
-def add_notificacao(usuario_id, mensagem):
-    enviar_notificacao(usuario_id, mensagem)
-    notificacoes.append({
-        "id": len(notificacoes) + 1,
-        "mensagem": mensagem,
-        "data_notificacao": None,
-        "lida": False
-    })
 
 
 

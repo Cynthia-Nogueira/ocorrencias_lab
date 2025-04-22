@@ -43,11 +43,10 @@ def main_page():
     global grid
     grid = AgGrid({
         "columnDefs": [
-            {"headerName": "ID", "field": "id"},
+            {"headerName": "Data", "field": "data"},
             {"headerName": "Cliente", "field": "cliente"},
             {"headerName": "Nº Processo", "field": "num_processo"},
             {"headerName": "Responsável", "field": "responsavel"},
-            {"headerName": "Data", "field": "data"},
             {"headerName": "Status", "field": "status", "cellRenderer": "CustomButtonComponent"},
             {"headerName": "Título", "field": "titulo"},
             {"headerName": "Conteúdo", "field": "conteudo"},

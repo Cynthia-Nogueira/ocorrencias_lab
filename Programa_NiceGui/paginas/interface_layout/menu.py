@@ -91,6 +91,15 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                 """
                                 params = ()
 
+                            elif status == "Expirada":
+                                query = """
+                                   SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
+                                   FROM ocorrencias 
+                                   WHERE status = 'Expirada'
+                                   ORDER BY data_status_alterado DESC, data DESC;
+                                """
+                                params = ()
+
                             elif status == "Devolvida":
                                 query = """
                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
@@ -154,8 +163,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                         conn.close()
 
                 # Botão de Fechar rodapé
-                with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1; padding: 4px 0 8px 0;").classes(
-                                                                                                                "w-full justify-center"):
+                with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1; padding: 4px 0 8px 0;").classes("w-full justify-center"):
                     ui.button("Fechar", on_click=dialog.close).style(
                         "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
                     ).classes("text-white font-bold px-4 py-2")
@@ -257,6 +265,9 @@ def ocorrencia_espera():
 
 def ocorrencia_devolvida():
     ocorrencias_filtradas("Devolvida", "Ocorrências devolvidas")
+
+def ocorrencia_expirada_filtro():
+    ocorrencias_filtradas("Expirada", "Ocorrências expirada")
 
 def ocorrencia_cancelada():
     ocorrencias_filtradas("Cancelada", "Canceladas")

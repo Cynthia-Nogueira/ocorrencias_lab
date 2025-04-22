@@ -118,11 +118,10 @@ def carregar_ocorrencias_user():
 
     grid = ui.aggrid({
         "columnDefs": [
-            {"headerName": "ID", "field": "id"},
+            {"headerName": "Data", "field": "data"},
             {"headerName": "Cliente", "field": "cliente"},
             {"headerName": "Nº Processo", "field": "num_processo"},
             {"headerName": "Responsável", "field": "responsavel"},
-            {"headerName": "Data", "field": "data"},
             {"headerName": "Status", "field": "status", "cellRenderer": "CustomButtonComponent"},
             {"headerName": "Título", "field": "titulo"},
             {"headerName": "Conteúdo", "field": "conteudo"},
@@ -139,8 +138,6 @@ def carregar_ocorrencias_user():
                   on_click=lambda: atualizar_tabela(grid, buscar_ocorrencias_aceitas(current_user_id))).style(
             "color: white; font-weight: bold; background-color: #008B8B !important;"
              ).classes("btn-secondary w-48")
-
-
 
 # ---------------------------------- ATUALIZA A TABELA OCORRENCIAS  -------------------------------
 

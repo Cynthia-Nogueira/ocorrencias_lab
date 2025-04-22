@@ -3,7 +3,8 @@ from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado
 from Programa_NiceGui.paginas.interface_layout.menu import (carregar_notificacoes, exibir_notificacoes_menu,
                                                             ocorrencia_execucao, ocorrencia_espera,
                                                             ocorrencia_concluida, nao_atribuida, ocorrencia_devolvida,
-                                                            ocorrencia_cancelada)
+                                                            ocorrencia_cancelada, ocorrencia_expirada_filtro)
+
 
 #---------------------------------------------- INTERFACE DO MENU -----------------------------
 
@@ -49,6 +50,9 @@ def pag_layout():
 
         # Botão (devolvido)
         ui.button("Devolvidas", icon='arrow_right', on_click=ocorrencia_devolvida).props('flat')
+
+        # Botão (expirada)
+        ui.button("Expiradas", icon='arrow_right', on_click=ocorrencia_expirada_filtro).props('flat')
 
         # Botão (cacelada)
         ui.button("Canceladas", icon='arrow_right', on_click=ocorrencia_cancelada).props('flat')
