@@ -247,7 +247,7 @@ def detalhes_ocorrencia(ocorrencia):
 # ---------------------------- Funções específicas chamando a função genérica -------------------------------------
 
 def ocorrencia_concluida():
-    ocorrencias_filtradas("Concluída", "Ocorrências concludes")
+    ocorrencias_filtradas("Concluída", "Ocorrências concluídas")
 
 def ocorrencia_execucao():
     ocorrencias_filtradas("Em Execução", "Ocorrências em execução")

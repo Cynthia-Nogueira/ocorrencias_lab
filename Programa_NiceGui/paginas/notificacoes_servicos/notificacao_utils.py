@@ -40,17 +40,17 @@ def carregar_notificacoes(usuario_id: object) -> object:
 
 # -------------------------------- ENVIA AS NOTIFICACOES QUANDO UMA ACAO E REALIZADA --------------------------
 
-def enviar_notificacao(usuario_id, mensagem, ocorrencia_id):
+def enviar_notificacao(usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia="Info"):
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         # Inserir notificação no banco de dados
         query = """
-            INSERT INTO notificacoes (usuario_id, mensagem, data_notificacao, ocorrencia_id)
-            VALUES (%s, %s, NOW(), %s)
+            INSERT INTO notificacoes (usuario_id, mensagem, data_notificacao, ocorrencia_id, tipo_ocorrencia)
+            VALUES (%s, %s, NOW(), %s, %s)
         """
-        cursor.execute(query, (usuario_id, mensagem, ocorrencia_id))
+        cursor.execute(query, (usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia))
         conn.commit()
 
 

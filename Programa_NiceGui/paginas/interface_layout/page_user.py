@@ -126,7 +126,6 @@ def carregar_ocorrencias_user():
             {"headerName": "Status", "field": "status", "cellRenderer": "CustomButtonComponent"},
             {"headerName": "Título", "field": "titulo"},
             {"headerName": "Conteúdo", "field": "conteudo"},
-            {"headerName": "Ações", "field": "acoes", "cellRenderer": "htmlRenderer"}, # Placeholder (pois UI não pode ser passado para AgGrid)
         ],
         "rowData": ocorrencias,
     }).classes("w-full h-[500px] mx-auto").style("background: transparent; border: 5px solid "

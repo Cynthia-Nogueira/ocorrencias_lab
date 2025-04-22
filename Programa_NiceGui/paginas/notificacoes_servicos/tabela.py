@@ -116,7 +116,7 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         mensagem = f"✅ {nome_completo} aceitou a ocorrência ({num_processo}) do cliente {cliente}"
 
         for usuario in outros_usuarios:
-            enviar_notificacao(usuario[0], mensagem, ocorrencia_id)
+            enviar_notificacao(usuario[0], mensagem, ocorrencia_id, tipo_ocorrencia="Em execução")
 
         # Notifica o usuário que aceitou
         ui.notify("Ocorrência aceita com sucesso!", color="green")

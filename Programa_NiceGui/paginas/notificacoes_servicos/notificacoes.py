@@ -18,7 +18,7 @@ def visualizar_notificacao(notificacao_id):
 
         # Consulta os detalhes da notificação
         query = """
-            SELECT o.id, o.cliente, o.num_processo, o.data, o.titulo, o.conteudo, o.responsavel_id, o.status
+            SELECT o.id, o.cliente, o.num_processo, o.data, o.titulo, o.conteudo, o.responsavel_id, o.status, n.tipo_ocorrencia
             FROM notificacoes n
             JOIN ocorrencias o ON n.ocorrencia_id = o.id
             WHERE n.id = %s AND n.usuario_id = %s
@@ -34,7 +34,7 @@ def visualizar_notificacao(notificacao_id):
             return
 
         # Desempacota os dados retornados
-        ocorrencia_id, cliente, num_processo, data_ocorrencia, titulo_ocorrencia, conteudo_ocorrencia, responsavel_id, status_ocorrencia  = resultado
+        ocorrencia_id, cliente, num_processo, data_ocorrencia, titulo_ocorrencia, conteudo_ocorrencia, responsavel_id, status_ocorrencia, tipo_ocorrencia  = resultado
 
         # Formatar data (assume datetime, senão faz parse de string)
         if isinstance(data_ocorrencia, str):
@@ -72,7 +72,7 @@ def visualizar_notificacao(notificacao_id):
                                       ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                     # Só mostra botão "Aceitar" se a ocorrência ainda não tiver responsável
-                    if responsavel_id is None and status_ocorrencia != "Cancelada":
+                    if responsavel_id is None and status_ocorrencia != "Cancelada" and tipo_ocorrencia == "Devolvida":
                         ui.button("Aceitar",
                                   on_click=lambda: mostra_confirmacao(ocorrencia_id, current_user_id, detalhe_dialog)
                                   ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
@@ -120,7 +120,7 @@ def notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario):
         usuarios = cursor.fetchall()
 
         for (usuario_id,) in usuarios:
-            enviar_notificacao(usuario_id, mensagem, ocorrencia_id)
+            enviar_notificacao(usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia="Devolvida")
 
     except Exception as e:
         ui.notify(f"Erro ao notificar devolução: {e}", type="negative")
