@@ -64,111 +64,112 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
         with ui.card().classes("w-120 mx-auto").style("padding: 8px 0;") as card_notificacoes:
             card_notificacoes.style("background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
 
-            # Título fixo no topo
-            with ui.row().classes("w-full justify-center items-center q-pa-sm").style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;"):
-                ui.label(titulo).style("background-color: #008B8B; color: #fff8ff !important; padding: 8px 0 4px 0").classes("text-center font-bold text-2xl")
+            with ui.column().classes("w-full"):
+                # Título fixo no topo
+                with ui.row().classes("w-full justify-center items-center q-pa-sm").style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;"):
+                    ui.label(titulo).style("background-color: #008B8B; color: #fff8ff !important;").classes("text-center font-bold text-2xl")
 
-            # Scroll Area para as notificações
-            with ui.column().classes("w-full") as column_notificacoes:
+                # Scroll Area para as notificações
                 with ui.scroll_area().style("flex-grow: 1; overflow-y: auto; background-color: #ececf5;").classes("w-full q-px-md q-pt-sm"):
-                    try:
-                        if condicao_extra:
-                            query = f"""
-                                SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                FROM ocorrencias 
-                                WHERE {condicao_extra}
-                                ORDER BY data DESC;
-                            """
-                            params = ()
-
-                        else:
-                            if status == "Em Espera":
-                                query = """
-                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                    FROM ocorrencias 
-                                    WHERE responsavel IS NOT NULL AND status = 'Em Espera'
-                                    ORDER BY data_status_alterado DESC, data DESC;
-                                """
-                                params = ()
-
-                            elif status == "Expirada":
-                                query = """
-                                   SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                   FROM ocorrencias 
-                                   WHERE status = 'Expirada'
-                                   ORDER BY data_status_alterado DESC, data DESC;
-                                """
-                                params = ()
-
-                            elif status == "Devolvida":
-                                query = """
-                                   SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                   FROM ocorrencias 
-                                   WHERE status = 'Devolvida'
-                                   ORDER BY data_status_alterado DESC, data DESC;
-                               """
-                                params = ()
-
-                            elif status == "Não Atribuída":
-                                query = """
-                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                    FROM ocorrencias 
-                                    WHERE responsavel IS NULL AND status = 'Não atribuída'
-                                    ORDER BY data_status_alterado DESC, data DESC;
-                                """
-                                params = ()
-
-                            elif status == "Cancelada":
-                                query = """
-                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                    FROM ocorrencias 
-                                    WHERE responsavel IS NOT NULL AND status = 'Cancelada'
-                                    ORDER BY data_status_alterado DESC, data DESC;
-                                """
-                                params = ()
-
-                            elif status is None:
-                                query = """
-                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                    FROM ocorrencias 
-                                    WHERE status IS NULL
-                                    ORDER BY data_status_alterado DESC, data DESC;
+                    with ui.column().classes("w-full gap-2"):
+                        try:
+                            if condicao_extra:
+                                query = f"""
+                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                    FROM ocorrencias
+                                    WHERE {condicao_extra}
+                                    ORDER BY data DESC;
                                 """
                                 params = ()
 
                             else:
-                                query = """
-                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo 
-                                    FROM ocorrencias 
-                                    WHERE status = %s
-                                    ORDER BY data_status_alterado DESC, data DESC;
-                                """
-                                params = (status,)
+                                if status == "Em Espera":
+                                    query = """
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        FROM ocorrencias
+                                        WHERE responsavel IS NOT NULL AND status = 'Em Espera'
+                                        ORDER BY data_status_alterado DESC, data DESC;
+                                    """
+                                    params = ()
 
-                        cursor.execute(query, params)
-                        ocorrencias = cursor.fetchall()
+                                elif status == "Expirada":
+                                    query = """
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        FROM ocorrencias
+                                        WHERE status = 'Expirada'
+                                        ORDER BY data_status_alterado DESC, data DESC;
+                                    """
+                                    params = ()
 
-                        if not ocorrencias:
-                            ui.notify(f"Nenhum resultado encontrado para '{titulo}'.", type="negative")
-                            return
+                                elif status == "Devolvida":
+                                    query = """
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        FROM ocorrencias
+                                        WHERE status = 'Devolvida'
+                                        ORDER BY data_status_alterado DESC, data DESC;
+                                    """
+                                    params = ()
 
-                        for ocorrencia in ocorrencias:
-                            ui.button(
-                                f"{ocorrencia[3] or 'Não Atribuído'}: Cliente  {ocorrencia[1]} - Título:  '{ocorrencia[7]}'",
-                                on_click=lambda o=ocorrencia: detalhes_ocorrencia(o)).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
-                                                                                            ).classes("q-pa-sm text-left full-width")
+                                elif status == "Não Atribuída":
+                                    query = """
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        FROM ocorrencias
+                                        WHERE responsavel IS NULL AND status = 'Não atribuída'
+                                        ORDER BY data_status_alterado DESC, data DESC;
+                                    """
+                                    params = ()
 
-                    finally:
-                        cursor.close()
-                        conn.close()
+                                elif status == "Cancelada":
+                                    query = """
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        FROM ocorrencias
+                                        WHERE responsavel IS NOT NULL AND status = 'Cancelada'
+                                        ORDER BY data_status_alterado DESC, data DESC;
+                                    """
+                                    params = ()
+
+                                elif status is None:
+                                    query = """
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        FROM ocorrencias
+                                        WHERE status IS NULL
+                                        ORDER BY data_status_alterado DESC, data DESC;
+                                    """
+                                    params = ()
+
+                                else:
+                                    query = """
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        FROM ocorrencias
+                                        WHERE status = %s
+                                        ORDER BY data_status_alterado DESC, data DESC;
+                                    """
+                                    params = (status,)
+
+                            cursor.execute(query, params)
+                            ocorrencias = cursor.fetchall()
+
+                            if not ocorrencias:
+                                ui.notify(f"Nenhum resultado encontrado para '{titulo}'.", type="negative")
+                                return
+
+                            for ocorrencia in ocorrencias:
+                                ui.button(
+                                    f"{ocorrencia[3] or 'Não Atribuído'}: Cliente  {ocorrencia[1]} - Título:  '{ocorrencia[7]}'",
+                                    on_click=lambda o=ocorrencia: detalhes_ocorrencia(o)).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
+                                                                                                    ).classes("q-pa-sm text-left full-width")
+
+                        finally:
+                            cursor.close()
+                            conn.close()
 
                 # Botão de Fechar rodapé
-                with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1; padding: 4px 0 8px 0;").classes("w-full justify-center"):
+                with ui.row().style("position: sticky; bottom: 0; background-color: #ffffff; z-index: 1; padding: 4px 0 8px 0;").classes("w-full justify-center"):
                     ui.button("Fechar", on_click=dialog.close).style(
                         "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
                     ).classes("text-white font-bold px-4 py-2")
 
-            dialog.open()
+        dialog.open()
 
 # ------------------------------------------------- CHAMA O DETALHE DAS OCORRENCIAS ------------------------------------------------
 
