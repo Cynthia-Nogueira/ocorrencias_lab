@@ -75,7 +75,6 @@ def buscar_ocorrencias_aceitas(usuario_id):
 def carregar_ocorrencias_user():
     app.add_static_files('/static', '../static')
     ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/styles.css">')
-    ui.add_head_html('<script src="/static/customButtonComponent.js"></script>')
     ui.add_head_html('<script src="/static/main.js"></script>')
 
     global grid
@@ -122,7 +121,7 @@ def carregar_ocorrencias_user():
             {"headerName": "Cliente", "field": "cliente"},
             {"headerName": "Nº Processo", "field": "num_processo"},
             {"headerName": "Responsável", "field": "responsavel"},
-            {"headerName": "Status", "field": "status", "cellRenderer": "CustomButtonComponent"},
+            {"headerName": "Status", "field": "status"},
             {"headerName": "Título", "field": "titulo"},
             {"headerName": "Conteúdo", "field": "conteudo"},
         ],

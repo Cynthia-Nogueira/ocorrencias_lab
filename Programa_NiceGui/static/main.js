@@ -14,7 +14,6 @@ const gridOptions = {
     {
       field: "actions",
       headerName: "Actions",
-      cellRenderer: CustomButtonComponent,
     },
   ],
 };

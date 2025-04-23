@@ -5,10 +5,16 @@ from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import car
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao, mostra_confirmacao
 from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias_utils import atualiza_status, confirmar_alteracao_status
 
+
+
 # --------------------------------- EXIBE AS NOTIFICACOES NO MENU ---------------------------
+
+notificacao_elements = {}
 
 def exibir_notificacoes_menu():
     global notificacoes
+    global notificacao_elements
+    notificacao_elements = {}
     current_user_id = app.storage.user.get("userid", None)
 
     if current_user_id:
@@ -18,36 +24,31 @@ def exibir_notificacoes_menu():
         with ui.card().classes("w-120 mx-auto").style("padding: 8px 0;") as card_notificacoes:
             card_notificacoes.style("background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
 
-
             # Título fixo no topo
             with ui.row().classes("w-full justify-center items-center q-pa-sm").style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;"):
                 ui.label("Notificações").style("background-color: #008B8B; color: #fff8ff !important;").classes("text-2xl font-bold text-center")
 
             # Área scrollável com notificações
             with ui.scroll_area().style("flex-grow: 1; overflow-y: auto; background-color: #ececf5;").classes("w-full q-px-md q-pt-sm"):
-
                 with ui.column().classes("w-full gap-2"):
                     for notificacao in notificacoes:
                         notificacao_id = notificacao["id"]
                         mensagem = notificacao["mensagem"]
 
+                        notif_button = ui.button(
+                            mensagem,
+                            on_click=lambda id=notificacao_id: visualizar_notificacao(id)
+                        ).classes("q-pa-sm text-left full-width")
 
-                        #ISSO MUDA A COR????
+                        notificacao_elements[notificacao_id] = notif_button  # Armazena a referência
 
                         if not notificacao["lida"]:
-                            ui.button(
-                                mensagem,
-                                on_click=lambda id=notificacao_id: visualizar_notificacao(id)
-                            ).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
-                            ).classes("q-pa-sm text-left full-width")
+                            notif_button.style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;")
                         else:
-                            ui.label(mensagem).style("background-color: #008B8B  !important; border-radius: 8px; padding: 8px;"
-                                                     ).classes("q-pa-sm text-left text-gray-500 full-width")
-
+                            notif_button.style("color: #808080 !important; font-weight: normal; background-color: #E5FCF2 !important;")
 
             # Botão fechar fixo no rodapé
-            with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1;").classes("w-full justify-center q-pa-sm"):
-
+            with ui.row().style("position: sticky; bottom: 0; background-color: #ffffff; z-index: 1;").classes("w-full justify-center q-pa-sm"):
                 ui.button("Fechar", on_click=dialog.close).style(
                     "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
                 ).classes("text-white font-bold px-4 py-2")

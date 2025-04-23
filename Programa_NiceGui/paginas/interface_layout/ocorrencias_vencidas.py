@@ -21,6 +21,7 @@ def ocorrencias_expiradas(modo_teste=False):
     WHERE status = 'Em espera' AND data_aceite IS NOT NULL
     ORDER BY data_status_alterado DESC, data DESC;
     """
+
     cursor.execute(query)
     ocorrencias = cursor.fetchall()
 
@@ -59,7 +60,6 @@ def ocorrencias_expiradas(modo_teste=False):
             mensagem_notificacao = f"⏳ Ocorrência '{titulo}' expirou!"
 
             for user in lista_user:
-               # if user['id'] != responsavel_id:
                 enviar_notificacao(user['id'], mensagem_notificacao, id_ocorrencia)
 
             # Atualiza o status da ocorrência para "Expirada" e limpa os campos relacionados
@@ -68,15 +68,15 @@ def ocorrencias_expiradas(modo_teste=False):
                 SET status = 'Expirada', responsavel_id = NULL, data_aceite = NULL
                 WHERE id = %s
             """, (id_ocorrencia,))
+
             conn.commit()
 
             # Envia notificação de expiração para todos os usuários
-            cursor.execute("SELECT id FROM utilizador")  # Pega os usuários
+            cursor.execute("SELECT id FROM utilizador")
             usuarios = cursor.fetchall()
 
             for (usuario_id,) in usuarios:
-                mensagem = f"⏳ A ocorrência '{titulo}' foi devolvida automaticamente devido ao prazo expirado!"
-                # Envia como tipo "Expiração"
+                mensagem = f"⏳ A ocorrência '{titulo}' foi devolvida automaticamente. Prazo expirado!"
                 enviar_notificacao(usuario_id, mensagem, id_ocorrencia, tipo_ocorrencia="Expiração")
 
     cursor.close()
