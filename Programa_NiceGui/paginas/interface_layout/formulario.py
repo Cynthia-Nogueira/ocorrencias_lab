@@ -1,6 +1,6 @@
 from nicegui import app, ui
 from datetime import date, datetime
-from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado
+from Programa_NiceGui.paginas.banco_dados.db_conection import obter_user_logado, get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
 from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import salvar_ocorrencia, ultima_ocorrencia_id
@@ -43,7 +43,6 @@ def novo_formulario():
         def atualizar_contador():
             carac_digitado = len(conteudo.value)
             contador.set_text(f"{carac_digitado}/400 caracteres")
-
             if carac_digitado >= 400:
                 contador.classes(replace="text-sm text-red-500 mb-4")
             else:
@@ -59,12 +58,11 @@ def novo_formulario():
         def btn_salvar():
 
             #Salva a ocorrência e envia notificações para outros usuários
-
-            if not conteudo.value.strip():  # Verifica se o campo está vazio
+            if not conteudo.value.strip():
                 ui.notify("O campo 'Conteúdo da ocorrência' é obrigatório.", type="negative")
                 return
 
-            if not titulo.value.strip():  # Verifica se o campo está vazio
+            if not titulo.value.strip():
                 ui.notify("O campo 'Título' é obrigatório.", type="negative")
                 return
 
@@ -75,8 +73,7 @@ def novo_formulario():
                 ui.notify(f"Erro ao formatar a data: {e}", type="negative")
                 return
 
-            # Agora, chamamos a função de salvar com a data formatada corretamente
-
+            # chama a função de salvar com a data formatada corretamente
             try:
                 msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, data_formatada,
                                                  status.value, titulo.value, conteudo.value)
@@ -86,9 +83,7 @@ def novo_formulario():
 
             if sucesso:
                 ui.notify(msg, type="positive")
-
-                # Obtém todos os usuários (exceto o usuário logado) para enviar a notificação
-                lista_user = obter_lista_user()
+                lista_user = obter_lista_user()    #obtem todos os usuarios para notificar
 
                 if not nome_user:
                     ui.notify("Utilizador logado não encontrado.", type="negative")
@@ -96,13 +91,11 @@ def novo_formulario():
 
                 # Criando a notificação formatada
                 mensagem_notificacao = (
-
                     f"🟠 Nova ocorrência registada por:\n"
                     f"  {nome_user}\n"
                 )
 
                 # Enviar a notificação para os usuários, excluindo o usuário logado
-
                 for user in lista_user:
                     if user['id'] != current_user_id:
                         enviar_notificacao(user['id'], mensagem_notificacao, ultima_ocorrencia_id())
@@ -129,4 +122,196 @@ def novo_formulario():
                                     " background-color: #008B8B !important;").classes("btn-secondary w-32")
 
     dialog.open()
+
+# ------------------------------------ FORM PARA EDITAR AS OCORRENCIAS ----------------------------------
+
+def abrir_formulario_edicao(ocorrencia):
+    ocorrencia_id, cliente_valor, num_processo_valor, responsavel, responsavel_id, data_valor, status_valor, titulo_valor, conteudo_valor = ocorrencia
+
+    with ui.dialog() as dialog_edicao, ui.card().classes("w-4/5 h-[600px] mx-auto"):
+        ui.label("Editar Ocorrência").classes("text-2xl mx-auto font-bold mb-4")
+
+        with ui.row().classes("w-full justify-between"):
+            with ui.grid(columns=2).classes("w-full"):
+                cliente = ui.input("Cliente", value=cliente_valor).classes("w-full")
+                num_processo = ui.input("Nº Processo", value=num_processo_valor).classes("w-full")
+
+        data_formatada = data_valor.strftime("%d/%m/%Y") if isinstance(data_valor, datetime) else data_valor
+
+        with ui.row().classes("w-full justify-between"):
+            with ui.grid(columns=2).classes("w-full"):
+                ui.input("Data", value=data_formatada).props("readonly").classes("w-full")
+                ui.input("Status", value=status_valor).props("readonly").classes("w-full")
+
+        titulo = ui.input("Título", value=titulo_valor).props("maxlength=400").classes("w-full mr-2")
+        conteudo = ui.textarea("Conteúdo da ocorrência", value=conteudo_valor).props("maxlength=400").classes("w-full mr-2")
+        contador = ui.label("0/400 caracteres").classes("text-sm text-gray-500 mb-4")
+
+        def atualizar_contador():
+            carac_digitado = len(conteudo.value)
+            contador.set_text(f"{carac_digitado}/400 caracteres")
+            contador.classes(replace="text-sm text-red-500 mb-4" if carac_digitado >= 400 else "text-sm text-gray-500 mb-4")
+
+        conteudo.on("keydown", lambda: atualizar_contador())
+        atualizar_contador()
+
+        def salvar_edicao():
+            if not titulo.value.strip() or not conteudo.value.strip():
+                ui.notify("Preencha os campos obrigatórios: Título e Conteúdo.", type="negative")
+                return
+
+            # Exibir a caixa de confirmação antes de salvar
+            mostra_confirmacao_edicao(
+                ocorrencia_id,
+                cliente.value,
+                num_processo.value,
+                titulo.value,
+                conteudo.value,
+                dialog_edicao
+            )
+
+            try:
+                salvar_alteracoes_ocorrencia(ocorrencia_id, cliente.value, num_processo.value, titulo.value, conteudo.value)
+                ui.notify("Ocorrência atualizada com sucesso!", type="positive")
+                dialog_edicao.close()
+
+            except Exception as e:
+                ui.notify(f"Erro ao salvar: {e}", type="negative")
+
+        with ui.row().classes("mx-auto gap-x-8"):
+            ui.button("Salvar", on_click=salvar_edicao).style("color: white; font-weight: bold; background-color: #008B8B !important;").classes("btn-primary w-32")
+            ui.button("Cancelar", on_click=dialog_edicao.close).style("color: white; font-weight: bold; background-color: #008B8B !important;").classes("btn-secondary w-32")
+
+    dialog_edicao.open()
+
+# ----------------------------------- SALVA AS ALTERACOES ------------------------------------
+
+def salvar_alteracoes_ocorrencia(ocorrencia_id, cliente, num_processo, titulo, conteudo):
+    global status_global
+    global condicao_extra_global
+    global refresh_lista_ocorrencias
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE ocorrencias
+            SET cliente = %s,
+                num_processo = %s,
+                titulo = %s,
+                conteudo = %s
+            WHERE id = %s;
+        """, (cliente, num_processo, titulo, conteudo, ocorrencia_id))
+        conn.commit()
+
+        if refresh_lista_ocorrencias:
+            conn_recarregar = get_db_connection()
+            cursor_recarregar = conn_recarregar.cursor()
+
+            # mesma lógica de ocorrencias_filtradas
+            if condicao_extra_global:
+                query = f"""
+                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                    FROM ocorrencias
+                    WHERE {condicao_extra_global}
+                    ORDER BY data DESC;
+                """
+                params = ()
+            else:
+                if status_global == "Em Espera":
+                    query = f"""
+                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                        FROM ocorrencias
+                        WHERE responsavel IS NOT NULL AND status = 'Em Espera'
+                        ORDER BY data_status_alterado DESC, data DESC;
+                    """
+                    params = ()
+
+                elif status_global == "Expirada":
+                    query = """
+                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                        FROM ocorrencias
+                        WHERE status = 'Expirada'
+                        ORDER BY data_status_alterado DESC, data DESC;
+                    """
+                    params = ()
+
+                elif status_global == "Devolvida":
+                    query = """
+                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                        FROM ocorrencias
+                        WHERE status = 'Devolvida'
+                        ORDER BY data_status_alterado DESC, data DESC;
+                    """
+                    params = ()
+
+                elif status_global == "Não Atribuída":
+                    query = """
+                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                        FROM ocorrencias
+                        WHERE responsavel IS NULL AND status = 'Não atribuída'
+                        ORDER BY data_status_alterado DESC, data DESC;
+                    """
+                    params = ()
+
+                elif status_global == "Cancelada":
+                    query = """
+                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                        FROM ocorrencias
+                        WHERE responsavel IS NOT NULL AND status = 'Cancelada'
+                        ORDER BY data_status_alterado DESC, data DESC;
+                    """
+                    params = ()
+
+                elif status_global is None:
+                    query = """
+                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                        FROM ocorrencias
+                        WHERE status IS NULL
+                        ORDER BY data_status_alterado DESC, data DESC;
+                    """
+                    params = ()
+
+                else:
+                    query = """
+                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                        FROM ocorrencias
+                        WHERE status = %s
+                        ORDER BY data_status_alterado DESC, data DESC;
+                    """
+                    params = (status_global,)
+
+            cursor_recarregar.execute(query, params)
+            ocorrencias_atualizadas = cursor_recarregar.fetchall()
+            cursor_recarregar.close()
+            conn_recarregar.close()
+
+            refresh_lista_ocorrencias.refresh(ocorrencias_atualizadas)
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# -----------------------------------  MOSTRAR CONFIRMACAO EDICAO ------------------------------------
+
+def mostra_confirmacao_edicao(ocorrencia_id, cliente, num_processo, titulo, conteudo, dialog_edicao):
+    with ui.dialog() as confirm_dialog:
+        with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
+            ui.label("Tem certeza que deseja salvar as alterações?").classes(
+                "text-lg font-bold mx-auto q-mb-sm text-center")
+
+            with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
+                ui.button("Não", on_click=confirm_dialog.close).style(
+                    "color: white; font-weight: bold; background-color: #FF6347 !important;")
+
+                ui.button("Sim", on_click=lambda: (
+                    salvar_alteracoes_ocorrencia(ocorrencia_id, cliente, num_processo, titulo, conteudo),
+                    ui.notify("Ocorrência atualizada com sucesso!", type="positive"),
+                    confirm_dialog.close(),
+                    dialog_edicao.close()
+                )).style("color: white; font-weight: bold; background-color: #008B8B !important;")
+
+    confirm_dialog.open()
 

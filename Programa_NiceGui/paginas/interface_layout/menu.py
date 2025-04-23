@@ -1,8 +1,8 @@
 from nicegui import ui, app
 from datetime import datetime
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
+from Programa_NiceGui.paginas.interface_layout.formulario import abrir_formulario_edicao
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import carregar_notificacoes
-from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao, mostra_confirmacao
 from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias_utils import atualiza_status, confirmar_alteracao_status
 
 
@@ -12,6 +12,7 @@ from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias_utils import atu
 notificacao_elements = {}
 
 def exibir_notificacoes_menu():
+    from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import visualizar_notificacao
     global notificacoes
     global notificacao_elements
     notificacao_elements = {}
@@ -57,7 +58,29 @@ def exibir_notificacoes_menu():
 
 # ----------------------------------- FILTRA AS OCORRENCIAS POR STATUS -------------------------------------
 
+refresh_lista_ocorrencias = None
+
+@ui.refreshable
+def refreshable_ocorrencias_lista(ocorrencias):
+    #ocorrencias = ocorrencias_filtradas()
+
+    with ui.column().classes("w-full gap-2"):
+        for ocorrencia in ocorrencias:
+            ui.button(
+                f"{ocorrencia[3] or 'Não Atribuído'}: Cliente  {ocorrencia[1]} - Título:  '{ocorrencia[7]}'",
+                on_click=lambda o=ocorrencia: detalhes_ocorrencia(o)).style(
+                "color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
+                ).classes("q-pa-sm text-left full-width")
+
+refresh_lista_ocorrencias = refreshable_ocorrencias_lista.refresh
+
+
 def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
+    global refresh_lista_ocorrencias
+    global status_global
+    global condicao_extra_global
+    status_global = status
+    condicao_extra_global = condicao_extra
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -66,7 +89,6 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
             card_notificacoes.style("background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
 
             with ui.column().classes("w-full"):
-                # Título fixo no topo
                 with ui.row().classes("w-full justify-center items-center q-pa-sm").style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;"):
                     ui.label(titulo).style("background-color: #008B8B; color: #fff8ff !important;").classes("text-center font-bold text-2xl")
 
@@ -154,15 +176,18 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                 ui.notify(f"Nenhum resultado encontrado para '{titulo}'.", type="negative")
                                 return
 
-                            for ocorrencia in ocorrencias:
-                                ui.button(
-                                    f"{ocorrencia[3] or 'Não Atribuído'}: Cliente  {ocorrencia[1]} - Título:  '{ocorrencia[7]}'",
-                                    on_click=lambda o=ocorrencia: detalhes_ocorrencia(o)).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
-                                                                                                    ).classes("q-pa-sm text-left full-width")
+                            refresh_lista_ocorrencias = refreshable_ocorrencias_lista(ocorrencias) #chama a funcao para recarregar
+
+                       #     for ocorrencia in ocorrencias:
+                        #        ui.button(
+                         #           f"{ocorrencia[3] or 'Não Atribuído'}: Cliente  {ocorrencia[1]} - Título:  '{ocorrencia[7]}'",
+                          #          on_click=lambda o=ocorrencia: detalhes_ocorrencia(o)).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
+                           #                                                                         ).classes("q-pa-sm text-left full-width")
 
                         finally:
                             cursor.close()
                             conn.close()
+
 
                 # Botão de Fechar rodapé
                 with ui.row().style("position: sticky; bottom: 0; background-color: #ffffff; z-index: 1; padding: 4px 0 8px 0;").classes("w-full justify-center"):
@@ -175,6 +200,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 # ------------------------------------------------- CHAMA O DETALHE DAS OCORRENCIAS ------------------------------------------------
 
 def detalhes_ocorrencia(ocorrencia):
+    from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import mostra_confirmacao
     ocorrencia_id, cliente, num_processo, responsavel, responsavel_id, data_ocorrencia, status, titulo, conteudo_ocorrencia = ocorrencia
     current_user_id = int(app.storage.user.get("userid"))
     responsavel_id = int(responsavel_id) if responsavel_id is not None else None
@@ -231,6 +257,7 @@ def detalhes_ocorrencia(ocorrencia):
                     "color: white; font-weight: bold; background-color: #008B8B !important;"
                 ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
+
                 if responsavel_id == current_user_id and status in ["Em execução", "Em espera"]:
                     ui.button(
                         "Confirmar",
@@ -241,6 +268,13 @@ def detalhes_ocorrencia(ocorrencia):
                         )).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                         ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
+
+                if responsavel_id == current_user_id and status not in ["Cancelada", "Concluída"]:
+                    ui.button("Editar", on_click=lambda o=ocorrencia: abrir_formulario_edicao(o)).style(
+                        "color: white; font-weight: bold; background-color: #008B8B !important;"
+                    ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+
+
                 elif (status == "Devolvida" or responsavel is None) and responsavel_id is None:
                     if current_user_id:
                         ui.button(
@@ -248,7 +282,8 @@ def detalhes_ocorrencia(ocorrencia):
                             on_click=lambda o_id=ocorrencia_id, u_id=current_user_id:
                             mostra_confirmacao(o_id, u_id, detalhe_dialog)
                         ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
-                        ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+                                ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+
 
                 elif (status == "Expirada" or responsavel is None) and responsavel_id is None:
                     if current_user_id:
@@ -257,11 +292,9 @@ def detalhes_ocorrencia(ocorrencia):
                             on_click=lambda o_id=ocorrencia_id, u_id=current_user_id:
                             mostra_confirmacao(o_id, u_id, detalhe_dialog)
                         ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
-                        ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
-
+                                ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
     detalhe_dialog.open()
-
 
 # ---------------------------- Funções específicas chamando a função genérica -------------------------------------
 
