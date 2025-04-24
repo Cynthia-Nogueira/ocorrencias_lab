@@ -1,7 +1,6 @@
 from nicegui import ui
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.helper_notificacoes import minha_funcao_visualizar_notificacao
-from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias import ultima_ocorrencia_id
 
 # -------------------------------- CARREGA TODAS AS NOTIFICACOES --------------------------
 
@@ -23,6 +22,7 @@ def carregar_notificacoes(usuario_id: object) -> object:
 
         for notificacao in notificacoes_db:
             id, mensagem, data_notificacao, lida, ocorrencia_id  = notificacao
+
             if not lida:
                 notificacoes_nao_lidas += 1
             dados_tabela.append({
@@ -32,7 +32,7 @@ def carregar_notificacoes(usuario_id: object) -> object:
                 "lida": lida
             })
 
-        return dados_tabela, notificacoes_nao_lidas  # Retorna notificações e contador de não lidas
+        return dados_tabela, notificacoes_nao_lidas
 
     finally:
         cursor.close()
@@ -67,7 +67,7 @@ def add_notificacao(usuario_id, mensagem):
 
 # -------------------------------- ENVIA AS NOTIFICACOES QUANDO UMA ACAO E REALIZADA --------------------------
 
-def enviar_notificacao(usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia="Info"):
+def enviar_notificacao(criador_id, mensagem, ocorrencia_id, tipo_ocorrencia="Info"):
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -77,7 +77,7 @@ def enviar_notificacao(usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia="Inf
             INSERT INTO notificacoes (usuario_id, mensagem, data_notificacao, ocorrencia_id, tipo_ocorrencia)
             VALUES (%s, %s, NOW(), %s, %s)
         """
-        cursor.execute(query, (usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia))
+        cursor.execute(query, (criador_id, mensagem, ocorrencia_id, tipo_ocorrencia))
         conn.commit()
 
 
@@ -87,6 +87,7 @@ def enviar_notificacao(usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia="Inf
     finally:
         cursor.close()
         conn.close()
+
 
 
 

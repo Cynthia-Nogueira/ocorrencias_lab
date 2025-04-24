@@ -58,12 +58,9 @@ def exibir_notificacoes_menu():
 
 # ----------------------------------- FILTRA AS OCORRENCIAS POR STATUS -------------------------------------
 
-refresh_lista_ocorrencias = None
-
 @ui.refreshable
 def refreshable_ocorrencias_lista(ocorrencias):
-    #ocorrencias = ocorrencias_filtradas()
-
+    # processa as ocorrências
     with ui.column().classes("w-full gap-2"):
         for ocorrencia in ocorrencias:
             ui.button(
@@ -98,7 +95,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                         try:
                             if condicao_extra:
                                 query = f"""
-                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                    SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                     FROM ocorrencias
                                     WHERE {condicao_extra}
                                     ORDER BY data DESC;
@@ -108,7 +105,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                             else:
                                 if status == "Em Espera":
                                     query = """
-                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                         FROM ocorrencias
                                         WHERE responsavel IS NOT NULL AND status = 'Em Espera'
                                         ORDER BY data_status_alterado DESC, data DESC;
@@ -117,7 +114,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
                                 elif status == "Expirada":
                                     query = """
-                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                         FROM ocorrencias
                                         WHERE status = 'Expirada'
                                         ORDER BY data_status_alterado DESC, data DESC;
@@ -126,7 +123,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
                                 elif status == "Devolvida":
                                     query = """
-                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                         FROM ocorrencias
                                         WHERE status = 'Devolvida'
                                         ORDER BY data_status_alterado DESC, data DESC;
@@ -135,7 +132,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
                                 elif status == "Não Atribuída":
                                     query = """
-                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                         FROM ocorrencias
                                         WHERE responsavel IS NULL AND status = 'Não atribuída'
                                         ORDER BY data_status_alterado DESC, data DESC;
@@ -144,7 +141,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
                                 elif status == "Cancelada":
                                     query = """
-                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                         FROM ocorrencias
                                         WHERE responsavel IS NOT NULL AND status = 'Cancelada'
                                         ORDER BY data_status_alterado DESC, data DESC;
@@ -153,7 +150,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
                                 elif status is None:
                                     query = """
-                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                         FROM ocorrencias
                                         WHERE status IS NULL
                                         ORDER BY data_status_alterado DESC, data DESC;
@@ -162,7 +159,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
                                 else:
                                     query = """
-                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo
+                                        SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                         FROM ocorrencias
                                         WHERE status = %s
                                         ORDER BY data_status_alterado DESC, data DESC;
@@ -201,7 +198,14 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
 def detalhes_ocorrencia(ocorrencia):
     from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import mostra_confirmacao
-    ocorrencia_id, cliente, num_processo, responsavel, responsavel_id, data_ocorrencia, status, titulo, conteudo_ocorrencia = ocorrencia
+
+    print(f"DEBUG: ", ocorrencia)
+    print(f"Tamanho lista: ", len(ocorrencia))
+
+
+    ocorrencia_id, cliente, num_processo, responsavel, responsavel_id, data_ocorrencia, status, titulo, conteudo_ocorrencia, criador_id = ocorrencia
+
+
     current_user_id = int(app.storage.user.get("userid"))
     responsavel_id = int(responsavel_id) if responsavel_id is not None else None
 
@@ -268,8 +272,7 @@ def detalhes_ocorrencia(ocorrencia):
                         )).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                         ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
-
-                if responsavel_id == current_user_id and status not in ["Cancelada", "Concluída"]:
+                if criador_id is not None and current_user_id == criador_id and status not in ["Concluída"]:
                     ui.button("Editar", on_click=lambda o=ocorrencia: abrir_formulario_edicao(o)).style(
                         "color: white; font-weight: bold; background-color: #008B8B !important;"
                     ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")

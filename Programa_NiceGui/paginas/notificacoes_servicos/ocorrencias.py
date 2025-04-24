@@ -24,25 +24,31 @@ def update_ocorrencia(id, cliente, num_processo, data, status, conteudo):
 
 # ----------------------------- Cria uma nova ocorrência no banco -------------------------
 
-def nova_ocorrencia(cliente, num_processo, data, status, conteudo, usuario_criador):
-
+def nova_ocorrencia(cliente, num_processo, data, status, titulo, conteudo, app):
     from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
+
+    criador_id = app.storage.user.get("userid", None)
+
+    print("RESULTADO", criador_id)
+
+    if not criador_id:
+        raise Exception("Erro: Não foi possível identificar o usuário logado.")
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         query = """
-            INSERT INTO ocorrencias (cliente, num_processo, data, status, conteudo, criador_id)
-            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
+            INSERT INTO ocorrencias (cliente, num_processo, data, status, titulo, conteudo, criador_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;
         """
-        cursor.execute(query, (cliente, num_processo, data, status, conteudo, usuario_criador))
+        cursor.execute(query, (cliente, num_processo, data, status, titulo, conteudo, criador_id))
         ocorrencia_id = cursor.fetchone()[0]
         conn.commit()
 
         # Buscar todos os usuários, exceto o criador da ocorrência
         query_usuarios = "SELECT id FROM utilizador WHERE id != %s"
-        cursor.execute(query_usuarios, (usuario_criador,))
+        cursor.execute(query_usuarios, (criador_id,))
         usuarios = cursor.fetchall()
 
         mensagem = f"Nova ocorrência registada: {cliente} - processo {num_processo}."
@@ -52,16 +58,15 @@ def nova_ocorrencia(cliente, num_processo, data, status, conteudo, usuario_criad
 
     except Exception as e:
         print("Ocorreu um erro ao salvar a ocorrência:")
-        print(traceback.format_exc())  # Exibe o traceback completo
+        print(traceback.format_exc())  # Exibe o traceback caso de erro
 
     finally:
         cursor.close()
         conn.close()
 
-
 # ------------------------------------- SALVA FORMULÁRIO ----------------------------------------
 
-def salvar_ocorrencia(cliente, num_processo, data_formatada, status, titulo, conteudo):
+def salvar_ocorrencia(cliente, num_processo, data_formatada, status, titulo, conteudo, app):
     if len(conteudo) > 400:
         return "Erro: o campo não pode exceder 400 caracteres."
 
@@ -79,16 +84,29 @@ def salvar_ocorrencia(cliente, num_processo, data_formatada, status, titulo, con
             if data_formatada.hour == 0 and data_formatada.minute == 0 and data_formatada.second == 0:
                 data_formatada = datetime.combine(data_formatada.date(), datetime.now().time())
 
+
+
+        criador_id = app.storage.user.get("userid", None)
+
+        print("CRIADOR ID:", criador_id)
+
+        if not criador_id:
+            raise Exception("Usuário não identificado!")
+
+
+
         # consulta de inserção
         insert_stmt = (
             "INSERT INTO ocorrencias "
-            "(cliente, num_processo, data, status, titulo, conteudo)"
-            "VALUES (%s, %s, %s, %s, %s, %s)"
+            "(cliente, num_processo, data, status, titulo, conteudo, criador_id)"
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)"
         )
+
         #valores da tabela
-        cont = (cliente, num_processo, data_formatada, status, titulo, conteudo)
+        cont = (cliente, num_processo, data_formatada, status, titulo, conteudo, criador_id)
         cursor.execute(insert_stmt, cont)
         conn.commit()
+
         return "Ocorrência salva com sucesso!", True
 
     except Exception as e:
@@ -97,7 +115,7 @@ def salvar_ocorrencia(cliente, num_processo, data_formatada, status, titulo, con
         print(traceback.format_exc())
 
         ui.notify(f"Erro ao salvar ocorrência: {e}. Verifique os dados preenchidos.", color="red")
-        return False
+        return "Erro ao salvar ocorrência.", False
 
     finally:
         cursor.close()

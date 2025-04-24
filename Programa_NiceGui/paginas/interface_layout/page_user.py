@@ -13,7 +13,7 @@ def buscar_ocorrencias_aceitas(usuario_id):
 
     try:
         query = """
-        SELECT id, cliente, num_processo, data, responsavel, status, titulo, conteudo, data_aceite
+        SELECT id, cliente, num_processo, data, responsavel, status, titulo, conteudo, data_aceite, criador_id
         FROM ocorrencias
         WHERE responsavel_id = %s
         ORDER BY data_aceite DESC
@@ -29,7 +29,7 @@ def buscar_ocorrencias_aceitas(usuario_id):
 
         for o in ocorrencias:
             # verifica se a ocorrência foi aceita há mais de 48 horas
-            id_ocorrencia, cliente, num_processo, data, responsavel, status, titulo, conteudo, data_aceite = o
+            id_ocorrencia, cliente, num_processo, data, responsavel, status, titulo, conteudo, data_aceite, criador_id = o
 
             if data_aceite:
                 # converte para datetime
@@ -61,7 +61,8 @@ def buscar_ocorrencias_aceitas(usuario_id):
                 "responsavel": responsavel if responsavel else "Responsável vázio",
                 "status": status if status else "Desconhecido",
                 "titulo": titulo if titulo else "Sem título",
-                "conteudo": conteudo if conteudo else "Sem conteúdo"
+                "conteudo": conteudo if conteudo else "Sem conteúdo",
+                "criador_id": criador_id if criador_id else "Não encontrado",
             })
 
         return resultado if resultado else []
