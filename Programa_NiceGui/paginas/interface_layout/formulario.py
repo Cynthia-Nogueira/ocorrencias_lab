@@ -28,7 +28,7 @@ def novo_formulario():
                         with ui.date().bind_value(date_input).style(
                                 "--q-primary:#008B8B; --q-color-calendar-header:#008B8B;"):
                             with ui.row().classes('justify-end'):
-                                ui.button('Fechar', on_click=menu.close).props('flat').style("color:#008B8B;")
+                                ui.button('Fechar', on_click=menu.close).props('flat').style("color:#0a0476;")
                     with date_input.add_slot('prepend'):
                         ui.icon('edit_calendar', color="#008B8B").on('click', menu.open).classes(
                             'cursor-pointer w-full')
@@ -115,11 +115,12 @@ def novo_formulario():
 
 
         with ui.row().classes("mx-auto gap-x-8"):
-            ui.button("Salvar", on_click=btn_salvar).style("color: white; font-weight: bold; "
-                                    "background-color: #008B8B !important;").classes("btn-primary w-32")
-
             ui.button("Cancelar", on_click=dialog.close).style("color: white; font-weight: bold;"
-                                    " background-color: #008B8B !important;").classes("btn-secondary w-32")
+                            " background-color: #E73B3B !important;").classes( "btn-secondary w-32")
+
+            ui.button("Salvar", on_click=btn_salvar).style("color: white; font-weight: bold; "
+                            "background-color: #008B8B !important;").classes("btn-primary w-32")
+
 
     dialog.open()
 
@@ -171,10 +172,12 @@ def abrir_formulario_edicao(ocorrencia):
             )
 
         with ui.row().classes("mx-auto gap-x-8"):
+            ui.button("Cancelar", on_click=dialog_edicao.close).style(
+                "color: white; font-weight: bold; background-color: #E73B3B !important;").classes("btn-secondary w-32")
+
             ui.button("Salvar", on_click=salvar_edicao).style(
                 "color: white; font-weight: bold; background-color: #008B8B !important;").classes("btn-primary w-32")
-            ui.button("Cancelar", on_click=dialog_edicao.close).style(
-                "color: white; font-weight: bold; background-color: #008B8B !important;").classes("btn-secondary w-32")
+
 
         dialog_edicao.open()
 
@@ -210,8 +213,14 @@ def salvar_alteracoes_ocorrencia(ocorrencia_id, cliente, num_processo, titulo, c
 
 def mostra_confirmacao_edicao(ocorrencia_id, cliente, num_processo, titulo, conteudo, dialog_edicao):
     from Programa_NiceGui.paginas.interface_layout.menu import refresh_lista_ocorrencias
+    import Programa_NiceGui.paginas.interface_layout.global_state as global_state
 
-    with ui.dialog() as confirm_dialog:
+    global_state.cliente_label = cliente
+    global_state.num_processo_label = num_processo
+    global_state.titulo_label = titulo
+    global_state.conteudo_label = conteudo
+
+    with (ui.dialog() as confirm_dialog):
         with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
             ui.label("Tem certeza que deseja salvar as alterações?").classes(
                 "text-lg font-bold mx-auto q-mb-sm text-center")

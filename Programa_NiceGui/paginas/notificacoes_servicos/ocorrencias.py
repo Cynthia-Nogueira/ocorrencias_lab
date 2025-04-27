@@ -200,7 +200,7 @@ def formulario_edicao(id_):
                 ui.button("Salvar", on_click=btn_salvar).style("color: white; font-weight: bold;"
                                     " background-color: #008B8B !important;").classes("btn-primary")
                 ui.button("Cancelar", on_click=lambda: dialog.close()).style("color: white; font-weight: bold;"
-                                    " background-color: #008B8B !important;").classes("btn-secondary")
+                                    " background-color: #881820 !important;").classes("btn-secondary")
 
         dialog.open()
 

@@ -6,9 +6,7 @@ from nicegui import ui, app
 
 # ----------------------------------- ABRE UMA CAIXA COM DETALHES DA MENSAGEM ------------------------------------
 
-notificacao_elements = {}
-
-def visualizar_notificacao(notificacao_id):
+def visualizar_notificacao(notificacao_id, notificacao_elements):
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -52,7 +50,7 @@ def visualizar_notificacao(notificacao_id):
         # Atualiza o estilo do botão na interface, se ele ainda existir no diálogo
         if notificacao_id in notificacao_elements:
             notificacao_elements[notificacao_id].style(
-                "color: #808080 !important; font-weight: normal; background-color: #f0f0f0 !important;")
+                "color: #808080 !important; font-weight: normal; background-color: #E5FCF2 !important;")
             notificacao_elements[notificacao_id].update() # Notifica o NiceGUI para re-renderizar
 
         # Criar o diálogo de detalhes
@@ -75,7 +73,7 @@ def visualizar_notificacao(notificacao_id):
                         ui.label(conteudo_ocorrencia).classes("text-justify").style("text-align: justify;")
                 with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
                     ui.button("Fechar", on_click=detalhe_dialog.close
-                              ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
+                              ).style("color: white; font-weight: bold; background-color: #0a0476 !important;"
                                       ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
                     if responsavel_id is None and status_ocorrencia != "Cancelada" and tipo_ocorrencia == "Devolvida":
                         ui.button("Aceitar",

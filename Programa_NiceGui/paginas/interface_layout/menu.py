@@ -36,12 +36,10 @@ def exibir_notificacoes_menu():
                         notificacao_id = notificacao["id"]
                         mensagem = notificacao["mensagem"]
 
-                        notif_button = ui.button(
-                            mensagem,
-                            on_click=lambda id=notificacao_id: visualizar_notificacao(id)
-                        ).classes("q-pa-sm text-left full-width")
+                        notif_button = ui.button(mensagem).classes("q-pa-sm text-left full-width")
+                        notificacao_elements[notificacao_id] = notif_button
 
-                        notificacao_elements[notificacao_id] = notif_button  # Armazena a referência
+                        notif_button.on('click', lambda e, id=notificacao_id: visualizar_notificacao(id, notificacao_elements))
 
                         if not notificacao["lida"]:
                             notif_button.style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;")
@@ -198,13 +196,17 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 
 def detalhes_ocorrencia(ocorrencia):
     from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import mostra_confirmacao
-
+    import Programa_NiceGui.paginas.interface_layout.global_state as global_state
     print(f"DEBUG: ", ocorrencia)
     print(f"Tamanho lista: ", len(ocorrencia))
 
 
     ocorrencia_id, cliente, num_processo, responsavel, responsavel_id, data_ocorrencia, status, titulo, conteudo_ocorrencia, criador_id = ocorrencia
 
+    global_state.cliente_label = cliente
+    global_state.num_processo_label = num_processo
+    global_state.titulo_label = titulo
+    global_state.conteudo_label = conteudo_ocorrencia
 
     current_user_id = int(app.storage.user.get("userid"))
     responsavel_id = int(responsavel_id) if responsavel_id is not None else None
@@ -241,10 +243,10 @@ def detalhes_ocorrencia(ocorrencia):
                 data_formatada = data_ocorrencia.strftime('%d-%m-%y')
 
                 for titulo_info, valor in [
-                    ("Cliente", cliente),
-                    ("Nº Processo", num_processo),
+                    ("Cliente", global_state.cliente_label),
+                    ("Nº Processo", global_state.num_processo_label),
                     ("Data", data_formatada),
-                    ("Título", titulo),
+                    ("Título", global_state.titulo_label),
                 ]:
                     with ui.row():
                         ui.label(f"{titulo_info}:").classes("font-bold")
@@ -253,12 +255,12 @@ def detalhes_ocorrencia(ocorrencia):
                 with ui.row():
                     ui.label("Detalhes:").classes("font-bold")
                 with ui.row():
-                    ui.label(conteudo_ocorrencia).style("text-align: justify; white-space: pre-wrap; width: 100%;").classes("text-base")
+                    ui.label(global_state.conteudo_label).style("text-align: justify; white-space: pre-wrap; width: 100%;").classes("text-base")
 
             # Botões de ação
             with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
                 ui.button("Fechar", on_click=detalhe_dialog.close).style(
-                    "color: white; font-weight: bold; background-color: #008B8B !important;"
+                    "color: white; font-weight: bold; background-color: #0a0476 !important;"
                 ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
 
@@ -274,7 +276,7 @@ def detalhes_ocorrencia(ocorrencia):
 
                 if criador_id is not None and current_user_id == criador_id and status not in ["Concluída"]:
                     ui.button("Editar", on_click=lambda o=ocorrencia: abrir_formulario_edicao(o)).style(
-                        "color: white; font-weight: bold; background-color: #008B8B !important;"
+                        "color: white; font-weight: bold; background-color: #dd932a !important;"
                     ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
 
