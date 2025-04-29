@@ -275,10 +275,8 @@ def detalhes_ocorrencia(ocorrencia):
                 # Botão "Restaurar" visível só para admin nas ocorrências canceladas
                 if status == "Cancelada" and app.storage.user.get("type_user") == "admin":
 
-                    print(f"[DEBUG - detalhes_ocorrencia] Tipo de usuário: {type_user} | Status da ocorrência: {status}")
-
                     ui.button("Restaurar", on_click=lambda: confirmar_restauracao(ocorrencia_id, detalhe_dialog)
-                    ).style("color: white; font-weight: bold; background-color: #27ae60 !important;"
+                    ).style("color: white; font-weight: bold; background-color: #F2522E !important;"
                     ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                 # Botão "Aceitar" se a ocorrência estiver devolvida/expirada e sem responsável

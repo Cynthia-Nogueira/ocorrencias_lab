@@ -14,7 +14,7 @@ import re
 def check_login(username, password):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT  CONCAT(nome, ' ', apelido), password, id FROM utilizador WHERE username = %s", (username,))
+    cursor.execute("SELECT  CONCAT(nome, ' ', apelido), password, id, type_user FROM utilizador WHERE username = %s", (username,))
     result = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -22,6 +22,7 @@ def check_login(username, password):
     if result and bcrypt.checkpw(password.encode(), result[1].encode()):
         app.storage.user["username"] = result[0]
         app.storage.user["userid"] = result[2]
+        app.storage.user["type_user"] = result[3]
         return True
     return False
 

@@ -116,7 +116,7 @@ def atualiza_status(ocorrencia_id, novo_status):
 
         elif novo_status == "Cancelada":
             notifica_ocorrencia_cancelada(ocorrencia_id, nome_usuario)
-            ui.notify("❌ Ocorrência cancelada com sucesso!", type="positive")
+            ui.notify("Ocorrência cancelada com sucesso!", type="positive")
 
         elif novo_status == "Concluída":
             notifica_ocorrencias_concluidas(ocorrencia_id, novo_status, nome_usuario)
@@ -150,13 +150,11 @@ def confirmar_alteracao_status(ocorrencia_id, novo_status, detalhe_dialog):
                     "color: white; font-weight: bold; background-color: #FF6347 !important;"
                 ).classes("text-white font-bold px-4 py-2 w-32 text-center")
 
-                ui.button("Sim",
-                          on_click=lambda: [
+                ui.button("Sim", on_click=lambda: [
                               atualiza_status(ocorrencia_id, novo_status),
                               confirm_dialog.close(),
                               detalhe_dialog.close()
-                          ]).style(
-                    "color: white; font-weight: bold; background-color: #008B8B !important;"
+                          ]).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                 ).classes("text-white font-bold px-4 py-2 w-32 text-center")
 
 
