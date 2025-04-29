@@ -13,75 +13,71 @@ def ocorrencias_expiradas(modo_teste=False):
 
     conn = get_db_connection()
     cursor = conn.cursor()
+    try:
 
-    # Busca ocorrências em "Em Espera" com data de aceite
-    query = """
-    SELECT id, data_aceite
-    FROM ocorrencias
-    WHERE status = 'Em espera' AND data_aceite IS NOT NULL
-    ORDER BY data_status_alterado DESC, data DESC;
-    """
+        # Busca ocorrências em "Em Espera" com data de aceite
+        query = """
+        SELECT id, data_aceite
+        FROM ocorrencias
+        WHERE status = 'Em espera' AND data_aceite IS NOT NULL
+        ORDER BY data_status_alterado DESC, data DESC;
+        """
 
-    cursor.execute(query)
-    ocorrencias = cursor.fetchall()
+        cursor.execute(query)
+        ocorrencias = cursor.fetchall()
 
-    agora = datetime.now()
-    feriados = feriados_portugal()
+        agora = datetime.now()
+        feriados = feriados_portugal()
 
-    for id_ocorrencia, data_aceite in ocorrencias:
-        # Converte string para datetime se necessário
-        if isinstance(data_aceite, str):
-            try:
-                data_aceite = datetime.strptime(data_aceite, "%Y-%m-%d %H:%M:%S")
-            except ValueError:
-                data_aceite = datetime.strptime(data_aceite, "%Y-%m-%d")
+        for id_ocorrencia, data_aceite in ocorrencias:
+            # Converte string para datetime se necessário
+            if isinstance(data_aceite, str):
+                try:
+                    data_aceite = datetime.strptime(data_aceite, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    data_aceite = datetime.strptime(data_aceite, "%Y-%m-%d")
 
-        # Calcula o tempo passado
-        total_horas = horas_uteis(data_aceite, agora, feriados)
-        total_segundos = total_horas.total_seconds()
-        total_horas_em_horas = total_segundos / 3600
+            # Calcula o tempo passado
+            total_horas = horas_uteis(data_aceite, agora, feriados)
+            total_segundos = total_horas.total_seconds()
+            total_horas_em_horas = total_segundos / 3600
 
-        # Define limite com base no modo de teste ou não
-        limite_segundos = 30 if modo_teste else 48 * 3600
+            # Define limite com base no modo de teste ou não
+            limite_segundos = 30 if modo_teste else 48 * 3600
 
-        print(f"[DEBUG] Ocorrência {id_ocorrencia}: {total_horas_em_horas:.2f}h desde aceite | Limite: {limite_segundos / 3600:.2f}h")
+            print(f"[DEBUG] Ocorrência {id_ocorrencia}: {total_horas_em_horas:.2f}h desde aceite | Limite: {limite_segundos / 3600:.2f}h")
 
-        if total_segundos >= limite_segundos:
-            # Busca o título e o responsável atual da ocorrência
-            cursor.execute("SELECT titulo, responsavel_id FROM ocorrencias WHERE id = %s", (id_ocorrencia,))
-            resultado = cursor.fetchone()
-            titulo = resultado[0] if resultado else "Sem título"
-            responsavel_id = resultado[1] if resultado else None
+            if total_segundos >= limite_segundos:
+                print(f"[EXPIRADA] Ocorrência {id_ocorrencia} atingiu o limite!")
+                # Busca o título e o responsável atual da ocorrência
+                cursor.execute("SELECT titulo, responsavel_id FROM ocorrencias WHERE id = %s", (id_ocorrencia,))
+                resultado = cursor.fetchone()
+                titulo = resultado[0] if resultado else "Sem título"
+                responsavel_id = resultado[1] if resultado else None
 
-            # Lista de usuários para notificar
-            lista_user = obter_lista_user()
 
-            # Mensagem de notificação
-            mensagem_notificacao = f"⏳ Ocorrência '{titulo}' expirou!"
+                # Atualiza o status da ocorrência para "Expirada" e limpa os campos relacionados
+                cursor.execute("""
+                    UPDATE ocorrencias
+                    SET status = 'Expirada', responsavel_id = NULL, data_aceite = NULL
+                    WHERE id = %s
+                """, (id_ocorrencia,))
+                conn.commit()
 
-            for user in lista_user:
-                enviar_notificacao(user['id'], mensagem_notificacao, id_ocorrencia)
+                # Envia notificação de expiração para todos os usuários
+                cursor.execute("SELECT id FROM utilizador")
+                usuarios = cursor.fetchall()
 
-            # Atualiza o status da ocorrência para "Expirada" e limpa os campos relacionados
-            cursor.execute("""
-                UPDATE ocorrencias
-                SET status = 'Expirada', responsavel_id = NULL, data_aceite = NULL
-                WHERE id = %s
-            """, (id_ocorrencia,))
+                for (usuario_id,) in usuarios:
+                    mensagem = f"⏳ A ocorrência '{titulo}' foi devolvida automaticamente. Prazo expirado!"
+                    enviar_notificacao(usuario_id, mensagem, id_ocorrencia, tipo_ocorrencia="Expirada")
 
-            conn.commit()
+    except Exception as e:
+        print(f"[ERRO] Falha ao verificar ocorrências expiradas: {e}")
 
-            # Envia notificação de expiração para todos os usuários
-            cursor.execute("SELECT id FROM utilizador")
-            usuarios = cursor.fetchall()
-
-            for (usuario_id,) in usuarios:
-                mensagem = f"⏳ A ocorrência '{titulo}' foi devolvida automaticamente. Prazo expirado!"
-                enviar_notificacao(usuario_id, mensagem, id_ocorrencia, tipo_ocorrencia="Expiração")
-
-    cursor.close()
-    conn.close()
-
+    finally:
+        cursor.close()
+        conn.close()
 
 # -------------------------------------- CARREGA O PROGRAMA A CADA X HORAS --------------------------------------------
 

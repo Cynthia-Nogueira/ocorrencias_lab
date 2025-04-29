@@ -84,7 +84,7 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         nome_completo = usuario[0]
 
         # Obtém informações da ocorrência
-        cursor.execute("SELECT cliente, num_processo, responsavel, status FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
+        cursor.execute("SELECT cliente, titulo, responsavel, status FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
         ocorrencia = cursor.fetchone()
 
         if not ocorrencia:
@@ -92,7 +92,7 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
             return
 
         # Dados da ocorrência
-        cliente, num_processo, responsavel, status = ocorrencia
+        cliente, titulo, responsavel, status = ocorrencia
 
         # Atualiza o status da ocorrência para "Em execução" e atribui o responsável
         query = """
@@ -113,7 +113,7 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         outros_usuarios = cursor.fetchall()
 
         # Envia notificação para os demais usuários
-        mensagem = f"✅ {nome_completo} aceitou a ocorrência ({num_processo}) do cliente {cliente}"
+        mensagem = f"✅ {nome_completo} aceitou a ocorrência '{titulo}' do cliente {cliente}"
 
         for usuario in outros_usuarios:
             enviar_notificacao(usuario[0], mensagem, ocorrencia_id, tipo_ocorrencia="Em execução")
@@ -124,7 +124,7 @@ def aceitar_ocorrencia(ocorrencia_id, ultima_usuario_id, detalhe_dialog, confirm
         # Atualiza a lista de notificações
         carregar_notificacoes(ultima_usuario_id)
 
-        # Evitar o ciclo chamando carregar_tabela apenas uma vez
+        # Evita o ciclo chamando carregar_tabela apenas uma vez
         if not tabela_recarregada:
             tabela_recarregada = True
             carregar_tabela(global_state.grid, ultima_usuario_id)

@@ -1,5 +1,7 @@
 from nicegui import ui, app
 from datetime import datetime
+
+from Programa_NiceGui.paginas.adm.permissoes import confirmar_restauracao
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.formulario import abrir_formulario_edicao
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import carregar_notificacoes
@@ -47,7 +49,7 @@ def exibir_notificacoes_menu():
                             notif_button.style("color: #808080 !important; font-weight: normal; background-color: #E5FCF2 !important;")
 
             # Botão fechar fixo no rodapé
-            with ui.row().style("position: sticky; bottom: 0; background-color: #ffffff; z-index: 1;").classes("w-full justify-center q-pa-sm"):
+            with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1;").classes("w-full justify-center q-pa-sm"):
                 ui.button("Fechar", on_click=dialog.close).style(
                     "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
                 ).classes("text-white font-bold px-4 py-2")
@@ -171,24 +173,19 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                 ui.notify(f"Nenhum resultado encontrado para '{titulo}'.", type="negative")
                                 return
 
-                            refresh_lista_ocorrencias = refreshable_ocorrencias_lista(ocorrencias) #chama a funcao para recarregar
-
-                       #     for ocorrencia in ocorrencias:
-                        #        ui.button(
-                         #           f"{ocorrencia[3] or 'Não Atribuído'}: Cliente  {ocorrencia[1]} - Título:  '{ocorrencia[7]}'",
-                          #          on_click=lambda o=ocorrencia: detalhes_ocorrencia(o)).style("color: #464646 !important; font-weight: bold; background-color: #D2E9DD !important;"
-                           #                                                                         ).classes("q-pa-sm text-left full-width")
+                            # chama a funcao para recarregar
+                            refresh_lista_ocorrencias = refreshable_ocorrencias_lista(ocorrencias)
 
                         finally:
                             cursor.close()
                             conn.close()
 
-
                 # Botão de Fechar rodapé
-                with ui.row().style("position: sticky; bottom: 0; background-color: #ffffff; z-index: 1; padding: 4px 0 8px 0;").classes("w-full justify-center"):
+                with ui.row().style("position: sticky; bottom: 0; background-color: #008B8B; z-index: 1; padding: 4px 0 8px 0;").classes("w-full justify-center"):
                     ui.button("Fechar", on_click=dialog.close).style(
                         "color: black !important; font-weight: bold; background-color: #fff8ff !important;"
                     ).classes("text-white font-bold px-4 py-2")
+
 
         dialog.open()
 
@@ -197,9 +194,6 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
 def detalhes_ocorrencia(ocorrencia):
     from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import mostra_confirmacao
     import Programa_NiceGui.paginas.interface_layout.global_state as global_state
-    print(f"DEBUG: ", ocorrencia)
-    print(f"Tamanho lista: ", len(ocorrencia))
-
 
     ocorrencia_id, cliente, num_processo, responsavel, responsavel_id, data_ocorrencia, status, titulo, conteudo_ocorrencia, criador_id = ocorrencia
 
@@ -209,22 +203,22 @@ def detalhes_ocorrencia(ocorrencia):
     global_state.conteudo_label = conteudo_ocorrencia
 
     current_user_id = int(app.storage.user.get("userid"))
+    type_user = app.storage.user.get("type_user")
     responsavel_id = int(responsavel_id) if responsavel_id is not None else None
 
     detalhe_dialog = ui.dialog()
 
     with detalhe_dialog:
-        with ui.card().style('background-color: #ebebeb !important; width: 480px; height: 440px;').classes("mx-auto"):
-
+        with ui.card().style('background: #ececf5 !important; width: 480px; height: 440px;').classes("mx-auto"):
             ui.label("Detalhes da Ocorrência").style("font-size: 1.25rem; margin: 0 auto; display: block;").classes(
                 "font-bold q-mb-sm")
 
             print("Responsável ID:", responsavel_id)
             print("User logado ID:", current_user_id)
             print("Status atual:", status)
+            print("user logado:", type_user)
 
-
-            # --- SELECT de status (só se o user for o responsável) ---
+            # --------- SELECT de status (só se o user for o responsável) ---------
             if responsavel_id == current_user_id and status in ["Em execução", "Em espera"]:
                 with ui.row().classes("items-center q-mb-md"):
                     ui.label("Atualizar Status:").classes("font-bold")
@@ -233,7 +227,7 @@ def detalhes_ocorrencia(ocorrencia):
                         value=""
                     ).style("background-color: white; min-width: 200px;").props("outlined dense")
 
-            # Área com rolagem para os dados da ocorrência (corrigido duplicação de with)
+            # Área com rolagem para os dados da ocorrência
             with ui.column().style(
                 "max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; box-sizing: border-box;"
             ).classes("q-mb-sm"):
@@ -255,7 +249,9 @@ def detalhes_ocorrencia(ocorrencia):
                 with ui.row():
                     ui.label("Detalhes:").classes("font-bold")
                 with ui.row():
-                    ui.label(global_state.conteudo_label).style("text-align: justify; white-space: pre-wrap; width: 100%;").classes("text-base")
+                    ui.label(global_state.conteudo_label).style(
+                        "text-align: justify; white-space: pre-wrap; width: 100%;"
+                    ).classes("text-base")
 
             # Botões de ação
             with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
@@ -263,41 +259,35 @@ def detalhes_ocorrencia(ocorrencia):
                     "color: white; font-weight: bold; background-color: #0a0476 !important;"
                 ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
-
                 if responsavel_id == current_user_id and status in ["Em execução", "Em espera"]:
-                    ui.button(
-                        "Confirmar",
-                        on_click=lambda: (
-                            confirmar_alteracao_status(ocorrencia_id, status_selecionado.value, detalhe_dialog)
-                            if status_selecionado.value else ui.notify(
-                                "Por favor, selecione um status válido!", type="warning")
-                        )).style("color: white; font-weight: bold; background-color: #008B8B !important;"
-                        ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
+                    ui.button("Confirmar", on_click=lambda: (
+                        confirmar_alteracao_status(ocorrencia_id, status_selecionado.value, detalhe_dialog)
+                        if status_selecionado.value else ui.notify(
+                            "Por favor, selecione um status válido!", type="warning"))
+                    ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
+                    ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                 if criador_id is not None and current_user_id == criador_id and status not in ["Concluída"]:
                     ui.button("Editar", on_click=lambda o=ocorrencia: abrir_formulario_edicao(o)).style(
                         "color: white; font-weight: bold; background-color: #dd932a !important;"
                     ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
+                # Botão "Restaurar" visível só para admin nas ocorrências canceladas
+                if status == "Cancelada" and app.storage.user.get("type_user") == "admin":
 
-                elif (status == "Devolvida" or responsavel is None) and responsavel_id is None:
+                    print(f"[DEBUG - detalhes_ocorrencia] Tipo de usuário: {type_user} | Status da ocorrência: {status}")
+
+                    ui.button("Restaurar", on_click=lambda: confirmar_restauracao(ocorrencia_id, detalhe_dialog)
+                    ).style("color: white; font-weight: bold; background-color: #27ae60 !important;"
+                    ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
+
+                # Botão "Aceitar" se a ocorrência estiver devolvida/expirada e sem responsável
+                if (status in ["Devolvida", "Expirada"] or responsavel is None) and responsavel_id is None:
                     if current_user_id:
-                        ui.button(
-                            "Aceitar",
-                            on_click=lambda o_id=ocorrencia_id, u_id=current_user_id:
+                        ui.button("Aceitar", on_click=lambda o_id=ocorrencia_id, u_id=current_user_id:
                             mostra_confirmacao(o_id, u_id, detalhe_dialog)
                         ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
-                                ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
-
-
-                elif (status == "Expirada" or responsavel is None) and responsavel_id is None:
-                    if current_user_id:
-                        ui.button(
-                            "Aceitar",
-                            on_click=lambda o_id=ocorrencia_id, u_id=current_user_id:
-                            mostra_confirmacao(o_id, u_id, detalhe_dialog)
-                        ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
-                                ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+                        ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
     detalhe_dialog.open()
 

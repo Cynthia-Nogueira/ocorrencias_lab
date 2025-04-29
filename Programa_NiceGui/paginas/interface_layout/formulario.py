@@ -98,7 +98,8 @@ def novo_formulario():
                 # Enviar a notificação para os usuários, excluindo o usuário logado
                 for user in lista_user:
                     if user['id'] != current_user_id:
-                        enviar_notificacao(user['id'], mensagem_notificacao, ultima_ocorrencia_id())
+                        enviar_notificacao(user['id'], mensagem_notificacao, ultima_ocorrencia_id(),
+                                                                     tipo_ocorrencia="Não atribuída")
 
                 # Limpa os campos do formulário
                 cliente.set_value("")

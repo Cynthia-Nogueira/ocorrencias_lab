@@ -19,8 +19,6 @@ def check_login(username, password):
     cursor.close()
     conn.close()
 
-    #print(result[0])
-
     if result and bcrypt.checkpw(password.encode(), result[1].encode()):
         app.storage.user["username"] = result[0]
         app.storage.user["userid"] = result[2]

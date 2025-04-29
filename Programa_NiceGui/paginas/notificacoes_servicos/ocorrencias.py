@@ -46,15 +46,25 @@ def nova_ocorrencia(cliente, num_processo, data, status, titulo, conteudo, app):
         ocorrencia_id = cursor.fetchone()[0]
         conn.commit()
 
+        # define o tipo_ocorrencia com base no status
+        if status == "Devolvida":
+            tipo_ocorrencia = "Devolvida"
+        elif status == "Expirada":
+            tipo_ocorrencia = "Expirada"
+        elif status == "Cancelada":
+            tipo_ocorrencia = "Cancelada"
+        else:
+            tipo_ocorrencia = "Não atribuída"  # status comum
+
         # Buscar todos os usuários, exceto o criador da ocorrência
         query_usuarios = "SELECT id FROM utilizador WHERE id != %s"
         cursor.execute(query_usuarios, (criador_id,))
         usuarios = cursor.fetchall()
 
-        mensagem = f"Nova ocorrência registada: {cliente} - processo {num_processo}."
+        mensagem = f"Nova ocorrência registada! Cliente: {cliente}."
 
         for usuario in usuarios:
-            enviar_notificacao(usuario[0], mensagem, ocorrencia_id)
+            enviar_notificacao(usuario[0], mensagem, ocorrencia_id, tipo_ocorrencia=tipo_ocorrencia)
 
     except Exception as e:
         print("Ocorreu um erro ao salvar a ocorrência:")

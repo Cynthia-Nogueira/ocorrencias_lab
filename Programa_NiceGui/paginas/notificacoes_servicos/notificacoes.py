@@ -1,3 +1,7 @@
+from os.path import curdir
+
+from docutils.nodes import status
+
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao, carregar_notificacoes
 from Programa_NiceGui.paginas.notificacoes_servicos.tabela import aceitar_ocorrencia
@@ -55,7 +59,7 @@ def visualizar_notificacao(notificacao_id, notificacao_elements):
 
         # Criar o diálogo de detalhes
         with ui.dialog() as detalhe_dialog:
-            with ui.card().style('background-color: #ebebeb !important; width: 480px; height: 440px;').classes("mx-auto"):
+            with ui.card().style('background: #ececf5 !important; width: 480px; height: 440px;').classes("mx-auto"):
                 ui.label("Detalhes da Notificação").style("font-size: 1.25rem; margin: 0 auto; display: block;").classes("font-bold q-mb-sm")
                 with ui.column():
                     for title, valor in [
@@ -72,10 +76,13 @@ def visualizar_notificacao(notificacao_id, notificacao_elements):
                     with ui.row():
                         ui.label(conteudo_ocorrencia).classes("text-justify").style("text-align: justify;")
                 with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
+                    print(f"[DEBUG] tipo_ocorrencia: '{tipo_ocorrencia}'")
+
                     ui.button("Fechar", on_click=detalhe_dialog.close
                               ).style("color: white; font-weight: bold; background-color: #0a0476 !important;"
                                       ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
-                    if responsavel_id is None and status_ocorrencia != "Cancelada" and tipo_ocorrencia == "Devolvida":
+
+                    if responsavel_id is None and status_ocorrencia != "Cancelada" and tipo_ocorrencia in ["Devolvida", "Não atribuída", "Expirada"]:
                         ui.button("Aceitar",
                                   on_click=lambda: mostra_confirmacao(ocorrencia_id, current_user_id, detalhe_dialog)
                                   ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
@@ -140,7 +147,7 @@ def notifica_ocorrencia_cancelada(ocorrencia_id, nome_usuario):
         cursor.execute("SELECT cliente, titulo FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
         cliente, titulo = cursor.fetchone()
 
-        mensagem = f"📛 {nome_usuario} cancelou a ocorrência do cliente: {cliente}"
+        mensagem = f"📛 {nome_usuario} cancelou a ocorrência '{titulo}'"
 
         # Pegando users
         cursor.execute("SELECT id FROM utilizador")
@@ -154,6 +161,47 @@ def notifica_ocorrencia_cancelada(ocorrencia_id, nome_usuario):
     finally:
         cursor.close()
         conn.close()
+
+
+# ---------------------------------- NOTIFICA OCORRENCIA CONCLUIDAS ------------------------
+
+def notifica_ocorrencias_concluidas(ocorrencia_id, novo_status, nome_usuario):
+
+    if novo_status != "Concluída":
+        return
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT status, criador_id, titulo FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
+        resultado = cursor.fetchone()
+
+        if not resultado:
+            ui.notify("[ERRO] Ocorrência não encontrada!")
+            return
+
+        _, criador_id, titulo = resultado
+
+        # Envia a notificação para o criador da ocorrência
+        mensagem = f"🎯 A ocorrência '{titulo}' foi concluída por {nome_usuario}."
+        enviar_notificacao(criador_id, mensagem, ocorrencia_id, tipo_ocorrencia="Concluída")
+
+    except Exception as e:
+        ui.notify(f"[ERRO] Falha ao notificar conclusão da ocorrência: {e}")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+
+
+
+
+
 
 
 

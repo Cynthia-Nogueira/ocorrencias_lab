@@ -68,6 +68,8 @@ def add_notificacao(usuario_id, mensagem):
 # -------------------------------- ENVIA AS NOTIFICACOES QUANDO UMA ACAO E REALIZADA --------------------------
 
 def enviar_notificacao(criador_id, mensagem, ocorrencia_id, tipo_ocorrencia="Info"):
+    print(f"[DEBUG] Notificação enviada com tipo: {tipo_ocorrencia}")
+
     conn = get_db_connection()
     cursor = conn.cursor()
 

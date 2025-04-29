@@ -24,3 +24,23 @@ def obter_lista_user():
     conn.close()
     return users
 
+# ------------------------- PEGA O NOME DOS USERS REGISTRADOS - SELECT ADMIN ---------------------------
+
+def utilizador_ativo():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT id, CONCAT(nome, ' ', apelido) as nome_completo 
+            FROM utilizador 
+            WHERE type_user IN ('user', 'admin')
+            ORDER BY type_user DESC, nome, apelido
+            """)
+        utilizador = cursor.fetchall()
+
+        return [{'label': nome_completo, 'value': user_id} for user_id, nome_completo in utilizador]
+
+    finally:
+        cursor.close()
+        conn.close()

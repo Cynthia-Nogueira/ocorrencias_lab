@@ -4,7 +4,7 @@ from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.page_user import carregar_ocorrencias_user
 from Programa_NiceGui.paginas.notificacoes_servicos.helper_notificacoes import atribui_nome_usuario
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import notifica_ocorrencia_devolvida, \
-    notifica_ocorrencia_cancelada
+    notifica_ocorrencia_cancelada, notifica_ocorrencias_concluidas
 
 
 #------------------------------------ DEVOLVE A OCORRENCIA DO USER ----------------------------
@@ -46,9 +46,10 @@ def confirmar_devolucao_cacelamento(ocorrencia_id, detalhe_dialog):
 def atualiza_status(ocorrencia_id, novo_status):
     conn = get_db_connection()
     cursor = conn.cursor()
+
     try:
         if novo_status == "Devolvida":
-            #     atualiza status e remove responsavel
+            #  atualiza status e remove responsavel
             cursor.execute("""
                 UPDATE ocorrencias
                 SET status = %s, 
@@ -111,17 +112,27 @@ def atualiza_status(ocorrencia_id, novo_status):
         # Notificação para todos os usuários quando for devolvida
         if novo_status == "Devolvida":
             notifica_ocorrencia_devolvida(ocorrencia_id, nome_usuario)
-            ui.notify("✅ Ocorrência devolvida com sucesso!", type="positive")
+            ui.notify("🔄 Ocorrência devolvida com sucesso!", type="positive")
 
         elif novo_status == "Cancelada":
             notifica_ocorrencia_cancelada(ocorrencia_id, nome_usuario)
-            ui.notify("❌ Ocorrência cancelada com sucesso!", type="warning")
+            ui.notify("❌ Ocorrência cancelada com sucesso!", type="positive")
+
+        elif novo_status == "Concluída":
+            notifica_ocorrencias_concluidas(ocorrencia_id, novo_status, nome_usuario)
+            ui.notify(f"✨ Ocorrência concluída!", type="positive")
+
+        elif novo_status == "Em Execução":
+            ui.notify("🔧 Ocorrência em execução!", type="positive")
+
+        elif novo_status == "Em Espera":
+            ui.notify("⏳ Ocorrência em espera!", type="positive")
 
         else:
-            ui.notify(f"Status atualizado para {novo_status}.", type="positive")
+            ui.notify(f"📌 Status alterado para {novo_status}.", type="positive")
 
     except Exception as e:
-        ui.notify(f"Erro ao atualizar status: {e}", type="negative")
+        ui.notify(f"⚠️ Erro ao atualizar status: {e}", type="negative")
     finally:
         cursor.close()
         conn.close()
