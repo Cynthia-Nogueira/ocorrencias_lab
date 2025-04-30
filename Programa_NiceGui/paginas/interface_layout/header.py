@@ -54,7 +54,7 @@ def pag_layout():
         # Botão (expirada)
         ui.button("Expiradas", icon='arrow_right', on_click=ocorrencia_expirada_filtro).props('flat')
 
-        # Botão (cacelada)
+        # Botão (cancelar)
         ui.button("Canceladas", icon='arrow_right', on_click=ocorrencia_cancelada).props('flat')
 
         # Botão de logout no menu

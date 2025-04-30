@@ -1,51 +1,63 @@
 from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
-from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user
-
-
-# -------------------------------- xxxxxxxxxxxxxxxxxxxx ----------------------------------------
-
-def atribui_ocorrencias(ocorrencia):
-    pass
-
+from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user, utilizador_ativo
 
 
 # ----------------------------------------- CONFIRMA A ESCOLHA DO USER --------------------------------------------
 
-def confirma_atribuicao(ocorrencia_id, user_id, admin_id, atribuir_ocorrencia_dialog):
-    atribui_ocorrencias(ocorrencia_id, user_id, admin_id)
-    ui.notify("✅ Ocorrência atribuída com sucesso!", type="positive")
-    atribuir_ocorrencia_dialog.close()
+def confirma_atribuicao(ocorrencia_id, user_id, detalhe_dialog):
+    if not user_id:
+        ui.notify("Por favor, selecione um responsável!", type="warning")
+        return
 
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT CONCAT(nome, ' ', apelido) FROM utilizador WHERE id = %s", (user_id,))
+    user_name = cursor.fetchone()[0]
 
+    cursor.close()
+    conn.close()
 
-
-
-
-
-
-
-# ---------------------------------- CONFIRMA A RESTAURACAO OCORRENCIA ----------------------------------------
-
-def confirmar_restauracao(ocorrencia_id, dialog):
+    ui.icon("question_mark").style("color: #008B8B; font-size: 2rem;").classes("q-mb-md")
     with ui.dialog() as confirm_dialog:
         with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
-
-            ui.label("Deseja realmente restaurar esta ocorrência para 'Não atribuída'?").classes("text-lg font-bold").classes(
-                "text-lg font-bold mx-auto q-mb-sm text-center")
+            ui.label(f"Deseja atribuir essa ocorrência a {user_name}?").classes("text-lg font-bold text-center q-mb-sm")
 
             with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
                 ui.button("Não", on_click=confirm_dialog.close).style(
                     "color: white; font-weight: bold; background-color: #FF6347 !important;"
-                    ).classes("text-white font-bold px-4 py-2 w-32 text-center")
+                ).classes("text-white font-bold px-4 py-2 w-32 text-center")
 
-                ui.button("Sim", on_click=lambda: restaurar_ocorrencia(ocorrencia_id, confirm_dialog, dialog)
-                          ).style("color: white; font-weight: bold; background-color: #008B8B !important;").classes(
-                          "text-white font-bold px-4 py-2 w-32 text-center")
+                ui.button("Sim", on_click=lambda: salvar_atribuicao(ocorrencia_id, user_id, detalhe_dialog)).style(
+                    "color: white; font-weight: bold; background-color: #008B8B !important;"
+                ).classes("text-white font-bold px-4 py-2 w-32 text-center")
 
+    confirm_dialog.open()
 
-        confirm_dialog.open()
+# ------------------------------------------ SALVA NO BANCO  ----------------------------------------
+
+def salvar_atribuicao(ocorrencia_id, responsavel_id, detalhe_dialog):
+    if responsavel_id:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE ocorrencia 
+            SET responsavel_id = %s, 
+                status = 'Em espera' 
+            WHERE id = %s
+        """, (responsavel_id, ocorrencia_id))
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+        detalhe_dialog.close()
+
+        ui.notify("Ocorrência atribuída com sucesso!", type="success")
+    else:
+        ui.notify("Por favor, selecione um responsável!", type="warning")
+
 
 # ---------------------------------- RESTAURA A OCORRENCIA ----------------------------------------
 
@@ -94,3 +106,25 @@ def restaurar_ocorrencia(ocorrencia_id, confirm_dialog, detalhe_dialog):
     finally:
         cursor.close()
         conn.close()
+
+
+# ---------------------------------- CONFIRMA A RESTAURACAO OCORRENCIA ----------------------------------------
+
+def confirmar_restauracao(ocorrencia_id, dialog):
+    with ui.dialog() as confirm_dialog:
+        with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
+
+            ui.label("Deseja realmente restaurar esta ocorrência para 'Não atribuída'?").classes("text-lg font-bold").classes(
+                "text-lg font-bold mx-auto q-mb-sm text-center")
+
+            with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
+                ui.button("Não", on_click=confirm_dialog.close).style(
+                    "color: white; font-weight: bold; background-color: #FF6347 !important;"
+                    ).classes("text-white font-bold px-4 py-2 w-32 text-center")
+
+                ui.button("Sim", on_click=lambda: restaurar_ocorrencia(ocorrencia_id, confirm_dialog, dialog)
+                          ).style("color: white; font-weight: bold; background-color: #008B8B !important;").classes(
+                          "text-white font-bold px-4 py-2 w-32 text-center")
+
+
+        confirm_dialog.open()

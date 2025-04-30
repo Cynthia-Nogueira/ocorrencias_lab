@@ -1,13 +1,12 @@
 from nicegui import ui, app
 from datetime import datetime
 
-from Programa_NiceGui.paginas.adm.permissoes import confirmar_restauracao
+from Programa_NiceGui.paginas.adm.permissoes import confirmar_restauracao, salvar_atribuicao, confirma_atribuicao
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.formulario import abrir_formulario_edicao
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import carregar_notificacoes
 from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias_utils import atualiza_status, confirmar_alteracao_status
-
-
+from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import utilizador_ativo
 
 # --------------------------------- EXIBE AS NOTIFICACOES NO MENU ---------------------------
 
@@ -24,7 +23,7 @@ def exibir_notificacoes_menu():
         notificacoes, _ = carregar_notificacoes(current_user_id)
 
     with ui.dialog() as dialog:
-        with ui.card().classes("w-120 mx-auto").style("padding: 8px 0;") as card_notificacoes:
+        with ui.card().style("padding: 8px 0; background: #ececf5").classes("w-120 mx-auto") as card_notificacoes:
             card_notificacoes.style("background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
 
             # Título fixo no topo
@@ -82,11 +81,11 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
     cursor = conn.cursor()
 
     with ui.dialog() as dialog:
-        with ui.card().classes("w-120 mx-auto").style("padding: 8px 0;") as card_notificacoes:
+        with ui.card().style("padding: 8px 0;").classes("w-120 mx-auto") as card_notificacoes:
             card_notificacoes.style("background-color: #008B8B; border-radius: 10px; overflow-y: auto; width: 600px; height: 600px;")
 
             with ui.column().classes("w-full"):
-                with ui.row().classes("w-full justify-center items-center q-pa-sm").style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;"):
+                with ui.row().style("position: sticky; top: 0; background-color: #008B8B; z-index: 1;").classes("w-full justify-center items-center q-pa-sm"):
                     ui.label(titulo).style("background-color: #008B8B; color: #fff8ff !important;").classes("text-center font-bold text-2xl")
 
                 # Scroll Area para as notificações
@@ -222,10 +221,27 @@ def detalhes_ocorrencia(ocorrencia):
             if responsavel_id == current_user_id and status in ["Em execução", "Em espera"]:
                 with ui.row().classes("items-center q-mb-md"):
                     ui.label("Atualizar Status:").classes("font-bold")
+
                     status_selecionado = ui.select(
                         options=["", "Em Execução", "Em Espera", "Devolvida", "Concluída", "Cancelada"],
                         value=""
                     ).style("background-color: white; min-width: 200px;").props("outlined dense")
+
+            responsavel_select = None
+
+            # Se for admin é possível atribuir a tarefa
+            if type_user == 'admin' and status in ["Não atribuída", "Devolvida", "Expirada"]:
+                with ui.row().classes("items-center q-mb-md"):
+                    ui.label("Atribuir tarefa:").classes("font-bold")
+
+                    usuarios = utilizador_ativo()
+                    opcoes_usuarios = [{'label': 'Selecione...', 'value': None}] + usuarios
+
+                    responsavel_select = ui.select(
+                        options=opcoes_usuarios,
+                        value=None
+                    ).style("background-color: white; min-width: 200px;").props("outlined dense")
+
 
             # Área com rolagem para os dados da ocorrência
             with ui.column().style(
@@ -253,6 +269,7 @@ def detalhes_ocorrencia(ocorrencia):
                         "text-align: justify; white-space: pre-wrap; width: 100%;"
                     ).classes("text-base")
 
+
             # Botões de ação
             with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
                 ui.button("Fechar", on_click=detalhe_dialog.close).style(
@@ -267,7 +284,15 @@ def detalhes_ocorrencia(ocorrencia):
                     ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
                     ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
-                if criador_id is not None and current_user_id == criador_id and status not in ["Concluída"]:
+                # Botão de atribuição
+                ui.button("Atribuir", on_click=lambda: (
+                    confirma_atribuicao(ocorrencia_id, responsavel_select.value, detalhe_dialog)
+                    if responsavel_select.value else ui.notify("Por favor, selecione um responsável!", type="warning")
+                    )).style("color: white; font-weight: bold; background-color: #bab8b7 !important;").classes(
+                    "bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+
+                # Botão editar para quem cria a ocorrencia e para os adm
+                if (criador_id is not None and current_user_id == criador_id or type_user=='admin') and status not in ["Concluída"]:
                     ui.button("Editar", on_click=lambda o=ocorrencia: abrir_formulario_edicao(o)).style(
                         "color: white; font-weight: bold; background-color: #dd932a !important;"
                     ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")

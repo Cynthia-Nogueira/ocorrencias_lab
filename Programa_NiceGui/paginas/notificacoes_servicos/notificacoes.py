@@ -53,13 +53,12 @@ def visualizar_notificacao(notificacao_id, notificacao_elements):
 
         # Atualiza o estilo do botão na interface, se ele ainda existir no diálogo
         if notificacao_id in notificacao_elements:
-            notificacao_elements[notificacao_id].style(
-                "color: #808080 !important; font-weight: normal; background-color: #E5FCF2 !important;")
+            notificacao_elements[notificacao_id].style("color: #808080 !important; font-weight: normal; background-color: #E5FCF2 !important;")
             notificacao_elements[notificacao_id].update() # Notifica o NiceGUI para re-renderizar
 
         # Criar o diálogo de detalhes
         with ui.dialog() as detalhe_dialog:
-            with ui.card().style('background: #ececf5 !important; width: 480px; height: 440px;').classes("mx-auto"):
+            with ui.card().style('background-color: #ececf5 !important; width: 480px; height: 440px;').classes("mx-auto"):
                 ui.label("Detalhes da Notificação").style("font-size: 1.25rem; margin: 0 auto; display: block;").classes("font-bold q-mb-sm")
                 with ui.column():
                     for title, valor in [
