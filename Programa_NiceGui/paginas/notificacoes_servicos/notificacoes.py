@@ -165,7 +165,6 @@ def notifica_ocorrencia_cancelada(ocorrencia_id, nome_usuario):
 # ---------------------------------- NOTIFICA OCORRENCIA CONCLUIDAS ------------------------
 
 def notifica_ocorrencias_concluidas(ocorrencia_id, novo_status, nome_usuario):
-
     if novo_status != "Concluída":
         return
 
@@ -173,6 +172,7 @@ def notifica_ocorrencias_concluidas(ocorrencia_id, novo_status, nome_usuario):
     cursor = conn.cursor()
 
     try:
+        # Buscar informações da ocorrência
         cursor.execute("SELECT status, criador_id, titulo FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
         resultado = cursor.fetchone()
 
@@ -182,9 +182,15 @@ def notifica_ocorrencias_concluidas(ocorrencia_id, novo_status, nome_usuario):
 
         _, criador_id, titulo = resultado
 
-        # Envia a notificação para o criador da ocorrência
         mensagem = f"🎯 A ocorrência '{titulo}' foi concluída por {nome_usuario}."
-        enviar_notificacao(criador_id, mensagem, ocorrencia_id, tipo_ocorrencia="Concluída")
+
+        # Enviar notificação para todos os usuários
+        cursor.execute("SELECT id FROM utilizador")
+        usuarios = cursor.fetchall()
+
+        for (usuario_id,) in usuarios:
+            enviar_notificacao(usuario_id, mensagem, ocorrencia_id, tipo_ocorrencia="Concluída")
+
 
     except Exception as e:
         ui.notify(f"[ERRO] Falha ao notificar conclusão da ocorrência: {e}")

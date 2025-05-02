@@ -1,7 +1,8 @@
 from nicegui import ui, app
 from datetime import datetime
 
-from Programa_NiceGui.paginas.adm.permissoes import confirmar_restauracao, salvar_atribuicao, confirma_atribuicao
+from Programa_NiceGui.paginas.adm.permissoes import confirmar_restauracao, salvar_atribuicao, confirma_atribuicao, \
+    confirmar_excluir_ocorrencia
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.formulario import abrir_formulario_edicao
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import carregar_notificacoes
@@ -219,33 +220,44 @@ def detalhes_ocorrencia(ocorrencia):
 
             # --------- SELECT de status (só se o user for o responsável) ---------
             if responsavel_id == current_user_id and status in ["Em execução", "Em espera"]:
+
                 with ui.row().classes("items-center q-mb-md"):
                     ui.label("Atualizar Status:").classes("font-bold")
 
                     status_selecionado = ui.select(
                         options=["", "Em Execução", "Em Espera", "Devolvida", "Concluída", "Cancelada"],
                         value=""
-                    ).style("background-color: white; min-width: 200px;").props("outlined dense")
+                    ).style("background-color: white; min-width: 160px;").props("outlined dense")  # Menor largura
 
             responsavel_select = None
 
-            # Se for admin é possível atribuir a tarefa
+            # Se for admin, é possível atribuir a tarefa
             if type_user == 'admin' and status in ["Não atribuída", "Devolvida", "Expirada"]:
-                with ui.row().classes("items-center q-mb-md"):
-                    ui.label("Atribuir tarefa:").classes("font-bold")
+                with ui.row().classes("items-center q-mb-md").style("justify-content: space-between; gap: 0.5rem;"):
+                    ui.label("Atribuir tarefa:").style("min-width: 110px; margin-right: 8px;").classes("font-bold")
 
                     usuarios = utilizador_ativo()
-                    opcoes_usuarios = [{'label': 'Selecione...', 'value': None}] + usuarios
+                    opcoes_usuarios = [('Selecione...', None)] + [(u['label'], u['value']) for u in usuarios]
 
                     responsavel_select = ui.select(
-                        options=opcoes_usuarios,
+                        options=opcoes_usuarios,  # Lista de tuplas (nome, id)
                         value=None
-                    ).style("background-color: white; min-width: 200px;").props("outlined dense")
+                    ).style("flex: 1; min-width: 140px; max-width: 180px; background-color: white;").props(
+                        "outlined dense")
+
+                    ui.button("Atribuir", on_click=lambda: (
+                        confirma_atribuicao(ocorrencia_id, responsavel_select.value, detalhe_dialog)
+                        if responsavel_select.value else ui.notify("Por favor, selecione um responsável!",type="warning")
+                    )).style("color: white; font-weight: bold; background-color: #008B8B !important; min-width: 100px; margin-left: 16px;").classes(
+                        "bg-blue-700 text-white font-bold px-4 py-2")
+
+
+
 
 
             # Área com rolagem para os dados da ocorrência
             with ui.column().style(
-                "max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; box-sizing: border-box;"
+                    "max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; box-sizing: border-box;"
             ).classes("q-mb-sm"):
 
                 if isinstance(data_ocorrencia, str):
@@ -269,7 +281,6 @@ def detalhes_ocorrencia(ocorrencia):
                         "text-align: justify; white-space: pre-wrap; width: 100%;"
                     ).classes("text-base")
 
-
             # Botões de ação
             with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
                 ui.button("Fechar", on_click=detalhe_dialog.close).style(
@@ -281,38 +292,38 @@ def detalhes_ocorrencia(ocorrencia):
                         confirmar_alteracao_status(ocorrencia_id, status_selecionado.value, detalhe_dialog)
                         if status_selecionado.value else ui.notify(
                             "Por favor, selecione um status válido!", type="warning"))
-                    ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
-                    ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
-
-                # Botão de atribuição
-                ui.button("Atribuir", on_click=lambda: (
-                    confirma_atribuicao(ocorrencia_id, responsavel_select.value, detalhe_dialog)
-                    if responsavel_select.value else ui.notify("Por favor, selecione um responsável!", type="warning")
-                    )).style("color: white; font-weight: bold; background-color: #bab8b7 !important;").classes(
-                    "bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+                              ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
+                                      ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                 # Botão editar para quem cria a ocorrencia e para os adm
-                if (criador_id is not None and current_user_id == criador_id or type_user=='admin') and status not in ["Concluída"]:
+                if (criador_id is not None and current_user_id == criador_id or type_user == 'admin') and status not in ["Concluída"]:
                     ui.button("Editar", on_click=lambda o=ocorrencia: abrir_formulario_edicao(o)).style(
                         "color: white; font-weight: bold; background-color: #dd932a !important;"
                     ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                 # Botão "Restaurar" visível só para admin nas ocorrências canceladas
                 if status == "Cancelada" and app.storage.user.get("type_user") == "admin":
-
                     ui.button("Restaurar", on_click=lambda: confirmar_restauracao(ocorrencia_id, detalhe_dialog)
-                    ).style("color: white; font-weight: bold; background-color: #F2522E !important;"
-                    ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
+                              ).style("color: white; font-weight: bold; background-color: #F2522E !important;"
+                                      ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
                 # Botão "Aceitar" se a ocorrência estiver devolvida/expirada e sem responsável
                 if (status in ["Devolvida", "Expirada"] or responsavel is None) and responsavel_id is None:
                     if current_user_id:
                         ui.button("Aceitar", on_click=lambda o_id=ocorrencia_id, u_id=current_user_id:
-                            mostra_confirmacao(o_id, u_id, detalhe_dialog)
-                        ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
-                        ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+                        mostra_confirmacao(o_id, u_id, detalhe_dialog)
+                                  ).style("color: white; font-weight: bold; background-color: #008B8B !important;"
+                                          ).classes("bg-blue-700 text-white font-bold px-4 py-2 w-32 text-center")
+
+                # Botão "Excluir" visível só para admin nas ocorrências
+                if (status in ["Expirada", "Em espera", "Em execução", "Concluída", "Devolvida",
+                               "Não atribuída", "Cancelada", "Expirada"] and app.storage.user.get("type_user") == "admin"):
+                    ui.button("Excluir", on_click=lambda: confirmar_excluir_ocorrencia(ocorrencia_id, detalhe_dialog)
+                              ).style("color: white; font-weight: bold; background-color: #E73B3B !important;"
+                                      ).classes("bg-green-700 text-white font-bold px-4 py-2 w-32 text-center")
 
     detalhe_dialog.open()
+
 
 # ---------------------------- Funções específicas chamando a função genérica -------------------------------------
 

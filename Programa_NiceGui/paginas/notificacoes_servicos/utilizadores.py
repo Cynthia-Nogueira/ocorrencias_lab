@@ -34,8 +34,7 @@ def utilizador_ativo():
         cursor.execute("""
             SELECT id, CONCAT(nome, ' ', apelido) as nome_completo 
             FROM utilizador 
-            WHERE type_user IN ('user', 'admin')
-            ORDER BY type_user DESC, nome, apelido
+            ORDER BY nome, apelido
             """)
         utilizador = cursor.fetchall()
 

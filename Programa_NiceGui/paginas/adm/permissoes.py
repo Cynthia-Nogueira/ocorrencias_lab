@@ -11,6 +11,7 @@ def confirma_atribuicao(ocorrencia_id, user_id, detalhe_dialog):
         ui.notify("Por favor, selecione um responsável!", type="warning")
         return
 
+    # Conectar ao banco de dados para pegar o nome do responsável
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT CONCAT(nome, ' ', apelido) FROM utilizador WHERE id = %s", (user_id,))
@@ -19,7 +20,7 @@ def confirma_atribuicao(ocorrencia_id, user_id, detalhe_dialog):
     cursor.close()
     conn.close()
 
-    ui.icon("question_mark").style("color: #008B8B; font-size: 2rem;").classes("q-mb-md")
+    # Exibir o diálogo de confirmação
     with ui.dialog() as confirm_dialog:
         with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
             ui.label(f"Deseja atribuir essa ocorrência a {user_name}?").classes("text-lg font-bold text-center q-mb-sm")
@@ -34,6 +35,7 @@ def confirma_atribuicao(ocorrencia_id, user_id, detalhe_dialog):
                 ).classes("text-white font-bold px-4 py-2 w-32 text-center")
 
     confirm_dialog.open()
+
 
 # ------------------------------------------ SALVA NO BANCO  ----------------------------------------
 
@@ -128,3 +130,52 @@ def confirmar_restauracao(ocorrencia_id, dialog):
 
 
         confirm_dialog.open()
+
+# ------------------------------------------- EXCLUI OCORRENCIAS -----------------------------------------
+
+def excluir_ocorrencia(ocorrencia_id, detalhe_dialog, confirm_dialog=None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT id FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
+        ocorrencia = cursor.fetchone()
+
+        if not ocorrencia:
+            ui.notify("[ERRO] Ocorrência não encontrada!", type="warning")
+            return
+
+        cursor.execute("DELETE FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
+        conn.commit()
+
+        if confirm_dialog:
+            confirm_dialog.close()
+        if detalhe_dialog:
+            detalhe_dialog.close()
+
+        ui.notify("Ocorrência excluída com sucesso!", type="positive")
+
+    except Exception as e:
+        ui.notify(f"[ERRO] Erro ao excluir ocorrência: {e}", type="warning")
+
+    finally:
+        conn.close()
+        cursor.close()
+
+# -------------------------------------- CONFIRMA EXCLUI OCORRENCIAS -----------------------------------
+
+def confirmar_excluir_ocorrencia(ocorrencia_id, detalhe_dialog):
+    with ui.dialog() as confirm_dialog:
+        with ui.card().style('background-color: #ffffff !important;').classes("w-96 mx-auto"):
+            ui.label("⚠️ Tem certeza que deseja excluir esta ocorrência?").classes("text-lg font-bold text-center")
+
+            with ui.row().classes("w-full flex justify-center items-center q-mt-md gap-4"):
+                ui.button("Não", on_click=confirm_dialog.close).style(
+                    "color: white; font-weight: bold; background-color: #FF6347 !important;"
+                ).classes("w-32")
+
+                ui.button("Sim", on_click=lambda: excluir_ocorrencia(ocorrencia_id, detalhe_dialog, confirm_dialog)).style(
+                    "color: white; font-weight: bold; background-color: #008B8B !important;"
+                ).classes("w-32")
+
+    confirm_dialog.open()

@@ -126,7 +126,7 @@ def atualiza_status(ocorrencia_id, novo_status):
             ui.notify("🔧 Ocorrência em execução!", type="positive")
 
         elif novo_status == "Em Espera":
-            ui.notify("⏳ Ocorrência em espera!", type="positive")
+            ui.notify("⏳ Ocorrência em espera!", type="info")
 
         else:
             ui.notify(f"📌 Status alterado para {novo_status}.", type="positive")
