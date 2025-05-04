@@ -227,7 +227,10 @@ def detalhes_ocorrencia(ocorrencia):
                     status_selecionado = ui.select(
                         options=["", "Em Execução", "Em Espera", "Devolvida", "Concluída", "Cancelada"],
                         value=""
-                    ).style("background-color: white; min-width: 160px;").props("outlined dense")  # Menor largura
+                    ).style("background-color: white; min-width: 160px;").props("outlined dense")
+
+
+            # CODIGO DE ATRIBUIR OCORRENCIA
 
             responsavel_select = None
 
@@ -237,10 +240,11 @@ def detalhes_ocorrencia(ocorrencia):
                     ui.label("Atribuir tarefa:").style("min-width: 110px; margin-right: 8px;").classes("font-bold")
 
                     usuarios = utilizador_ativo()
-                    opcoes_usuarios = [('Selecione...', None)] + [(u['label'], u['value']) for u in usuarios]
 
+                    opcoes_usuarios = {None: 'Selecione...'}
+                    opcoes_usuarios.update({u['value']: u['label'] for u in usuarios})
                     responsavel_select = ui.select(
-                        options=opcoes_usuarios,  # Lista de tuplas (nome, id)
+                        options=opcoes_usuarios,  
                         value=None
                     ).style("flex: 1; min-width: 140px; max-width: 180px; background-color: white;").props(
                         "outlined dense")

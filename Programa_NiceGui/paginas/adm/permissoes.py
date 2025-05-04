@@ -45,7 +45,7 @@ def salvar_atribuicao(ocorrencia_id, responsavel_id, detalhe_dialog):
         cursor = conn.cursor()
 
         cursor.execute("""
-            UPDATE ocorrencia 
+            UPDATE ocorrencias 
             SET responsavel_id = %s, 
                 status = 'Em espera' 
             WHERE id = %s
