@@ -72,17 +72,14 @@ def enviar_notificacao(criador_id, mensagem, ocorrencia_id, tipo_ocorrencia="Inf
     conn = get_db_connection()
     cursor = conn.cursor()
 
-
     try:
         # Inserir notificação no banco de dados
         query = """
             INSERT INTO notificacoes (usuario_id, mensagem, data_notificacao, ocorrencia_id, tipo_ocorrencia)
             VALUES (%s, %s, NOW(), %s, %s)
         """
-
         cursor.execute(query, (criador_id, mensagem, ocorrencia_id, tipo_ocorrencia))
         conn.commit()
-
 
     except Exception as e:
         ui.notify(f"Erro ao enviar notificação: {str(e)}", type="negative")
@@ -92,6 +89,27 @@ def enviar_notificacao(criador_id, mensagem, ocorrencia_id, tipo_ocorrencia="Inf
         conn.close()
 
 
+# -------------------------------- NOTIFICACOES PARA ATRIBUIDAS --------------------------
 
+def envia_notificacao_atribuida(reponsavel_id, mensagem, ocorrencia_id, tipo_ocorrencia="Info"):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Inserir notificação no banco de dados
+        query = """
+            INSERT INTO notificacoes (usuario_id, mensagem, data_notificacao, ocorrencia_id, tipo_ocorrencia)
+            VALUES (%s, %s, NOW(), %s, %s)
+        """
+        cursor.execute(query, (reponsavel_id, mensagem, ocorrencia_id, tipo_ocorrencia))
+        conn.commit()
+
+    except Exception as e:
+        ui.notify(f"Erro ao enviar notificação: {str(e)}", type="negative")
+
+    finally:
+        cursor.close()
+        conn.close()
 
 

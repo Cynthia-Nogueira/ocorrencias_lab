@@ -1,6 +1,7 @@
 from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import ocorrencia_atribuida
 from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user, utilizador_ativo
 
 
@@ -30,7 +31,9 @@ def confirma_atribuicao(ocorrencia_id, user_id, detalhe_dialog):
                     "color: white; font-weight: bold; background-color: #FF6347 !important;"
                 ).classes("text-white font-bold px-4 py-2 w-32 text-center")
 
-                ui.button("Sim", on_click=lambda: salvar_atribuicao(ocorrencia_id, user_id, detalhe_dialog)).style(
+                atribuidor_id = app.storage.user.get('userid')
+
+                ui.button("Sim", on_click=lambda: salvar_atribuicao(ocorrencia_id, user_id, atribuidor_id, detalhe_dialog)).style(
                     "color: white; font-weight: bold; background-color: #008B8B !important;"
                 ).classes("text-white font-bold px-4 py-2 w-32 text-center")
 
@@ -39,7 +42,7 @@ def confirma_atribuicao(ocorrencia_id, user_id, detalhe_dialog):
 
 # ------------------------------------------ SALVA NO BANCO  ----------------------------------------
 
-def salvar_atribuicao(ocorrencia_id, responsavel_id, detalhe_dialog):
+def salvar_atribuicao(ocorrencia_id, responsavel_id, atribuidor_id, detalhe_dialog):
     if responsavel_id:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -47,9 +50,11 @@ def salvar_atribuicao(ocorrencia_id, responsavel_id, detalhe_dialog):
         cursor.execute("""
             UPDATE ocorrencias 
             SET responsavel_id = %s, 
-                status = 'Em espera' 
+                atribuidor_id = %s,
+                status = 'Em espera',
+                data_status_alterado = NOW() 
             WHERE id = %s
-        """, (responsavel_id, ocorrencia_id))
+        """, (responsavel_id, atribuidor_id, ocorrencia_id))
         conn.commit()
 
         cursor.close()
@@ -57,8 +62,13 @@ def salvar_atribuicao(ocorrencia_id, responsavel_id, detalhe_dialog):
         detalhe_dialog.close()
 
         ui.notify("Ocorrência atribuída com sucesso!", type="positive")
+
+        # Corrigido: notifica apenas o responsável
+        ocorrencia_atribuida(ocorrencia_id, atribuidor_id, responsavel_id)
+
     else:
         ui.notify("Por favor, selecione um responsável!", type="warning")
+
 
 
 # ---------------------------------- RESTAURA A OCORRENCIA ----------------------------------------

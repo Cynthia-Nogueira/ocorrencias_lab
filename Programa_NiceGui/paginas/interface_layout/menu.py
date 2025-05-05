@@ -103,11 +103,11 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                 params = ()
 
                             else:
-                                if status == "Em Espera":
+                                if status == "Em espera":
                                     query = """
                                         SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                         FROM ocorrencias
-                                        WHERE responsavel IS NOT NULL AND status = 'Em Espera'
+                                        WHERE responsavel IS NOT NULL AND status = 'Em espera'
                                         ORDER BY data_status_alterado DESC, data DESC;
                                     """
                                     params = ()
@@ -130,7 +130,7 @@ def ocorrencias_filtradas(status: str, titulo: str, condicao_extra: str = None):
                                     """
                                     params = ()
 
-                                elif status == "Não Atribuída":
+                                elif status == "Não atribuída":
                                     query = """
                                         SELECT id, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id
                                         FROM ocorrencias

@@ -1,9 +1,6 @@
-from os.path import curdir
-
-from docutils.nodes import status
-
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
-from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao, carregar_notificacoes
+from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao, carregar_notificacoes, \
+     envia_notificacao_atribuida
 from Programa_NiceGui.paginas.notificacoes_servicos.tabela import aceitar_ocorrencia
 from datetime import datetime
 from nicegui import ui, app
@@ -200,16 +197,13 @@ def notifica_ocorrencias_concluidas(ocorrencia_id, novo_status, nome_usuario):
         conn.close()
 
 
-
-
 # ---------------------------------- NOTIFICA OCORRENCIA ATRIBUIDA ------------------------
 
-def notifica_ocorrencia_atribuida(ocorrencia_id: int, responsavel_id: int, dialog=None):
+def ocorrencia_atribuida(ocorrencia_id: int, atribuidor_id: int, responsavel_id: int, dialog=None):
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        #busca dados da ocorrencia atribuida
         cursor.execute("SELECT titulo FROM ocorrencias WHERE id = %s", (ocorrencia_id,))
         ocorrencia = cursor.fetchone()
 
@@ -218,25 +212,25 @@ def notifica_ocorrencia_atribuida(ocorrencia_id: int, responsavel_id: int, dialo
 
         titulo = ocorrencia[0]
 
-        #pega o id de quem atribuiu a tarefa
-        atribuinte_id = app.storage.user.get('userid')
-        cursor.execute("SELECT CONCAT(nome, ' ', apelido) FROM utilizador WHERE id = %s", atribuinte_id,)
-        atribuinte = cursor.fetchone()
+        # Pega o nome de quem atribuiu
+        cursor.execute("SELECT CONCAT(nome, ' ', apelido) FROM utilizador WHERE id = %s", (atribuidor_id,))
+        atribuidor = cursor.fetchone()
 
-        mensagem = (f"{atribuinte[0]} atribuiu a ocorrência {titulo} a você."
-                    f"Favor consultar ocorrências 'Em espera'.")
+        mensagem = (
+            f"📌 {atribuidor[0]} atribuiu a ocorrência '{titulo}' a você! "
+            "Favor verificar suas ocorrências 'Em espera'."
+        )
 
-        print(f"[DEBUG] Enviando notificação para user_id={responsavel_id}")
-
-        enviar_notificacao(atribruinte_id, mensagem, ocorrencia_id, tipo_ocorrencia='Info')
+        envia_notificacao_atribuida(responsavel_id, mensagem, ocorrencia_id, tipo_ocorrencia='Info')
 
     except Exception as e:
-        print(f"Erro ao notificar {e}")
+        print(f"Erro ao notificar: {e}")
         if dialog:
             ui.notify(f"Erro ao enviar notificação: {e}", type="negative")
 
     finally:
-        conn.close()
         cursor.close()
+        conn.close()
+
 
 
