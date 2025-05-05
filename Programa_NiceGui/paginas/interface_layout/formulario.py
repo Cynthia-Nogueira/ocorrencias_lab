@@ -75,8 +75,16 @@ def novo_formulario():
 
             # chama a função de salvar com a data formatada corretamente
             try:
-                msg, sucesso = salvar_ocorrencia(cliente.value, num_processo.value, data_formatada,
-                                                 status.value, titulo.value, conteudo.value, app)
+                msg, sucesso = salvar_ocorrencia(
+                    cliente.value.strip(),
+                    num_processo.value.strip(),
+                    data_formatada,
+                    status.value,
+                    titulo.value.strip(),
+                    conteudo.value.strip(),
+                    app
+                )
+
             except Exception as e:
                 ui.notify(f"Erro ao salvar: {e}. Verifique os dados preenchidos.", type="negative")
                 return
