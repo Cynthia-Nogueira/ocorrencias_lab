@@ -56,7 +56,7 @@ def salvar_atribuicao(ocorrencia_id, responsavel_id, detalhe_dialog):
         conn.close()
         detalhe_dialog.close()
 
-        ui.notify("Ocorrência atribuída com sucesso!", type="success")
+        ui.notify("Ocorrência atribuída com sucesso!", type="positive")
     else:
         ui.notify("Por favor, selecione um responsável!", type="warning")
 

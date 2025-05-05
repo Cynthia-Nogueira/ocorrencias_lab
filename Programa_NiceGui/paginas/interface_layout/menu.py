@@ -230,11 +230,11 @@ def detalhes_ocorrencia(ocorrencia):
                     ).style("background-color: white; min-width: 160px;").props("outlined dense")
 
 
-            # CODIGO DE ATRIBUIR OCORRENCIA
+            # Se for admin, é possível atribuir a tarefa (CODIGO DE ATRIBUIR OCORRENCIA)
+
 
             responsavel_select = None
 
-            # Se for admin, é possível atribuir a tarefa
             if type_user == 'admin' and status in ["Não atribuída", "Devolvida", "Expirada"]:
                 with ui.row().classes("items-center q-mb-md").style("justify-content: space-between; gap: 0.5rem;"):
                     ui.label("Atribuir tarefa:").style("min-width: 110px; margin-right: 8px;").classes("font-bold")
@@ -244,7 +244,7 @@ def detalhes_ocorrencia(ocorrencia):
                     opcoes_usuarios = {None: 'Selecione...'}
                     opcoes_usuarios.update({u['value']: u['label'] for u in usuarios})
                     responsavel_select = ui.select(
-                        options=opcoes_usuarios,  
+                        options=opcoes_usuarios,
                         value=None
                     ).style("flex: 1; min-width: 140px; max-width: 180px; background-color: white;").props(
                         "outlined dense")
@@ -254,8 +254,6 @@ def detalhes_ocorrencia(ocorrencia):
                         if responsavel_select.value else ui.notify("Por favor, selecione um responsável!",type="warning")
                     )).style("color: white; font-weight: bold; background-color: #008B8B !important; min-width: 100px; margin-left: 16px;").classes(
                         "bg-blue-700 text-white font-bold px-4 py-2")
-
-
 
 
 

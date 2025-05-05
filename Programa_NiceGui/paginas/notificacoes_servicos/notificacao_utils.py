@@ -69,10 +69,9 @@ def add_notificacao(usuario_id, mensagem):
 
 def enviar_notificacao(criador_id, mensagem, ocorrencia_id, tipo_ocorrencia="Info"):
 
-    print(f"[DEBUG] Notificação enviada com tipo: {tipo_ocorrencia}")
-
     conn = get_db_connection()
     cursor = conn.cursor()
+
 
     try:
         # Inserir notificação no banco de dados
@@ -91,8 +90,6 @@ def enviar_notificacao(criador_id, mensagem, ocorrencia_id, tipo_ocorrencia="Inf
     finally:
         cursor.close()
         conn.close()
-
-
 
 
 
