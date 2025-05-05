@@ -51,10 +51,11 @@ def salvar_atribuicao(ocorrencia_id, responsavel_id, atribuidor_id, detalhe_dial
             UPDATE ocorrencias 
             SET responsavel_id = %s, 
                 atribuidor_id = %s,
+                responsavel = (SELECT CONCAT(nome, ' ', apelido) FROM utilizador WHERE id = %s),
                 status = 'Em espera',
                 data_status_alterado = NOW() 
             WHERE id = %s
-        """, (responsavel_id, atribuidor_id, ocorrencia_id))
+        """, (responsavel_id, atribuidor_id, responsavel_id, ocorrencia_id))
         conn.commit()
 
         cursor.close()

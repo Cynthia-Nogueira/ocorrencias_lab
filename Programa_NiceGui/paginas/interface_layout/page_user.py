@@ -13,10 +13,15 @@ def buscar_ocorrencias_aceitas(usuario_id):
 
     try:
         query = """
-        SELECT id, cliente, num_processo, data, responsavel, status, titulo, conteudo, data_aceite, criador_id
-        FROM ocorrencias
-        WHERE responsavel_id = %s
-        ORDER BY data_aceite DESC
+        SELECT 
+            id, cliente, num_processo, responsavel, responsavel_id,
+            data_status_alterado AS data, status, titulo, conteudo, criador_id
+        FROM 
+            ocorrencias
+        WHERE 
+            responsavel_id = %s
+        ORDER BY 
+            data_status_alterado DESC;
         """
 
         cursor.execute(query, (usuario_id,))
@@ -29,28 +34,28 @@ def buscar_ocorrencias_aceitas(usuario_id):
 
         for o in ocorrencias:
             # verifica se a ocorrência foi aceita há mais de 48 horas
-            id_ocorrencia, cliente, num_processo, data, responsavel, status, titulo, conteudo, data_aceite, criador_id = o
+            id_ocorrencia, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id = o
+
+            data_aceite = data
 
             if data_aceite:
                 # converte para datetime
                 data_aceite = datetime.strptime(str(data_aceite), "%Y-%m-%d %H:%M:%S")
                 agora = datetime.now()
-
-                # Calcular as horas úteis passadas
                 horas_passadas = horas_uteis(data_aceite, agora, feriados)
 
-                # Se passaram mais de 48h, muda o status para "Não Atribuída"
+                # Se passaram mais de 48h, muda o status para "Expirada"
                 if horas_passadas.total_seconds() / 3600 > 48 and status == "Em espera":
-                    # Atualiza o status para "Não Atribuída"
+                    # Atualiza o status para "Expirada"
                     update_query = """
                     UPDATE ocorrencias
-                    SET status = 'Não Atribuída', responsavel_id = NULL, data_aceite = NULL
+                    SET status = 'Expirada', responsavel_id = NULL, data_aceite = NULL
                     WHERE id = %s
                     """
                     cursor.execute(update_query, (id_ocorrencia,))
                     conn.commit()
 
-                    status = "Não Atribuída"
+                    status = "Expirada"
 
             # Adiciona ao resultado final
             resultado.append({
