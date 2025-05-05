@@ -173,10 +173,10 @@ def abrir_formulario_edicao(ocorrencia):
             # Exibir a caixa de confirmação antes de salvar
             mostra_confirmacao_edicao(
                 ocorrencia_id,
-                cliente.value,
-                num_processo.value,
-                titulo.value,
-                conteudo.value,
+                cliente.value.strip(),
+                num_processo.value.strip(),
+                titulo.value.strip(),
+                conteudo.value.strip(),
                 dialog_edicao
             )
 
@@ -194,7 +194,7 @@ def abrir_formulario_edicao(ocorrencia):
 # ----------------------------------- SALVA AS ALTERACOES ------------------------------------
 
 def salvar_alteracoes_ocorrencia(ocorrencia_id, cliente, num_processo, titulo, conteudo):
-    from Programa_NiceGui.paginas.interface_layout.menu import refresh_lista_ocorrencias
+    from Programa_NiceGui.paginas.interface_layout.menu import refreshable_ocorrencias_lista
     global status_global
     global condicao_extra_global
 
@@ -212,6 +212,13 @@ def salvar_alteracoes_ocorrencia(ocorrencia_id, cliente, num_processo, titulo, c
             WHERE id = %s;
         """, (cliente, num_processo, titulo, conteudo, ocorrencia_id))
         conn.commit()
+
+        # Atualiza a lista de ocorrências
+        ocorrencias_atualizadas = carregar_ocorrencias_do_banco()  # Você precisa implementar esta função
+        refreshable_ocorrencias_lista.refresh(ocorrencias_atualizadas)
+
+        ui.notify("Ocorrência atualizada com sucesso!", type="positive")
+
     except Exception as e:
         ui.notify(f"Erro ao atualizar a ocorrência: {e}", type="negative")
     finally:
@@ -221,15 +228,7 @@ def salvar_alteracoes_ocorrencia(ocorrencia_id, cliente, num_processo, titulo, c
 # -----------------------------------  MOSTRAR CONFIRMACAO EDICAO ------------------------------------
 
 def mostra_confirmacao_edicao(ocorrencia_id, cliente, num_processo, titulo, conteudo, dialog_edicao):
-    from Programa_NiceGui.paginas.interface_layout.menu import refresh_lista_ocorrencias
-    import Programa_NiceGui.paginas.interface_layout.global_state as global_state
-
-    global_state.cliente_label = cliente
-    global_state.num_processo_label = num_processo
-    global_state.titulo_label = titulo
-    global_state.conteudo_label = conteudo
-
-    with (ui.dialog() as confirm_dialog):
+    with ui.dialog() as confirm_dialog:
         with ui.card().style('background-color: #ebebeb !important;').classes("w-96 mx-auto"):
             ui.label("Tem certeza que deseja salvar as alterações?").classes(
                 "text-lg font-bold mx-auto q-mb-sm text-center")
@@ -239,15 +238,33 @@ def mostra_confirmacao_edicao(ocorrencia_id, cliente, num_processo, titulo, cont
                     "color: white; font-weight: bold; background-color: #FF6347 !important;").classes(
                     "text-white font-bold px-4 py-2 w-32 text-center")
 
-                ui.button("Sim", on_click=lambda: (
-                    salvar_alteracoes_ocorrencia(ocorrencia_id, cliente, num_processo, titulo, conteudo),
-                    ui.notify("Ocorrência atualizada com sucesso!", type="positive"),
-                    confirm_dialog.close(),
-                    dialog_edicao.close(),
-                    refresh_lista_ocorrencias()
-                )).style("color: white; font-weight: bold; background-color: #008B8B !important;").classes(
+                def acao_salvar():
+                    salvar_alteracoes_ocorrencia(ocorrencia_id, cliente, num_processo, titulo, conteudo)
+                    confirm_dialog.close()
+                    dialog_edicao.close()
+
+                ui.button("Sim", on_click=acao_salvar).style(
+                    "color: white; font-weight: bold; background-color: #008B8B !important;").classes(
                     "text-white font-bold px-4 py-2 w-32 text-center")
 
         confirm_dialog.open()
 
+# -----------------------------------  CARREGA DO BANCO ------------------------------------
 
+def carregar_ocorrencias_do_banco():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT o.id, o.cliente, o.num_processo, 
+                   u.nome as responsavel, u.id as responsavel_id,
+                   o.data, o.status, o.titulo, o.conteudo, o.criador_id
+            FROM ocorrencias o
+            LEFT JOIN utilizador u ON o.responsavel_id = u.id
+            ORDER BY o.data DESC
+        """)
+        return cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
