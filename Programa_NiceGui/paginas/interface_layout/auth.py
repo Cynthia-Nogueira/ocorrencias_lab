@@ -1,10 +1,8 @@
 import bcrypt
 import mysql.connector
 from nicegui import app, ui
-
 from Programa_NiceGui.paginas.interface_layout.token_helper import hash_senha
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
-
 from flask import session
 import re
 

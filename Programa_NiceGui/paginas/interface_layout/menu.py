@@ -1,12 +1,10 @@
 from nicegui import ui, app
 from datetime import datetime
-
-from Programa_NiceGui.paginas.adm.permissoes import confirmar_restauracao, salvar_atribuicao, confirma_atribuicao, \
-    confirmar_excluir_ocorrencia
+from Programa_NiceGui.paginas.adm.permissoes import confirmar_restauracao, confirma_atribuicao, confirmar_excluir_ocorrencia
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.formulario import abrir_formulario_edicao
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import carregar_notificacoes
-from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias_utils import atualiza_status, confirmar_alteracao_status
+from Programa_NiceGui.paginas.notificacoes_servicos.ocorrencias_utils import confirmar_alteracao_status
 from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import utilizador_ativo
 
 # --------------------------------- EXIBE AS NOTIFICACOES NO MENU ---------------------------
@@ -264,7 +262,7 @@ def detalhes_ocorrencia(ocorrencia):
 
                 if isinstance(data_ocorrencia, str):
                     data_ocorrencia = datetime.strptime(data_ocorrencia, "%Y-%m-%d %H:%M:%S")
-                data_formatada = data_ocorrencia.strftime('%d-%m-%y')
+                data_formatada = data_ocorrencia.strftime('%d-%m-%Y')
 
                 for titulo_info, valor in [
                     ("Cliente", global_state.cliente_label),

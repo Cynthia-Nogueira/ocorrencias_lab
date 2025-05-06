@@ -1,7 +1,7 @@
-# ------------------------------------------  token_helper.py --------------------------------------------------
 import secrets
 import mysql.connector
 
+# ------------------------------------------  token_helper.py --------------------------------------------------
 
 def gerar_token():
     return secrets.token_urlsafe(32)

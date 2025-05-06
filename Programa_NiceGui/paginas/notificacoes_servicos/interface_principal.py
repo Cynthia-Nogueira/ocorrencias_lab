@@ -1,17 +1,9 @@
-import json
-from socket import socket
-
-#from attr import dataclass
-from mysql.connector import cursor
 from nicegui import app
 from nicegui import ui
 import Programa_NiceGui.paginas.interface_layout.global_state as global_state
-#from Programa_NiceGui.paginas.banco_dados.db_conection import obter_dados
 from Programa_NiceGui.paginas.interface_layout.formulario import novo_formulario
-from Programa_NiceGui.paginas.interface_layout.menu import detalhes_ocorrencia
 from Programa_NiceGui.paginas.notificacoes_servicos.tabela import carregar_tabela
 from nicegui.elements.aggrid import AgGrid
-#import debugpy
 
 # ------------------------------------- TABELA OCORRENCIA  (SEM USO) ------------------------------------
 
@@ -61,12 +53,10 @@ def main_page():
             "filter": True,
             "flex": 1,
             "minWidth": 100,
-            "cellClass": "cell-wrap-text",  # Para permitir quebra de texto
+            "cellClass": "cell-wrap-text",  # Permiti quebra de texto
         },
-        "onCellClicked": "handleCellClick(event)",  # Adiciona o handler de clique
-        "suppressCellSelection": True,
-    }).classes("w-full h-[500px] mx-auto") \
-        .style(
+        "onCellClicked": "handleCellClick(event)",  #Adiciona handler de clique
+        "suppressCellSelection": True, }).classes("w-full h-[500px] mx-auto").style(
         "background: transparent; border: 5px solid rgba(255, 255, 255, 0.5); overflow-x: auto; max-width: 100%; min-width: 300px;")
 
     # Adiciona o JavaScript necessário
@@ -107,41 +97,3 @@ def main_page():
         ui.button("Atualizar", on_click=lambda: carregar_tabela(grid, usuario_logado)).style(
             "color: white; font-weight: bold; background-color: #008B8B !important;"
         ).classes("btn-secondary w-48")
-
-    # Handler para o evento de clique vindo do JavaScript
-    @ui.page('/')
-    def handle_socket_messages():
-        @socket.on_message
-        async def handle_message(msg):
-            data = json.loads(msg)
-            if data.get('type') == 'cell_clicked':
-                # Cria um dicionário no formato esperado pela função detalhes_ocorrencia
-                ocorrencia_data = (
-                    data['data'].get('id'),
-                    data['data'].get('cliente'),
-                    data['data'].get('num_processo'),
-                    data['data'].get('responsavel'),
-                    data['data'].get('responsavel_id'),
-                    data['data'].get('data'),
-                    data['data'].get('status'),
-                    data['data'].get('titulo'),
-                    data['data'].get('conteudo'),
-                    data['data'].get('criador_id')
-                )
-                detalhes_ocorrencia(ocorrencia_data)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

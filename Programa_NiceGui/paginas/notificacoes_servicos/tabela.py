@@ -1,5 +1,4 @@
 from nicegui import ui
-from nicegui.elements import grid
 from datetime import datetime, date
 import Programa_NiceGui.paginas.interface_layout.global_state as global_state
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection, obter_dados

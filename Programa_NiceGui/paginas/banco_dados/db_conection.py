@@ -1,6 +1,4 @@
 import mysql.connector
-
-
 # ------------------------------- CONECTA AO BANCO DE DADOS -------------------------------
 
 def get_db_connection():

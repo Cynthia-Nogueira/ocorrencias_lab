@@ -1,4 +1,4 @@
-from nicegui import ui, app
+from nicegui import ui
 from datetime import datetime
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.interface_layout.page_user import carregar_ocorrencias_user

@@ -2,7 +2,7 @@ from nicegui import ui, app
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacao_utils import enviar_notificacao
 from Programa_NiceGui.paginas.notificacoes_servicos.notificacoes import ocorrencia_atribuida
-from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user, utilizador_ativo
+from Programa_NiceGui.paginas.notificacoes_servicos.utilizadores import obter_lista_user
 
 
 # ----------------------------------------- CONFIRMA A ESCOLHA DO USER --------------------------------------------

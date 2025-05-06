@@ -10,8 +10,6 @@ from Programa_NiceGui.paginas.interface_layout.ocorrencias_vencidas import inici
 
 # ---------------------------------------------- Configuração das Rotas --------------------------------------------
 
-#app = Flask(__name__)
-
 @app.post('/atualizar_status')
 async def atualizar_status(request: dict):
     id_ = request.get("id")
@@ -63,7 +61,6 @@ def recuperacao_senha():
 def page_user():
     pag_layout()
     carregar_ocorrencias_user()
-
 
 # ------------------------------------------------ Inicializa o NiceGUI ---------------------------------------------
 

@@ -2,7 +2,6 @@ import secrets
 from token_helper import  hash_senha
 from Programa_NiceGui.paginas.banco_dados.db_conection import get_db_connection
 
-
 #-------------------------------------------- redefinindo a senha -----------------------------------
 
 # redefine a senha clicar no link
