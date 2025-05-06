@@ -87,13 +87,6 @@ def logout():
     ui.timer(0.5, redireciona)
 
 
-"""
-# Função para logout
-def logout():
-    app.storage.user.clear() #remove dados da sessao
-    ui.run_javascript("window.location.replace('/');")
-"""
-
 # ------------------------------------- RODA O APP (N FUNCIONA SEM) -----------------------------------------
 
 # Chama a função para rodar o programa

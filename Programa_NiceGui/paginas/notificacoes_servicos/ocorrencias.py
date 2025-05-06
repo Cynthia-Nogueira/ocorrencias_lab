@@ -134,24 +134,44 @@ def salvar_ocorrencia(cliente, num_processo, data_formatada, status, titulo, con
 
 # ---------------------------------- BD lista ocorrencias ---------------------------------------------------
 
-def obter_ocorrencias():
+def obter_ocorrencias(status_filter=None):
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    where_clause = ""
+    if status_filter:
+        if isinstance(status_filter, list):
+            status_list = ", ".join(f"'{s}'" for s in status_filter)
+            where_clause = f"WHERE o.status IN ({status_list})"
+        else:
+            where_clause = f"WHERE o.status = '{status_filter}'"
+
     try:
-        query = """
-        SELECT id, cliente, num_processo, responsavel, data, status, titulo, conteudo
-        FROM ocorrencias
-        WHERE status IN ('Devolvida', 'Não Atribuída', 'Em espera', 'Cancelada', 'Expirada')
-        ORDER BY data DESC
+        query = f"""
+        SELECT 
+            o.id,
+            o.cliente,
+            o.num_processo,
+            u.nome as responsavel,
+            o.responsavel_id,
+            o.data,
+            o.status,
+            o.titulo,
+            o.conteudo,
+            o.criador_id
+        FROM ocorrencias o
+        LEFT JOIN utilizador u ON o.responsavel_id = u.id
+        {where_clause}
+        ORDER BY o.data DESC
         """
         cursor.execute(query)
-        ocorrencias = cursor.fetchall()
-
+        return cursor.fetchall()
+    except Exception as e:
+        ui.notify(f"Erro ao obter ocorrências: {str(e)}", type='negative')
+        return []
     finally:
         cursor.close()
         conn.close()
-        return ocorrencias
 
 # ------------------------------------- Editar ocorrência -----------------------------------------
 

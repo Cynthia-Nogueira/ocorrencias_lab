@@ -29,3 +29,17 @@ document.addEventListener("DOMContentLoaded", () => {
       gridApi.setGridOption("rowData", data);
     });
 });
+
+#----------------------- FILTROS --------------------------
+
+const socket = new WebSocket("ws://localhost:8000/ws");
+
+socket.onopen = function() {
+    console.log("Conectado ao WebSocket");
+};
+
+socket.onmessage = function(event) {
+    console.log("Mensagem recebida: ", event.data);
+};
+
+

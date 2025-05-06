@@ -14,9 +14,11 @@ def carregar_tabela(grid, usuario_logado):
 
     try:
         for ocorrencia in obter_ocorrencias():
-            id_, cliente, num_processo, responsavel, data, status, titulo, conteudo  = ocorrencia
+            # Certifique-se que obter_ocorrencias() retorna todos os campos necessários
+            # Incluindo responsavel_id e criador_id que são usados no diálogo de detalhes
+            id_, cliente, num_processo, responsavel, responsavel_id, data, status, titulo, conteudo, criador_id = ocorrencia
 
-            # Verifica se a variável 'data' é uma string
+            # Formatação da data (mantendo igual ao seu código)
             if isinstance(data, str):
                 try:
                     data_formatada = datetime.strptime(data, "%Y-%m-%d").strftime("%d/%m/%Y")
@@ -26,25 +28,26 @@ def carregar_tabela(grid, usuario_logado):
             elif isinstance(data, date):
                 data_formatada = data.strftime("%d/%m/%Y")
             else:
-                # se a data não for string nem datetime trata o erro
                 ui.notify(f"Data inválida: {data}", color="red")
                 data_formatada = "Data inválida"
 
-            # Convertendo a ocorrência para dicionário (evita erro JSON serializable)
+            # Convertendo para dicionário com todos os campos necessários
             dados_tabela.append({
                 "id": id_,
                 "cliente": cliente,
                 "num_processo": num_processo,
-                "responsavel": responsavel or "Responsável vazio",
+                "responsavel": responsavel or "Não Atribuído",
+                "responsavel_id": responsavel_id,  # Necessário para o diálogo
                 "data": data_formatada,
                 "status": status,
                 "titulo": titulo,
                 "conteudo": conteudo,
-                "acoes": "Botão aqui"  # Placeholder (pois UI não pode ser passado para AgGrid)
+                "criador_id": criador_id  # Necessário para o diálogo
             })
 
         # Atualiza a tabela
-        atualizar_tabela(grid, dados_tabela)
+        grid.options["rowData"] = dados_tabela
+        grid.update()
 
     except Exception as e:
         ui.notify(f"Erro ao carregar a tabela: {e}", color="red")

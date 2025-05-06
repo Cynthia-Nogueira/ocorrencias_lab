@@ -42,6 +42,22 @@ button {
 }
 
 
+/* Estilo para as células da tabela */
+.ag-theme-alpine .ag-cell {
+    white-space: normal !important;
+    line-height: 1.5;
+    padding: 8px;
+}
 
+/* Estilo específico para a coluna de conteúdo */
+.ag-theme-alpine .ag-cell[col-id="conteudo"] {
+    cursor: pointer;
+    color: #0066cc;
+    text-decoration: underline;
+}
+
+.ag-theme-alpine .ag-cell[col-id="conteudo"]:hover {
+    background-color: #f0f0f0;
+}
 
 
