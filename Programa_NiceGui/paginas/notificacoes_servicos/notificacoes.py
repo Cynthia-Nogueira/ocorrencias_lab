@@ -29,7 +29,6 @@ def visualizar_notificacao(notificacao_id, notificacao_elements):
 
         if not resultado:
             ui.notify("Erro: Detalhes não encontrados.", type="negative")
-            print(f"[ERRO] Nenhuma ocorrência encontrada (notificacao_id={notificacao_id}, usuario_id={current_user_id})")
             return
 
         ocorrencia_id, cliente, num_processo, data_ocorrencia, titulo_ocorrencia, conteudo_ocorrencia, responsavel_id, status_ocorrencia, tipo_ocorrencia  = resultado

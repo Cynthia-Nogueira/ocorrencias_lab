@@ -159,3 +159,4 @@ def confirmar_alteracao_status(ocorrencia_id, novo_status, detalhe_dialog):
 
 
     confirm_dialog.open()
+

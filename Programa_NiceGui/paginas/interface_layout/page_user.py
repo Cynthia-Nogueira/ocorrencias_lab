@@ -121,7 +121,7 @@ def carregar_ocorrencias_user():
         ],
         "rowData": ocorrencias_aceitas or [{
             "id": "",
-            "cliente": "Nenhuma ocorrência encontrada",
+            "cliente": "",
             "num_processo": "",
             "responsavel": "",
             "data": "",
@@ -208,7 +208,7 @@ def atualizar_tabela_user(grid, user_id):
     if not novas_ocorrencias:
         novas_ocorrencias = [{
             "id": "",
-            "cliente": "Nenhuma ocorrência encontrada",
+            "cliente": "",
             "num_processo": "",
             "responsavel": "",
             "data": "",
